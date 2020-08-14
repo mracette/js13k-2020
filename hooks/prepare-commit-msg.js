@@ -49,6 +49,7 @@ function runHook(args) {
   LOG_MESSAGE += `| Raw Source Code | ${kb0} kb | ${bytes0} | NA |\n`;
 
   // perform the production build and log new size
+  execSync(`rm -rf ${path.join(BUILD_FOLDER, '/*')}`);
   execSync('rollup -c --environment BUILD:production');
   const [kb1, bytes1] = getFolderSize(path.join(BUILD_FOLDER, '/*'));
   LOG_MESSAGE += `| Build | ${kb1} kb | ${bytes1} | ${
