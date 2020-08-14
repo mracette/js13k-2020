@@ -57,6 +57,7 @@ function runHook(args) {
   }${Math.round((100 * (bytes0 - bytes1)) / bytes0)}% |\n`;
 
   // perform .zip compression and log new size
+  execSync(`rm -rf ${path.join(COMPRESSED_BUILD_FOLDER, '/*')}`);
   execSync(`cd ${BUILD_FOLDER}; zip -r -j ${COMPRESSED_BUILD_FILE} ./*`);
   const [kb2, bytes2] = getFolderSize(path.join(COMPRESSED_BUILD_FOLDER, '/*'));
   LOG_MESSAGE += `| Compressed Build | ${kb2} kb | ${bytes2} | ${
