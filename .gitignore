@@ -1,3 +1,5 @@
 .DS_Store
-build/
+.vscode/*
+build/*
+build-min/*
 node_modules/
