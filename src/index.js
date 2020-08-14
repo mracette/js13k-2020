@@ -1,37 +1,46 @@
-import { initDom } from './setup/dom';
-import { updateMouseHoverTile } from './state/screen';
-import { updatePlayerPosition } from './state/player';
-import { drawTiles, setStyles } from './drawing/tiles';
-import { drawPlayer } from './drawing/player';
-import {
-  G,
-  addScreenDependentGlobals,
-  addScreenIndependentGlobals
-} from './globals';
+import { main } from './designer';
 
-addScreenIndependentGlobals(G);
-initDom();
-addScreenDependentGlobals(G);
+main();
 
-const draw = () => {
-  G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
-  setStyles();
-  drawTiles();
-  drawPlayer();
-};
+// import { initDom } from './setup/dom';
+// import { updateMouseHoverTile } from './state/screen';
+// import { updatePlayerPosition, updatePathToHoverTile } from './state/player';
+// import { drawTileOutlines, drawPathToHover, setStyles } from './drawing/tiles';
+// import { drawPlayer } from './drawing/player';
+// import {
+//   G,
+//   addScreenDependentGlobals,
+//   addScreenIndependentGlobals
+// } from './globals';
 
-// TODO: add refresh method to coords
-window.addEventListener('resize', () => {
-  setStyles();
-  G.COORDS.SCREEN._baseHeight = G.DOM.CANVAS.height;
-  G.COORDS.SCREEN._baseWidth = G.DOM.CANVAS.width;
-  addScreenDependentGlobals(G);
-  draw();
-});
+// addScreenIndependentGlobals(G);
+// initDom();
+// addScreenDependentGlobals(G);
 
-G.DOM.CANVAS.addEventListener('contextmenu', (e) => e.preventDefault());
-window.addEventListener('mousedown', updatePlayerPosition);
-window.addEventListener('mousemove', updateMouseHoverTile);
-window.addEventListener('mousemove', draw);
+// const draw = () => {
+//   G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
+//   setStyles();
+//   drawTileOutlines();
+//   drawPlayer();
+//   drawPathToHover();
+// };
 
-draw();
+// // TODO: add refresh method to coords
+// window.addEventListener('resize', () => {
+//   setStyles();
+//   G.COORDS.SCREEN._baseHeight = G.DOM.CANVAS.height;
+//   G.COORDS.SCREEN._baseWidth = G.DOM.CANVAS.width;
+//   addScreenDependentGlobals(G);
+//   draw();
+// });
+
+// console.log(G.MAP.grid);
+// console.log(G.ASTAR.search(G.MAP, G.MAP.grid[5][5], G.MAP.grid[6][6]));
+
+// G.DOM.CANVAS.addEventListener('contextmenu', (e) => e.preventDefault());
+// window.addEventListener('mousedown', updatePlayerPosition);
+// window.addEventListener('mousemove', updateMouseHoverTile);
+// window.addEventListener('mousemove', updatePathToHoverTile);
+// window.addEventListener('mousemove', draw);
+
+// draw();

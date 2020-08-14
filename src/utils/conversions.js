@@ -16,7 +16,6 @@ export const mapToIso = (x, y) => {
 };
 
 export const orthoToMap = (x, y, round = false) => {
-  console.log(x, y, G.ORTHO_TILE_WIDTH, G.ORTHO_TILE_HEIGHT);
   const mx = x / G.ORTHO_TILE_WIDTH;
   const my = y / G.ORTHO_TILE_HEIGHT;
   if (round) return [Math.round(mx), Math.round(my)];

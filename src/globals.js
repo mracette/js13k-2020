@@ -1,4 +1,6 @@
 import { CanvasCoordinates } from 'crco-utils';
+import { AStar } from './algos/movement';
+import { Map, MapNode } from './state/map';
 
 /**
  * @type {object} a single global object which other global values attach to
@@ -26,10 +28,22 @@ export const addScreenIndependentGlobals = (G) => {
   G.COLORS = {
     RAISIN_BLACK: '#272838',
     LIGHT_GRAY: '#CCCCCC',
-    LILAC: '#7C77B9'
+    LILAC: '#7C77B9',
+    EMERALD_GREEN: '#5BBA6F',
+    WHITE_OVERLAY_02: 'rgba(255, 255, 255, .2)'
   };
-  G.MAP_SIZE = 10;
+  G.MAP_SIZE = 20;
   G.SCREEN_TILES = 20;
+  G.ASTAR = new AStar();
+  G.MAP = new Map({
+    mapWidth: G.MAP_SIZE,
+    mapHeight: G.MAP_SIZE,
+    diagonal: false
+  });
+  G.PATHS = {
+    PLAYER_TO_HOVER: []
+  };
+  G.MOUSE_HOVER = new MapNode();
 };
 
 /**
@@ -39,7 +53,6 @@ export const addScreenIndependentGlobals = (G) => {
  */
 
 export const addScreenDependentGlobals = (G) => {
-  console.log(G.DOM.CANVAS.width);
   G.DPR = window.devicePixelRatio || 1;
   G.COORDS = {
     SCREEN: new CanvasCoordinates({ canvas: G.DOM.CANVAS })

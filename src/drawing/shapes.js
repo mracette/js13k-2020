@@ -2,11 +2,19 @@ import { G } from '../globals';
 import { box } from '../generative/shapes';
 import { mapToIso, mapToOrtho } from '../utils/conversions';
 
-export const drawLines = (lines, close = false, fill = false) => {
+export const drawLines = (
+  lines,
+  close = false,
+  fill = false,
+  scaleX,
+  scaleY
+) => {
   // console.log(lines);
   G.CTX.beginPath();
   lines.forEach((line, i) => {
-    const [x, y] = line;
+    let [x, y] = line;
+    // scaleX && (x *= scaleX);
+    // scaleY && (y *= scaleY);
     if (i === 0) {
       G.CTX.moveTo(x, y);
     } else {
