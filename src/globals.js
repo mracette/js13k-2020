@@ -13,6 +13,7 @@ export const G = {};
  */
 
 export const addScreenIndependentGlobals = (G) => {
+  G.ISO = true;
   G.RATIO = { x: 2, y: 1 };
   G.DOM = {
     CANVAS: document.getElementById('viz'),
@@ -24,10 +25,11 @@ export const addScreenIndependentGlobals = (G) => {
   G.CTX = G.DOM.CANVAS.getContext('2d');
   G.COLORS = {
     RAISIN_BLACK: '#272838',
-    LIGHT_GRAY: '#CCCCCC'
+    LIGHT_GRAY: '#CCCCCC',
+    LILAC: '#7C77B9'
   };
   G.MAP_SIZE = 10;
-  G.SCREEN_TILES = 10;
+  G.SCREEN_TILES = 20;
 };
 
 /**

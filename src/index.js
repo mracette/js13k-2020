@@ -1,6 +1,8 @@
 import { initDom } from './setup/dom';
-import { updateMouseHoverTile } from './utils/screen';
+import { updateMouseHoverTile } from './state/screen';
+import { updatePlayerPosition } from './state/player';
 import { drawTiles, setStyles } from './drawing/tiles';
+import { drawPlayer } from './drawing/player';
 import {
   G,
   addScreenDependentGlobals,
@@ -9,12 +11,13 @@ import {
 
 addScreenIndependentGlobals(G);
 initDom();
-console.log(G.DOM.CANVAS.width);
 addScreenDependentGlobals(G);
 
 const draw = () => {
+  G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
   setStyles();
   drawTiles();
+  drawPlayer();
 };
 
 // TODO: add refresh method to coords
@@ -26,7 +29,9 @@ window.addEventListener('resize', () => {
   draw();
 });
 
+G.DOM.CANVAS.addEventListener('contextmenu', (e) => e.preventDefault());
+window.addEventListener('mousedown', updatePlayerPosition);
 window.addEventListener('mousemove', updateMouseHoverTile);
-// window.addEventListener('mousemove', draw);
+window.addEventListener('mousemove', draw);
 
 draw();
