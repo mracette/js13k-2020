@@ -1,6 +1,9 @@
 import { CanvasCoordinates } from 'crco-utils';
 import { AStar } from './algos/movement';
 import { Map, MapNode } from './state/map';
+import { Camera } from './core/Camera';
+import { Point } from './core/Point';
+import { Group } from './core/Group';
 
 /**
  * @type {object} a single global object which other global values attach to
@@ -32,18 +35,26 @@ export const addScreenIndependentGlobals = (G) => {
     EMERALD_GREEN: '#5BBA6F',
     WHITE_OVERLAY_02: 'rgba(255, 255, 255, .2)'
   };
-  G.MAP_SIZE = 20;
-  G.SCREEN_TILES = 20;
+  G.MAP_SIZE = {
+    x: 21,
+    y: 21
+  };
   G.ASTAR = new AStar();
   G.MAP = new Map({
-    mapWidth: G.MAP_SIZE,
-    mapHeight: G.MAP_SIZE,
+    mapWidth: G.MAP_SIZE.x,
+    mapHeight: G.MAP_SIZE.y,
     diagonal: false
   });
   G.PATHS = {
     PLAYER_TO_HOVER: []
   };
-  G.MOUSE_HOVER = new MapNode();
+  G.MOUSE_HOVER = new Point(5, 5, 0);
+  G.UID = 0;
+  G.CAMERA = new Camera({
+    magnification: 12,
+    position: new Point(10, 10, 0)
+  });
+  G.SCENE = new Group({ updatesOn: ['perspective', 'resize', 'mouse'] });
 };
 
 /**

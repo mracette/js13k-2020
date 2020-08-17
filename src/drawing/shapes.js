@@ -1,45 +1,15 @@
 import { G } from '../globals';
-import { box } from '../generative/shapes';
-import { mapToIso, mapToOrtho } from '../utils/conversions';
 
-export const drawLines = (
-  lines,
-  close = false,
-  fill = false,
-  scaleX,
-  scaleY
-) => {
-  // console.log(lines);
+export const drawLines = (lines, close = false, fill = false) => {
   G.CTX.beginPath();
-  lines.forEach((line, i) => {
-    let [x, y] = line;
-    // scaleX && (x *= scaleX);
-    // scaleY && (y *= scaleY);
+  lines.forEach((point, i) => {
     if (i === 0) {
-      G.CTX.moveTo(x, y);
+      G.CTX.moveTo(point.x, point.y);
     } else {
-      G.CTX.lineTo(x, y);
+      G.CTX.lineTo(point.x, point.y);
     }
   });
   close && G.CTX.closePath();
   fill && G.CTX.fill();
   G.CTX.stroke();
-};
-
-export const drawBox = (
-  x,
-  y,
-  w,
-  h,
-  stroke = true,
-  fill = false,
-  iso = G.ISO
-) => {
-  drawLines(
-    box(x, y, w, h).map((point) =>
-      iso ? mapToIso(...point) : mapToOrtho(...point)
-    ),
-    stroke,
-    fill
-  );
 };

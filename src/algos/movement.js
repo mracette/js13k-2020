@@ -139,7 +139,6 @@ export class AStar {
     // make sure start/end are nodes on the graph, not external
     start = graph.grid[start.x][start.y];
     end = graph.grid[end.x][end.y];
-    console.log(start, end);
     graph.cleanDirty();
     var closest = options.closest || false;
     var openHeap = this.getHeap();

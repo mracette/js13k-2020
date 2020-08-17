@@ -2,6 +2,13 @@ import { G } from '../globals';
 
 // ortho <--> map <--> iso
 
+export const mapToScreen = (x, y) => {
+  return [
+    G.COORDS.SCREEN.nx(-1) + x * (G.COORDS.SCREEN.getWidth() / G.SCREEN_TILES),
+    G.COORDS.SCREEN.ny(-1) + y * (G.COORDS.SCREEN.getHeight() / G.SCREEN_TILES)
+  ];
+};
+
 export const mapToOrtho = (x, y) => {
   return [x * G.ORTHO_TILE_WIDTH, y * G.ORTHO_TILE_WIDTH];
 };
