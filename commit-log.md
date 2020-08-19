@@ -34,3 +34,12 @@
 | Compressed Build (Adv Zip) | 3.02 kb | 3093 | -3% |
 
 
+**proper camera and 3d rendering** - *Mon, 17 Aug 2020 01:42:01 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 32.79 kb | 33576 | NA |
+| Build | 13.60 kb | 13928 | -59% |
+| Compressed Build | 4.52 kb | 4625 | -67% |
+| Compressed Build (Adv Zip) | 4.37 kb | 4474 | -3% |
+
+

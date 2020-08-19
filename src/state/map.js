@@ -1,3 +1,4 @@
+import { G } from '../globals';
 import { AStar } from '../algos/movement';
 
 export class Map {
@@ -5,9 +6,9 @@ export class Map {
     this.grid = [];
     this.nodes = [];
     this.diagonal = !!opts.diagonal;
-    for (let i = 0; i < opts.mapWidth; i++) {
+    for (let i = 0; i < G.VISIBLE_MAP_WIDTH; i++) {
       this.grid[i] = [];
-      for (let j = 0; j < opts.mapHeight; j++) {
+      for (let j = 0; j < G.VISIBLE_MAP_HEIGHT; j++) {
         const node = new MapNode(i, j);
         this.grid[i][j] = node;
         this.nodes.push(node);

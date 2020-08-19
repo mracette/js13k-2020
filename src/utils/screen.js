@@ -1,4 +1,5 @@
 import { G } from '../globals';
+import { Vector3 } from '../core/Vector3';
 
 export const cinematicResize = (element, container, ratio = G.RATIO) => {
   return () => {
@@ -15,4 +16,21 @@ export const cinematicResize = (element, container, ratio = G.RATIO) => {
     element.width = w * dpr;
     element.height = h * dpr;
   };
+};
+
+export const renderTileCoords = (tileGroup) => {
+  G.CTX.textAlign = 'center';
+  G.CTX.textBaseline = 'middle';
+  G.CTX.fillStyle = 'white';
+  G.CTX.font = `${G.COORDS.SCREEN.getWidth() * 0.007}px sans-serif`;
+  tileGroup.children.forEach((tile) => {
+    const position = new Vector3(
+      tile.position.x + 0.5,
+      tile.position.y + 0.5,
+      0
+    );
+    G.CAMERA.project(position, true, G.CTX);
+    const text = `${tile.position.x}, ${tile.position.y}`;
+    G.CTX.fillText(text, position.x, position.y);
+  });
 };

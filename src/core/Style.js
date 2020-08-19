@@ -2,12 +2,12 @@ import { G } from '../globals';
 
 export class Style {
   constructor(styles) {
-    Object.assign(this, { styles });
+    this.uid = G.UID++;
+    this.styles = styles;
   }
-  apply() {
-    this.styles.forEach((style) => {
-      const [name, prop] = style;
-      G.CTX[name] = typeof prop === 'function' ? prop() : prop;
-    });
+  apply(ctx = G.CTX) {
+    for (const [key, value] of Object.entries(this.styles)) {
+      ctx[key] = typeof value === 'function' ? value() : value;
+    }
   }
 }

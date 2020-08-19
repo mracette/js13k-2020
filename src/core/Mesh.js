@@ -1,92 +1,114 @@
 import { G } from '../globals';
-import { Point } from './Point';
+import { Vector3 } from './Vector3';
+import { Entity } from './Entity';
 
-export class Mesh {
-  /**
-   * @param {Array} geometry
-   * @param {Array} style
-   * @param {Point} opts.rotation
-   * @param {Point} opts.rotation
-   * @param {Point} opts.scale
-   */
-
+export class Mesh extends Entity {
   constructor(geometry, opts = {}) {
-    Object.assign(this, opts);
-    this.uid = G.UID++;
-    this.needsUpdate = false;
-    this.parent = null;
-    this.renderCache = {};
-    this.geometry = geometry;
-    this.position = opts.position
-      ? new Point(
-          opts.position.x || 0,
-          opts.position.y || 0,
-          opts.position.z || 0
-        )
-      : new Point(0, 0, 0);
-    this.rotation = opts.rotation
-      ? new Point(
-          opts.rotation.x || 0,
-          opts.rotation.y || 0,
-          opts.rotation.z || 0
-        )
-      : new Point(0, 0, 0);
-    this.scale = this.scale
-      ? new Point(opts.scale.x || 1, opts.scale.y || 1, opts.scale.z || 1)
-      : new Point(1, 1, 1);
+    super(opts);
+    const defaults = {
+      type: 'mesh',
+      style: null,
+      autoCache: false,
+      enabled: true,
+      needsUpdate: null,
+      box: [] // x, y, x, y
+    };
+    Object.assign(this, { geometry, ...defaults, ...opts });
   }
 
-  getPosition() {
-    if (this.parent) {
-      const parentPosition = this.parent.getPosition();
-      return new Point(
-        parentPosition.x + this.position.x,
-        parentPosition.y + this.position.y,
-        parentPosition.z + this.position.z
-      );
-    } else {
-      return this.rotation;
+  getStyleList() {
+    const list = [];
+    let obj = this;
+    while (obj) {
+      obj.style && list.push(obj.style);
+      obj = obj.parent || null;
     }
+    return list;
   }
 
-  getRotation() {
-    if (this.parent) {
-      const parentRotation = this.parent.getRotation();
-      return new Point(
-        parentRotation.x + this.rotation.x,
-        parentRotation.y + this.rotation.y,
-        parentRotation.z + this.rotation.z
-      );
-    } else {
-      return this.rotation;
-    }
+  applyAllStyles(ctx = G.CTX) {
+    this.getStyleList().forEach((s) => s.apply(ctx));
   }
 
-  getScale() {
-    if (this.parent) {
-      const parentScale = this.parent.getScale();
-      return new Point(
-        parentScale.x + this.scale.x,
-        parentScale.y + this.scale.y,
-        parentScale.z + this.scale.z
-      );
-    } else {
-      return this.scale;
-    }
+  getKey() {
+    // must uniquely identify the mesh in terms of how it would be rendered to
+    // the screen (not counting it's position)
+    return [
+      this.geometry.name,
+      this.getStyleList()
+        .map((s) => s.uid)
+        .join('-'),
+      's' + this.scale.x,
+      's' + this.scale.y,
+      's' + this.scale.z,
+      'r' + this.rotation.x,
+      'r' + this.rotation.y,
+      'r' + this.rotation.z
+    ].join('~');
   }
 
-  render(event, camera, iso = G.ISO) {
-    if (this.updatesOn.includes('mouse')) {
-      console.log(this.updatesOn);
-    }
-    if (
-      !event ||
-      this.needsUpdate ||
-      (this.updatesOn && this.updatesOn.includes(event))
-    ) {
-      this.style && this.style.apply();
-      camera.project(this, iso);
-      this.parent.style && this.parent.style.apply();
+  getProjectedPosition(camera) {
+    // add one to the position to get the point at the bottom center of the tile
+    const position = this.getPosition().clone().translate(new Vector3(1, 1, 0));
+    camera.project(position, true, G.CTX);
+    return position;
+  }
+
+  async cache(
+    camera = G.CAMERA,
+    iso = G.ISO,
+    w = G.DOM.CANVAS.width,
+    h = G.DOM.CANVAS.height
+  ) {
+    const key = this.getKey();
+    const offscreen = new OffscreenCanvas(w, h);
+    const offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    this.applyAllStyles(offscreenCtx);
+    camera.project(this, iso, offscreenCtx, this.box, true);
+    G.LOGGER.debug('writing to cache: ' + key);
+    const image = await createImageBitmap(
+      offscreen,
+      0,
+      0,
+      this.box[2] - this.box[0],
+      this.box[3] - this.box[1]
+    );
+    camera.setCache(key, image);
+    return key;
+  }
+
+  render(camera, ctx, iso = G.ISO) {
+    if (this.enabled || this.needsUpdate) {
+      // check if cache is supported
+      if (G.SUPPORTS_OFFSCREEN && G.CACHE) {
+        // check if the image is in the cache
+        const key = this.getKey();
+        const cache = camera.getCache(this.getKey());
+        if (cache) {
+          if (this.parent && this.parent.uid === 'path-to-hover') {
+            console.log(this);
+          }
+          // write from cache
+          G.LOGGER.debug('writing from cache: ' + key);
+          const position = this.getProjectedPosition(camera);
+          ctx.drawImage(
+            cache,
+            position.x - cache.width / 2,
+            position.y - cache.height
+          );
+        } else if (this.autoCache) {
+          this.cache(camera, iso).then(() => this.render(camera, ctx, iso));
+        } else {
+          this.style && this.style.apply(ctx);
+          camera.project(this, iso, ctx, false, true);
+        }
+      } else {
+        // cpu render
+        !G.SUPPORTS_OFFSCREEN && G.LOGGER.debug('cache not supported');
+        !G.CACHE && G.LOGGER.debug('cache disabled');
+        this.style && this.style.apply(ctx);
+        camera.project(this, iso, ctx, false, true);
+      }
     }
   }
 }

@@ -1,9 +1,9 @@
 import { G } from '../globals';
 import { cinematicResize } from '../utils/screen';
-import { setStyles } from '../utils/styles';
+import { setDomStyles } from '../utils/styles';
 
 const initBody = () => {
-  setStyles(G.DOM.BODY, [
+  setDomStyles(G.DOM.BODY, [
     ['backgroundColor', G.COLORS.RAISIN_BLACK],
     ['position', 'absolute'],
     ['top', '0'],
@@ -15,7 +15,7 @@ const initBody = () => {
 };
 
 const initRoot = () => {
-  setStyles(G.DOM.ROOT, [
+  setDomStyles(G.DOM.ROOT, [
     ['width', '100%'],
     ['height', '100%'],
     ['display', 'flex'],
@@ -25,13 +25,19 @@ const initRoot = () => {
 };
 
 const initCanvas = () => {
-  setStyles(G.DOM.CANVAS, [
-    ['backgroundColor', G.COLORS.RAISIN_BLACK],
-    ['border', `${G.BORDER_WIDTH}px solid ${G.COLORS.LIGHT_GRAY}`]
+  setDomStyles(G.DOM.CANVAS, [
+    ['border', `${G.BORDER_WIDTH}px solid ${G.COLORS.LIGHT_GRAY}`],
+    ['position', 'absolute']
   ]);
-  const resize = cinematicResize(G.DOM.CANVAS, G.DOM.ROOT);
-  window.addEventListener('resize', resize);
-  resize();
+  setDomStyles(G.DOM.TILE_CANVAS, ['position', 'absolute']);
+  const mainResize = cinematicResize(G.DOM.CANVAS, G.DOM.ROOT);
+  const tileResize = cinematicResize(G.DOM.TILE_CANVAS, G.DOM.ROOT);
+  const resizeAll = () => {
+    mainResize();
+    tileResize();
+  };
+  window.addEventListener('resize', resizeAll);
+  resizeAll();
 };
 
 export const initDom = () => {
