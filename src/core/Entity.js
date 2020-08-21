@@ -14,6 +14,10 @@ export class Entity {
     Object.assign(this, { ...defaults, ...opts });
   }
 
+  isAutoCached() {
+    return this.autoCache || (this.parent && this.parent.isAutoCached());
+  }
+
   getPosition() {
     if (this.parent) {
       const parentPosition = this.parent.getPosition();

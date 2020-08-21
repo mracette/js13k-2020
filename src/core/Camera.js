@@ -1,6 +1,5 @@
 import { G } from '../globals';
 import { degToRad, rotate3d } from '../utils/math';
-import { drawFaces } from '../drawing/shapes';
 import { Vector3 } from './Vector3';
 import { Entity } from './Entity';
 // import { Log } from '../core/Logger';
@@ -10,6 +9,10 @@ export class Camera extends Entity {
     super(opts);
     const defaults = { magnification: 12 };
     Object.assign(this, { ...defaults, ...opts });
+    this._cache = {};
+  }
+
+  clearCache() {
     this._cache = {};
   }
 
@@ -27,7 +30,7 @@ export class Camera extends Entity {
     const x1 = new Vector3(1, 0, 0);
     this.project(x0);
     this.project(x1);
-    return G.COORDS.SCREEN.getWidth() / (x1.x - x0.x);
+    return G.COORDS.getWidth() / (x1.x - x0.x);
   }
 
   isObjectVisible(object) {
@@ -37,8 +40,8 @@ export class Camera extends Entity {
       return (
         clone.x > 0 &&
         clone.y > 0 &&
-        clone.x < G.COORDS.SCREEN.getWidth() * 0.98 &&
-        clone.y < G.COORDS.SCREEN.getHeight() * 0.95
+        clone.x < G.COORDS.getWidth() * 0.98 &&
+        clone.y < G.COORDS.getHeight() * 0.95
       );
     }
     // const objPos = object.getPosition();
@@ -53,21 +56,21 @@ export class Camera extends Entity {
     const y1 = new Vector3(0, 1, 0);
     this.project(y0);
     this.project(y1);
-    return G.COORDS.SCREEN.getHeight() / (y1.y - y0.y);
+    return G.COORDS.getHeight() / (y1.y - y0.y);
   }
 
   mapToScreen(point) {
     // how many map units fit across the height of the canvas?
-    const scale = G.COORDS.SCREEN.getHeight() / (this.magnification || 1);
-    point.x = G.COORDS.SCREEN.nx(0) + point.x * scale;
-    point.y = G.COORDS.SCREEN.ny(0) + point.y * scale;
+    const scale = G.COORDS.getHeight() / (this.magnification || 1);
+    point.x = G.COORDS.nx(0) + point.x * scale;
+    point.y = G.COORDS.ny(0) + point.y * scale;
     point.z = 0;
   }
 
   screenToMap(point) {
-    const scale = G.COORDS.SCREEN.getHeight() / (this.magnification || 1);
-    point.x = (point.x - G.COORDS.SCREEN.nx(0)) / scale;
-    point.y = (point.y - G.COORDS.SCREEN.ny(0)) / (scale / 4);
+    const scale = G.COORDS.getHeight() / (this.magnification || 1);
+    point.x = (point.x - G.COORDS.nx(0)) / scale;
+    point.y = (point.y - G.COORDS.ny(0)) / (scale / 4);
     point.z = 0;
   }
 
@@ -125,7 +128,6 @@ export class Camera extends Entity {
         const bAvg =
           b.face.map((v) => v.x + v.y + v.z).reduce((a, b) => a + b) /
           b.face.length;
-        console.log(a, b);
         if (aAvg < bAvg) {
           return -1;
         } else {
@@ -134,9 +136,18 @@ export class Camera extends Entity {
       });
       // only render faces that face the camera
       facesAndNormals = facesAndNormals.filter((face) => {
-        return face.normal[0] >= 0 && face.normal[1] >= 0;
+        return face.normal[0] >= -degToRad(45) && face.normal[1] >= 0;
       });
-      console.log(facesAndNormals);
+      // when we're updating the bounding box, we need to account for the
+      // space in between the *bottom* (+1, +1) of the tile and the first line moving
+      // up (basically if something is "floating"). otherwise it won't render
+      // correctly off the cache
+      const boundingLowerBound = object
+        .getPosition()
+        .clone()
+        .translate(new Vector3(1, 1, 0));
+      this.projectTransform(boundingLowerBound, true, G.CTX);
+
       // final transformation is to use the camera projection
       for (let i = 0; i < facesAndNormals.length; i++) {
         const face = facesAndNormals[i].face;
@@ -145,8 +156,14 @@ export class Camera extends Entity {
           this.projectTransform(point, iso);
           // update the bounding box if necessary (yes for each point)
           if (bounding) {
-            (!bounding[2] || point.x > bounding[2]) && (bounding[2] = point.x);
-            (!bounding[3] || point.y > bounding[3]) && (bounding[3] = point.y);
+            if (!bounding[2] || point.x > bounding[2]) {
+              bounding[2] = point.x;
+            }
+            if (!bounding[3] || point.y > bounding[3]) {
+              // here we enforce the bounding lower bound for "floating" objects
+              // we're doing on the max y of the bounding box due to the graphics y-down convention
+              bounding[3] = Math.max(point.y, boundingLowerBound.y);
+            }
             if (point.x < bounding[0] || !bounding[0]) {
               bounding[0] = point.x;
             }
@@ -159,16 +176,16 @@ export class Camera extends Entity {
       if (bounding) {
         // account for line width in bounding box
         const lw = parseFloat(ctx.lineWidth || 0);
-        bounding[0] -= lw;
-        bounding[2] -= lw;
-        bounding[1] += lw;
-        bounding[3] += lw;
+        bounding[0] -= lw / 2;
+        bounding[1] -= lw / 2;
+        bounding[2] += lw / 2;
+        bounding[3] += lw / 2;
         G.LOGGER.debug(`set bounding to: ${bounding.flat()}`);
       }
       if (boxToOrigin) {
-        drawFaces(facesAndNormals, fill, ctx, bounding);
+        this.drawFaces(facesAndNormals, fill, ctx, bounding);
       } else {
-        drawFaces(facesAndNormals, fill, ctx);
+        this.drawFaces(facesAndNormals, fill, ctx);
       }
     } else if (object.type === 'point') {
       this.projectTransform(object, iso);
@@ -184,5 +201,31 @@ export class Camera extends Entity {
     point.x += 1 * this.position.x;
     point.y += 1 * this.position.y;
     return point;
+  }
+
+  drawFaces(faces, fill = false, ctx, boxToOrigin = false) {
+    const xAdj = boxToOrigin ? -1 * boxToOrigin[0] : 0;
+    const yAdj = boxToOrigin ? -1 * boxToOrigin[1] : 0;
+    faces.forEach((face, i) => {
+      const thetaAdjust = face.normal[0] / Math.PI;
+      const phiAdjust = face.normal[1] / Math.PI;
+      ctx.beginPath();
+      face.face.forEach((point, i) => {
+        if (i === 0) {
+          ctx.moveTo(point.x + xAdj, point.y + yAdj);
+        } else {
+          ctx.lineTo(point.x + xAdj, point.y + yAdj);
+        }
+      });
+      ctx.closePath();
+      if (fill) {
+        const baseStyle = ctx.fillStyle;
+        ctx.fill();
+        ctx.fillStyle = `rgba(0, 0, 0, ${thetaAdjust * 0.5 + phiAdjust * 0.5})`;
+        ctx.fill();
+        ctx.fillStyle = baseStyle;
+      }
+      ctx.stroke();
+    });
   }
 }

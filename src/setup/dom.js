@@ -29,14 +29,17 @@ const initCanvas = () => {
     ['border', `${G.BORDER_WIDTH}px solid ${G.COLORS.LIGHT_GRAY}`],
     ['position', 'absolute']
   ]);
+  setDomStyles(G.DOM.POST_CANVAS, ['position', 'absolute']);
   setDomStyles(G.DOM.TILE_CANVAS, ['position', 'absolute']);
   const mainResize = cinematicResize(G.DOM.CANVAS, G.DOM.ROOT);
   const tileResize = cinematicResize(G.DOM.TILE_CANVAS, G.DOM.ROOT);
+  const postResize = cinematicResize(G.DOM.POST_CANVAS, G.DOM.ROOT);
   const resizeAll = () => {
     mainResize();
     tileResize();
+    postResize();
   };
-  window.addEventListener('resize', resizeAll);
+  // window.addEventListener('resize', resizeAll);
   resizeAll();
 };
 

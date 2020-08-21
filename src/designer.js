@@ -29,8 +29,8 @@
 //   // TODO: add refresh method to coords
 //   window.addEventListener('resize', () => {
 //     setStyles();
-//     G.COORDS.SCREEN._baseHeight = G.DOM.CANVAS.height;
-//     G.COORDS.SCREEN._baseWidth = G.DOM.CANVAS.width;
+//     G.COORDS._baseHeight = G.DOM.CANVAS.height;
+//     G.COORDS._baseWidth = G.DOM.CANVAS.width;
 //     addScreenDependentGlobals(G);
 //     draw();
 //   });

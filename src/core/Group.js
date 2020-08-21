@@ -7,6 +7,7 @@ export class Group extends Entity {
     super(opts);
     const defaults = {
       type: 'group',
+      autoCache: true,
       style: null,
       children: []
     };

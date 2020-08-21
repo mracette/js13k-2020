@@ -2,17 +2,10 @@ import { SquareGeometry, BoxGeometry } from './geometries/shapes';
 import { Vector3 } from './core/Vector3';
 import { Mesh } from './core/Mesh';
 import { Style } from './core/Style';
-import { Map } from './state/map';
+import { Map } from './algos/movement';
 import { Group } from './core/Group';
 import { Camera } from './core/Camera';
-import {
-  initTiles,
-  initTestCubes,
-  initPlayer,
-  initHoverTile,
-  initPathToHover,
-  initTree001
-} from './setup/world';
+import * as initWorld from './setup/world';
 import { initDom } from './setup/dom';
 import { renderTileCoords } from './utils/screen';
 import { updateMouseHoverTile } from './state/screen';
@@ -34,30 +27,52 @@ G.CAMERA = new Camera({
 G.VISIBLE_MAP_WIDTH = G.CAMERA.getVisibleMapWidth();
 G.VISIBLE_MAP_HEIGHT = G.CAMERA.getVisibleMapHeight();
 
-Promise.all([
-  initTiles(),
-  initTestCubes(),
-  initPlayer(),
-  initHoverTile(),
-  initPathToHover(),
-  initTree001()
-]).then((result) => {
+const styles = {
+  baseLineStyle: new Style({
+    strokeStyle: 'white',
+    lineWidth: 2,
+    lineJoin: 'round',
+    lineCap: 'round'
+  }),
+  emeraldGreen: new Style({
+    fillStyle: G.COLORS.EMERALD_GREEN
+  }),
+  lilac: new Style({
+    fillStyle: G.COLORS.LILAC
+  }),
+  raisinBlack: new Style({
+    fillStyle: G.COLORS.RAISIN_BLACK
+  }),
+  brown: new Style({
+    fillStyle: 'brown'
+  })
+};
+
+const initFunctions = Object.entries(initWorld);
+
+Promise.all(initFunctions.map((kvs) => kvs[1](styles))).then((results) => {
+  const obj = {};
+  results.forEach((result, i) => {
+    console.log(result);
+    obj[initFunctions[i][0]] = result;
+  });
+
   // initialization
-  const [tiles, testCubes, player, hoverTile, pathToHover, trees001] = result;
-  G.CAMERA.position.set(player.position);
-  tiles.position.set(player.position);
-  G.MAP = new Map({ diagonal: false, position: player.position });
-  G.SCENE.add([testCubes, trees001, player]);
+  G.CAMERA.position.set(obj.player.position);
+  obj.tiles.position.set(obj.player.position);
+  G.MAP = new Map({ diagonal: false, position: obj.player.position });
+  G.SCENE.add([obj.testCubes, obj.allTrees, obj.player]);
   console.log(G.SCENE);
 
-  /* 
-  Draw once upon initialization
-  */
-  const drawOnce = () => {
-    tiles.render(G.CAMERA, G.TILE_CTX, true);
+  const postProcess = () => {
+    const args = [0, 0, G.COORDS.getWidth(), G.COORDS.getHeight()];
+    G.POST_CTX.clearRect(...args);
+    G.POST_CTX.setTransform(2, 0, 0, 1, -G.DOM.POST_CANVAS.width / 2, 0);
+    G.POST_CTX.fillStyle = G.GRADIENT;
+    G.POST_CTX.fillRect(...args);
   };
 
-  /* 
+  /*
   Main draw loop
   */
   const draw = (time, clear = false) => {
@@ -79,13 +94,13 @@ Promise.all([
 
     // updates the pathToHover with the AStar path
     G.PATHS.PLAYER_TO_HOVER.forEach((tile, i) => {
-      const child = pathToHover.children[i];
+      const child = obj.pathToHover.children[i];
       if (child) {
         child.position.x = tile.x;
         child.position.y = tile.y;
         child.enabled = true;
       } else {
-        pathToHover.add(
+        obj.pathToHover.add(
           new Mesh(new SquareGeometry(), {
             autoCache: true
           })
@@ -93,37 +108,37 @@ Promise.all([
       }
     });
     const pathLength = G.PATHS.PLAYER_TO_HOVER.length;
-    if (pathLength < pathToHover.children.length) {
-      pathToHover.children
+    if (pathLength < obj.pathToHover.children.length) {
+      obj.pathToHover.children
         .slice(pathLength)
         .forEach((child) => (child.enabled = false));
     }
 
     // draw hover tile
-    hoverTile.position.x = G.MOUSE_HOVER.x;
-    hoverTile.position.y = G.MOUSE_HOVER.y;
-    tiles.render(G.CAMERA, G.TILE_CTX);
-    hoverTile.render(G.CAMERA, G.TILE_CTX);
-    pathToHover.render(G.CAMERA, G.TILE_CTX);
+    obj.hoverTile.position.x = G.MOUSE_HOVER.x;
+    obj.hoverTile.position.y = G.MOUSE_HOVER.y;
+    obj.tiles.render(G.CAMERA, G.TILE_CTX);
+    obj.hoverTile.render(G.CAMERA, G.TILE_CTX);
+    obj.pathToHover.render(G.CAMERA, G.TILE_CTX);
   };
 
-  drawOnce();
+  postProcess();
 
   G.DOM.CANVAS.addEventListener('contextmenu', (e) => e.preventDefault());
 
   window.addEventListener('mousemove', (e) => {
     const needsUpdate = updateMouseHoverTile(e);
     if (needsUpdate) {
-      updatePathToHoverTile(player.position);
+      updatePathToHoverTile(obj.player.position);
       drawTiles();
     }
   });
 
   window.addEventListener('mousedown', (e) => {
-    player.position.set(G.MOUSE_HOVER);
-    G.CAMERA.position.set(player.position);
+    obj.player.position.set(G.MOUSE_HOVER);
+    G.CAMERA.position.set(obj.player.position);
     draw(null, true);
-    updatePathToHoverTile(player.position);
+    updatePathToHoverTile(obj.player.position);
     drawTiles(null, true);
   });
 
@@ -148,13 +163,22 @@ Promise.all([
   //   false
   // );
 
-  window.addEventListener('resize', () => {
-    G.COORDS.SCREEN._baseHeight = G.DOM.CANVAS.height;
-    G.COORDS.SCREEN._baseWidth = G.DOM.CANVAS.width;
-    addScreenDependentGlobals(G);
-    drawTiles(null);
-    draw(null, true);
-  });
+  // let resizeTimer;
+  // window.addEventListener('resize', () => {
+  //   // use timer to throttle resize events
+  //   clearTimeout(resizeTimer);
+  //   resizeTimer = setTimeout(() => {
+  //     G.COORDS._baseHeight = G.DOM.CANVAS.height;
+  //     G.COORDS._baseWidth = G.DOM.CANVAS.width;
+  //     G.VISIBLE_MAP_WIDTH = G.CAMERA.getVisibleMapWidth();
+  //     G.VISIBLE_MAP_HEIGHT = G.CAMERA.getVisibleMapHeight();
+  //     addScreenDependentGlobals(G);
+  //     // TODO: is this being garbage collected?
+  //     G.CAMERA.clearCache();
+  //     drawTiles(null, true);
+  //     draw(null, true);
+  //   }, 400);
+  // });
 
   window.requestAnimationFrame(draw);
 });

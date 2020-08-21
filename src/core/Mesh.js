@@ -8,10 +8,10 @@ export class Mesh extends Entity {
     const defaults = {
       type: 'mesh',
       style: null,
-      autoCache: false,
+      autoCache: true,
       enabled: true,
       needsUpdate: null,
-      box: [] // x, y, x, y
+      box: [] // minx, miny, maxx, maxy
     };
     Object.assign(this, { geometry, ...defaults, ...opts });
   }
@@ -94,7 +94,7 @@ export class Mesh extends Entity {
             position.x - cache.width / 2,
             position.y - cache.height
           );
-        } else if (this.autoCache) {
+        } else if (this.isAutoCached()) {
           this.cache(camera, iso).then(() => this.render(camera, ctx, iso));
         } else {
           this.style && this.style.apply(ctx);

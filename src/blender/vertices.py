@@ -5,7 +5,7 @@ import pprint
 import math
 
 # blender /Users/markracette/Drive/Dev/blender/projects/js13k/2020/grass.blend --background --python /Users/markracette/Drive/Dev/projects/js13k/2020/src/blender/vertices.py
-OBJECT_NAME = 'tree_001'
+OBJECT_NAME = 'tree_003'
 BLENDER_PROJECT_PATH = "/Users/markracette/Drive/Dev/blender/projects/js13k/2020/grass.blend"
 SAVE_PATH = "/Users/markracette/Drive/Dev/projects/js13k/2020/src/blender/raw"
 
