@@ -68,9 +68,6 @@ export class Group extends Entity {
   render(camera, ctx, iso = G.ISO) {
     if (this.enabled || this.needsUpdate) {
       this.style && this.style.apply();
-      if (this.uid === 'path-to-hover') {
-        console.log(this.children);
-      }
       this.children.forEach((child) => child.render(camera, ctx, iso));
     }
   }

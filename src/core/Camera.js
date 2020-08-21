@@ -1,12 +1,15 @@
 import { G } from '../globals';
 import { degToRad, rotate3d } from '../utils/math';
-import { drawLines, drawFaces } from '../drawing/shapes';
-import { Vector3 } from '../core/Vector3';
+import { drawFaces } from '../drawing/shapes';
+import { Vector3 } from './Vector3';
+import { Entity } from './Entity';
 // import { Log } from '../core/Logger';
 
-export class Camera {
+export class Camera extends Entity {
   constructor(opts) {
-    Object.assign(this, opts);
+    super(opts);
+    const defaults = { magnification: 12 };
+    Object.assign(this, { ...defaults, ...opts });
     this._cache = {};
   }
 
@@ -84,38 +87,75 @@ export class Camera {
     // isometric camera rotations
     if (object.type === 'mesh') {
       const rotation = object.getRotation();
-      const newFaces = [];
-      object.geometry.faces.forEach((face) => {
-        const newFace = [];
-        face.forEach((point) => {
-          // create a clone so we don't modify the geometry
-          const projected = point.clone();
+      const scale = object.getScale();
+      const normals = object.geometry.getNormals();
+      const faceCopy = [...object.geometry.getFaces()];
+      for (let i = 0; i < faceCopy.length; i++) {
+        const face = faceCopy[i];
+        for (let j = 0; j < face.length; j++) {
+          const point = face[j];
+          // apply object scaling
+          point.x *= scale.x;
+          point.y *= scale.y;
+          point.z *= scale.z;
           // apply object rotations
-          rotation.x && rotate3d(projected, 'x', rotation.x);
-          rotation.y && rotate3d(projected, 'y', rotation.y);
-          rotation.z && rotate3d(projected, 'z', rotation.z);
-          // account for object position
-          projected.translate(object.getPosition());
-          // account for camera angle and position
-          this.projectTransform(projected, iso);
-          // add back point
-          newFace.push(projected);
-          // update the bounding box if needed
+          rotation.x && rotate3d(point, 'x', rotation.x);
+          rotation.y && rotate3d(point, 'y', rotation.y);
+          rotation.z && rotate3d(point, 'z', rotation.z);
+          // apply object translation
+          point.translate(object.getPosition());
+          // reassign
+          face[j] = point;
+        }
+      }
+      // after the object translation, but before the camera projection,
+      // we sort the faces so they display back-to-front. we need to keep
+      // track of which normals correspond to which face as well, so we must
+      // combine them
+      let facesAndNormals = faceCopy.map((face, i) => {
+        return {
+          face: face,
+          normal: normals[i]
+        };
+      });
+      facesAndNormals.sort((a, b) => {
+        const aAvg =
+          a.face.map((v) => v.x + v.y + v.z).reduce((a, b) => a + b) /
+          a.face.length;
+        const bAvg =
+          b.face.map((v) => v.x + v.y + v.z).reduce((a, b) => a + b) /
+          b.face.length;
+        console.log(a, b);
+        if (aAvg < bAvg) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+      // only render faces that face the camera
+      facesAndNormals = facesAndNormals.filter((face) => {
+        return face.normal[0] >= 0 && face.normal[1] >= 0;
+      });
+      console.log(facesAndNormals);
+      // final transformation is to use the camera projection
+      for (let i = 0; i < facesAndNormals.length; i++) {
+        const face = facesAndNormals[i].face;
+        for (let j = 0; j < face.length; j++) {
+          const point = face[j];
+          this.projectTransform(point, iso);
+          // update the bounding box if necessary (yes for each point)
           if (bounding) {
-            (!bounding[2] || projected.x > bounding[2]) &&
-              (bounding[2] = projected.x);
-            (!bounding[3] || projected.y > bounding[3]) &&
-              (bounding[3] = projected.y);
-            if (projected.x < bounding[0] || !bounding[0]) {
-              bounding[0] = projected.x;
+            (!bounding[2] || point.x > bounding[2]) && (bounding[2] = point.x);
+            (!bounding[3] || point.y > bounding[3]) && (bounding[3] = point.y);
+            if (point.x < bounding[0] || !bounding[0]) {
+              bounding[0] = point.x;
             }
-            if (projected.y < bounding[1] || !bounding[1]) {
-              bounding[1] = projected.y;
+            if (point.y < bounding[1] || !bounding[1]) {
+              bounding[1] = point.y;
             }
           }
-        });
-        newFaces.push(newFace);
-      });
+        }
+      }
       if (bounding) {
         // account for line width in bounding box
         const lw = parseFloat(ctx.lineWidth || 0);
@@ -126,9 +166,9 @@ export class Camera {
         G.LOGGER.debug(`set bounding to: ${bounding.flat()}`);
       }
       if (boxToOrigin) {
-        drawFaces(newFaces, fill, ctx, bounding);
+        drawFaces(facesAndNormals, fill, ctx, bounding);
       } else {
-        drawFaces(newFaces, fill, ctx);
+        drawFaces(facesAndNormals, fill, ctx);
       }
     } else if (object.type === 'point') {
       this.projectTransform(object, iso);

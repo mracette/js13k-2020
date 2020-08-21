@@ -3,8 +3,10 @@ import { MapNode } from '../state/map';
 import { isoToMap, orthoToMap, pageToCanvas } from '../utils/conversions';
 
 export const updatePathToHoverTile = (fromObject) => {
-  const path = G.ASTAR.search(G.MAP, fromObject, G.MOUSE_HOVER);
-  G.PATHS.PLAYER_TO_HOVER = path;
+  try {
+    const path = G.ASTAR.search(G.MAP, fromObject, G.MOUSE_HOVER);
+    G.PATHS.PLAYER_TO_HOVER = path;
+  } catch {}
 };
 
 export const updatePlayerPosition = (e, player, iso = G.ISO) => {

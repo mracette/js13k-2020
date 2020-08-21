@@ -5,10 +5,10 @@ export class Vector3 {
     this.y = y;
     this.z = z;
   }
-  translate(point) {
-    this.x += point.x;
-    this.y += point.y;
-    this.z += point.z;
+  translate(vector) {
+    this.x += vector.x;
+    this.y += vector.y;
+    this.z += vector.z;
     return this;
   }
   round() {
@@ -16,6 +16,16 @@ export class Vector3 {
     this.y = Math.round(this.y);
     this.z = Math.round(this.z);
     return this;
+  }
+  set(vector) {
+    this.x = vector.x;
+    this.y = vector.y;
+    this.z = vector.z;
+    return this;
+  }
+  vectorTo(vector) {
+    console.log(vector, this);
+    return new Vector3(vector.x - this.x, vector.y - this.y, vector.z - this.z);
   }
   clone() {
     return new Vector3(this.x, this.y, this.z);

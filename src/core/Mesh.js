@@ -64,7 +64,8 @@ export class Mesh extends Entity {
     const offscreen = new OffscreenCanvas(w, h);
     const offscreenCtx = offscreen.getContext('2d', { alpha: true });
     this.applyAllStyles(offscreenCtx);
-    camera.project(this, iso, offscreenCtx, this.box, true);
+    // projects with boxToOrigin = true, meaning that the projection starts from the
+    camera.project(this, iso, offscreenCtx, this.box, true, true);
     G.LOGGER.debug('writing to cache: ' + key);
     const image = await createImageBitmap(
       offscreen,
@@ -85,9 +86,6 @@ export class Mesh extends Entity {
         const key = this.getKey();
         const cache = camera.getCache(this.getKey());
         if (cache) {
-          if (this.parent && this.parent.uid === 'path-to-hover') {
-            console.log(this);
-          }
           // write from cache
           G.LOGGER.debug('writing from cache: ' + key);
           const position = this.getProjectedPosition(camera);

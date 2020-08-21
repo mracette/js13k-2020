@@ -18,6 +18,14 @@ export const G = {};
 export const addScreenIndependentGlobals = (G) => {
   G.ISO = true;
   G.RATIO = { x: 2, y: 1 };
+  G.CACHE = true;
+  G.COLORS = {
+    RAISIN_BLACK: '#272838',
+    LIGHT_GRAY: '#CCCCCC',
+    LILAC: '#7C77B9',
+    EMERALD_GREEN: '#5BBA6F',
+    WHITE_OVERLAY_02: 'rgba(255, 255, 255, .2)'
+  };
   G.SUPPORTS_OFFSCREEN =
     typeof OffscreenCanvasRenderingContext2D === 'function';
   G.DOM = {
@@ -27,17 +35,9 @@ export const addScreenIndependentGlobals = (G) => {
     BODY: document.body,
     HTML: document.documentElement
   };
-  G.BORDER_WIDTH = 1;
   G.CTX = G.DOM.CANVAS.getContext('2d', { alpha: true });
+  G.BORDER_WIDTH = 1;
   G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', { alpha: false });
-  G.CACHE = true;
-  G.COLORS = {
-    RAISIN_BLACK: '#272838',
-    LIGHT_GRAY: '#CCCCCC',
-    LILAC: '#7C77B9',
-    EMERALD_GREEN: '#5BBA6F',
-    WHITE_OVERLAY_02: 'rgba(255, 255, 255, .2)'
-  };
   G.MAP_SIZE = {
     x: 21,
     y: 21
