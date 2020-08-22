@@ -51,6 +51,9 @@ export const addScreenIndependentGlobals = (G) => {
   G.MOUSE_HOVER = new Vector3(5, 5, 0);
   G.UID = 0;
   G.LOGGER = new Logger('info');
+  G.ANIMATION_FRAME;
+  G.CURRENT_TIME;
+  G.PROJECTED_ORIGIN = new Vector3(0, 0, 0);
 };
 
 /**

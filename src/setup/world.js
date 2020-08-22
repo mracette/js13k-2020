@@ -3,6 +3,7 @@ import { Group } from '../core/Group';
 import { Mesh } from '../core/Mesh';
 import { Vector3 } from '../core/Vector3';
 import { Style } from '../core/Style';
+import { Player } from '../state/player';
 import * as geos from '../geometries/shapes';
 
 export const pathToHover = (styles) => {
@@ -37,13 +38,7 @@ export const allTrees = (styles) => {
 };
 
 export const player = (styles) => {
-  const playerGroup = new Group({
-    position: new Vector3(15, 15, 0),
-    uid: 'player-group',
-    style: styles.emeraldGreen
-  });
-  playerGroup.add(new Mesh(geos.box));
-  return playerGroup;
+  return new Player(styles);
 };
 
 export const hoverTile = (styles) => {
