@@ -70,3 +70,12 @@
 | Compressed Build (Adv Zip) | 6.86 kb | 7023 | -4% |
 
 
+**about to do away with a star and paths** - *Sat, 22 Aug 2020 21:49:59 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 49.18 kb | 50359 | NA |
+| Build | 22.89 kb | 23444 | -53% |
+| Compressed Build | 7.92 kb | 8111 | -65% |
+| Compressed Build (Adv Zip) | 7.66 kb | 7847 | -3% |
+
+

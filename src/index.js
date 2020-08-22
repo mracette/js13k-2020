@@ -1,20 +1,16 @@
-import { SquareGeometry, BoxGeometry } from './geometries/shapes';
-import { Vector3 } from './core/Vector3';
-import { Mesh } from './core/Mesh';
 import { Style } from './core/Style';
-import { Map } from './algos/movement';
 import { Group } from './core/Group';
 import { Camera } from './core/Camera';
 import * as initWorld from './setup/world';
 import { initDom } from './setup/dom';
 import { renderTileCoords } from './utils/screen';
-import { updateMouseHoverTile } from './state/screen';
-import { updatePathToHoverTile } from './state/player';
 import {
   G,
   addScreenDependentGlobals,
   addScreenIndependentGlobals
 } from './globals';
+
+// TODO: remove
 import Stats from 'stats.js/src/Stats';
 var stats = new Stats();
 stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -30,7 +26,6 @@ G.CAMERA = new Camera({
 });
 G.VISIBLE_MAP_WIDTH = G.CAMERA.getVisibleMapWidth();
 G.VISIBLE_MAP_HEIGHT = G.CAMERA.getVisibleMapHeight();
-G.CAMERA.projectTransform(G.PROJECTED_ORIGIN);
 
 const styles = {
   baseLineStyle: new Style({
@@ -65,7 +60,6 @@ Promise.all(initFunctions.map((kvs) => kvs[1](styles))).then((results) => {
   // initialization
   G.CAMERA.position.set(obj.player.position);
   obj.tiles.position.set(obj.player.position);
-  G.MAP = new Map({ diagonal: false, position: obj.player.position });
   G.SCENE.add([obj.testCubes, obj.allTrees, obj.player.mesh]);
 
   const postProcess = () => {
@@ -83,20 +77,8 @@ Promise.all(initFunctions.map((kvs) => kvs[1](styles))).then((results) => {
     //renderTileCoords(tiles);
   };
 
-  const animate = (time, clear = true) => {
-    stats.begin();
-    G.CURRENT_TIME = time;
-    const needsUpdate = obj.player.updatePosition(time);
-    if (needsUpdate) {
-      G.CAMERA.position.set(obj.player.position);
-      drawWorld(time);
-    }
-    stats.end();
-    G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
-  };
-
   /* Drawn for the tile layer */
-  const drawTiles = (time, clear = false) => {
+  const drawTiles = (time, clear = true) => {
     // clear if called
     clear &&
       G.TILE_CTX.clearRect(
@@ -105,35 +87,20 @@ Promise.all(initFunctions.map((kvs) => kvs[1](styles))).then((results) => {
         G.DOM.TILE_CANVAS.width,
         G.DOM.TILE_CANVAS.height
       );
-
-    // // updates the pathToHover with the AStar path
-    // G.PATHS.PLAYER_TO_HOVER.forEach((tile, i) => {
-    //   const child = obj.pathToHover.children[i];
-    //   if (child) {
-    //     child.position.x = tile.x;
-    //     child.position.y = tile.y;
-    //     child.enabled = true;
-    //   } else {
-    //     obj.pathToHover.add(
-    //       new Mesh(new SquareGeometry(), {
-    //         autoCache: true
-    //       })
-    //     );
-    //   }
-    // });
-    // const pathLength = G.PATHS.PLAYER_TO_HOVER.length;
-    // if (pathLength < obj.pathToHover.children.length) {
-    //   obj.pathToHover.children
-    //     .slice(pathLength)
-    //     .forEach((child) => (child.enabled = false));
-    // }
-
-    // draw hover tile
-    // obj.hoverTile.position.x = G.MOUSE_HOVER.x;
-    // obj.hoverTile.position.y = G.MOUSE_HOVER.y;
     obj.tiles.render(G.CAMERA, G.TILE_CTX);
-    // obj.hoverTile.render(G.CAMERA, G.TILE_CTX);
-    // obj.pathToHover.render(G.CAMERA, G.TILE_CTX);
+  };
+
+  const animate = (time, clear = true) => {
+    stats.begin();
+    G.CURRENT_TIME = time;
+    const needsUpdate = obj.player.updatePosition(time);
+    if (needsUpdate) {
+      G.CAMERA.position.set(obj.player.position);
+      drawWorld(time);
+      drawTiles(time);
+    }
+    stats.end();
+    G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
   };
 
   drawWorld();
@@ -149,23 +116,6 @@ Promise.all(initFunctions.map((kvs) => kvs[1](styles))).then((results) => {
   window.addEventListener('keyup', (e) => {
     obj.player.onKeyUp(e);
   });
-
-  // window.addEventListener('mousemove', (e) => {
-  //   const needsUpdate = updateMouseHoverTile(e);
-  //   if (needsUpdate) {
-  //     console.log(obj.player.position);
-  //     updatePathToHoverTile(obj.player.position.clone().round());
-  //     drawTiles();
-  //   }
-  // });
-
-  // window.addEventListener('mousedown', (e) => {
-  //   // obj.player.position.set(G.MOUSE_HOVER);
-  //   // obj.player.mesh.position.set(G.MOUSE_HOVER);
-  //   // G.CAMERA.position.set(obj.player.position);
-  //   obj.player.move(G.PATHS.PLAYER_TO_HOVER, G.CURRENT_TIME);
-  //   drawTiles(null, true);
-  // });
 
   G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
 });

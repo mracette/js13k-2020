@@ -1,5 +1,4 @@
 import { CanvasCoordinates } from 'crco-utils';
-import { AStar } from './algos/movement';
 import { Vector3 } from './core/Vector3';
 import { Logger } from './core/Logger';
 
@@ -44,16 +43,10 @@ export const addScreenIndependentGlobals = (G) => {
     x: 21,
     y: 21
   };
-  G.ASTAR = new AStar();
-  G.PATHS = {
-    PLAYER_TO_HOVER: []
-  };
-  G.MOUSE_HOVER = new Vector3(5, 5, 0);
   G.UID = 0;
   G.LOGGER = new Logger('info');
   G.ANIMATION_FRAME;
   G.CURRENT_TIME;
-  G.PROJECTED_ORIGIN = new Vector3(0, 0, 0);
 };
 
 /**
