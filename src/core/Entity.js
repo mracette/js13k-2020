@@ -10,8 +10,18 @@ export class Entity {
       rotation: new Vector3(0, 0, 0),
       scale: new Vector3(1, 1, 1)
     };
-    this.uid = opts.uid || G.UID++;
+    this.uid = G.UID++;
     Object.assign(this, { ...defaults, ...opts });
+  }
+
+  getStyleList() {
+    const list = [];
+    let obj = this;
+    while (obj) {
+      obj.style && list.push(obj.style);
+      obj = obj.parent || null;
+    }
+    return list;
   }
 
   isAutoCached() {

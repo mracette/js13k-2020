@@ -1,29 +1,33 @@
-import { G } from '../globals';
-import { lerp } from 'crco-utils';
 import { Vector3 } from '../core/Vector3';
 import { Mesh } from '../core/Mesh';
 import { Group } from '../core/Group';
-import * as geos from '../geometries/shapes';
+import * as geos from '../entities/geometries';
+import * as styles from '../entities/styles';
 
 export class Player {
-  constructor(styles) {
+  constructor() {
     // this is a "virtual" position, because the mesh will always be at the center
-    this.prevPosition = new Vector3(15, 15, 0);
-    this.position = new Vector3(15, 15, 0);
-    this.mesh = this._initMesh(styles, { position: this.position });
+    this.position = new Vector3(-8, -8, 0);
+    this.prevPosition = null;
     this._movementSpeed = 0.075;
+    this._movementSpeedHalf = this._movementSpeed / 2;
     this._lastUpdateTime = null;
     this.isMoving = false;
-  }
 
-  _initMesh(styles, opts) {
-    const playerGroup = new Group({
+    this.mesh = new Group(new Mesh(geos.box), {
       uid: 'player-group',
       style: styles.emeraldGreen,
-      ...opts
+      position: this.position
     });
-    playerGroup.add(new Mesh(geos.box));
-    return playerGroup;
+  }
+
+  getNeighborMapCoords() {
+    return [
+      Math.round(this.position.x - 1),
+      Math.round(-1 * this.position.y - 3),
+      Math.round(this.position.x + 1),
+      Math.round(-1 * this.position.y + 3)
+    ];
   }
 
   updatePosition(time) {
@@ -41,13 +45,13 @@ export class Player {
       needsUpdate = true;
     }
     if (this.moveLeft) {
-      this.position.x -= delta;
-      this.position.y += delta;
+      this.position.x -= this._movementSpeedHalf;
+      this.position.y += this._movementSpeedHalf;
       needsUpdate = true;
     }
     if (this.moveRight) {
-      this.position.x += delta;
-      this.position.y -= delta;
+      this.position.x += this._movementSpeedHalf;
+      this.position.y -= this._movementSpeedHalf;
       needsUpdate = true;
     }
     return needsUpdate;

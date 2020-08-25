@@ -16,16 +16,6 @@ export class Mesh extends Entity {
     Object.assign(this, { geometry, ...defaults, ...opts });
   }
 
-  getStyleList() {
-    const list = [];
-    let obj = this;
-    while (obj) {
-      obj.style && list.push(obj.style);
-      obj = obj.parent || null;
-    }
-    return list;
-  }
-
   applyAllStyles(ctx = G.CTX) {
     this.getStyleList().forEach((s) => s.apply(ctx));
   }
@@ -35,9 +25,7 @@ export class Mesh extends Entity {
     // the screen (not counting it's position)
     return [
       this.geometry.name,
-      this.getStyleList()
-        .map((s) => s.uid)
-        .join('-'),
+      this.style ? this.style.uid : '-',
       's' + this.scale.x,
       's' + this.scale.y,
       's' + this.scale.z,
@@ -61,12 +49,12 @@ export class Mesh extends Entity {
     h = G.DOM.CANVAS.height
   ) {
     const key = this.getKey();
-    const offscreen = new OffscreenCanvas(w, h);
-    const offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    // TODO: implement power of two here
+    let offscreen = new OffscreenCanvas(w, h);
+    let offscreenCtx = offscreen.getContext('2d', { alpha: true });
     this.applyAllStyles(offscreenCtx);
-    // projects with boxToOrigin = true, meaning that the projection starts from the
+    // projects with boxToOrigin = true, meaning that the projection starts from the origin
     camera.project(this, iso, offscreenCtx, this.box, true, true);
-    G.LOGGER.debug('writing to cache: ' + key);
     const image = await createImageBitmap(
       offscreen,
       0,
@@ -75,19 +63,19 @@ export class Mesh extends Entity {
       this.box[3] - this.box[1]
     );
     camera.setCache(key, image);
+    offscreen = null;
+    offscreenCtx = null;
     return key;
   }
 
-  render(camera, ctx, iso = G.ISO) {
+  render(camera, ctx, iso = G.ISO, position = null) {
     if (this.enabled || this.needsUpdate) {
       // check if cache is supported
       if (G.SUPPORTS_OFFSCREEN && G.CACHE) {
         // check if the image is in the cache
-        const key = this.getKey();
         const cache = camera.getCache(this.getKey());
         if (cache) {
           // write from cache
-          G.LOGGER.debug('writing from cache: ' + key);
           const position = this.getProjectedPosition(camera);
           ctx.drawImage(
             cache,
@@ -102,8 +90,6 @@ export class Mesh extends Entity {
         }
       } else {
         // cpu render
-        !G.SUPPORTS_OFFSCREEN && G.LOGGER.debug('cache not supported');
-        !G.CACHE && G.LOGGER.debug('cache disabled');
         this.style && this.style.apply(ctx);
         camera.project(this, iso, ctx, false, true);
       }

@@ -1,5 +1,8 @@
-import { Vector3 } from '../core/Vector3';
 import { Rx, Ry, Rz } from '../core/Matrix';
+
+export const nearestPow2 = (size) => {
+  return Math.pow(2, Math.round(Math.log(size) / Math.log(2)));
+};
 
 export const degToRad = (deg) => (deg * Math.PI) / 180;
 export const radToDeg = (rad) => (rad * 180) / Math.PI;

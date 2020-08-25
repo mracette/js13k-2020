@@ -3,7 +3,7 @@ import { Vector3 } from './Vector3';
 import { Entity } from './Entity';
 
 export class Group extends Entity {
-  constructor(opts = {}) {
+  constructor(children, opts = {}) {
     super(opts);
     const defaults = {
       type: 'group',
@@ -12,6 +12,7 @@ export class Group extends Entity {
       children: []
     };
     Object.assign(this, { ...defaults, ...opts });
+    children && this.add(children);
   }
 
   add(object) {

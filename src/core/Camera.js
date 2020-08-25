@@ -2,7 +2,6 @@ import { G } from '../globals';
 import { degToRad, rotate3d } from '../utils/math';
 import { Vector3 } from './Vector3';
 import { Entity } from './Entity';
-// import { Log } from '../core/Logger';
 
 export class Camera extends Entity {
   constructor(opts) {
@@ -180,7 +179,6 @@ export class Camera extends Entity {
         bounding[1] -= lw / 2;
         bounding[2] += lw / 2;
         bounding[3] += lw / 2;
-        G.LOGGER.debug(`set bounding to: ${bounding.flat()}`);
       }
       if (boxToOrigin) {
         this.drawFaces(facesAndNormals, fill, ctx, bounding);

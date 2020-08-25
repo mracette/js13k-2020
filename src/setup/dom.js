@@ -1,10 +1,11 @@
 import { G } from '../globals';
+import * as colors from '../entities/styles';
 import { cinematicResize } from '../utils/screen';
 import { setDomStyles } from '../utils/styles';
 
 const initBody = () => {
   setDomStyles(G.DOM.BODY, [
-    ['backgroundColor', G.COLORS.RAISIN_BLACK],
+    ['backgroundColor', colors.RAISIN_BLACK],
     ['position', 'absolute'],
     ['top', '0'],
     ['left', '0'],
@@ -26,7 +27,7 @@ const initRoot = () => {
 
 const initCanvas = () => {
   setDomStyles(G.DOM.CANVAS, [
-    ['border', `${G.BORDER_WIDTH}px solid ${G.COLORS.LIGHT_GRAY}`],
+    ['border', `${G.BORDER_WIDTH}px solid ${colors.LIGHT_GRAY}`],
     ['position', 'absolute']
   ]);
   setDomStyles(G.DOM.POST_CANVAS, ['position', 'absolute']);

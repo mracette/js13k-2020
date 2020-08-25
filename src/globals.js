@@ -1,12 +1,12 @@
 import { CanvasCoordinates } from 'crco-utils';
-import { Vector3 } from './core/Vector3';
-import { Logger } from './core/Logger';
 
 /**
  * @type {object} a single global object which other global values attach to
  */
 
-export const G = {};
+export const G = {
+  UID: 0
+};
 
 /**
  * SCREEN INDEPENENT
@@ -18,13 +18,6 @@ export const addScreenIndependentGlobals = (G) => {
   G.ISO = true;
   G.RATIO = { x: 2, y: 1 };
   G.CACHE = true;
-  G.COLORS = {
-    RAISIN_BLACK: '#272838',
-    LIGHT_GRAY: '#CCCCCC',
-    LILAC: '#7C77B9',
-    EMERALD_GREEN: '#5BBA6F',
-    WHITE_OVERLAY_02: 'rgba(255, 255, 255, .2)'
-  };
   G.SUPPORTS_OFFSCREEN =
     typeof OffscreenCanvasRenderingContext2D === 'function';
   G.DOM = {
@@ -39,12 +32,10 @@ export const addScreenIndependentGlobals = (G) => {
   G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', { alpha: false });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.BORDER_WIDTH = 1;
-  G.MAP_SIZE = {
-    x: 21,
-    y: 21
-  };
-  G.UID = 0;
-  G.LOGGER = new Logger('info');
+  // G.MAP_SIZE = {
+  //   x: 21,
+  //   y: 21
+  // };
   G.ANIMATION_FRAME;
   G.CURRENT_TIME;
 };
