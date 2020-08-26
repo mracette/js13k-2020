@@ -12,12 +12,26 @@ export class Player {
     this._movementSpeed = 0.075;
     this._movementSpeedHalf = this._movementSpeed / 2;
     this._lastUpdateTime = null;
+    this._faceOffset = 0.1;
     this.isMoving = false;
+    this.mesh = this._initMesh();
+    console.log(this.face);
+  }
 
-    this.mesh = new Group(new Mesh(geos.box), {
+  _initMesh() {
+    const hands = new Mesh(geos.playerHands);
+    const body = new Mesh(geos.playerBody);
+    this.face = new Mesh(geos.playerFace, {
+      uid: 'player-face',
+      position: new Vector3(0.5, 0.5, 0)
+    });
+    const ringFront = new Mesh(geos.playerRingFront);
+    const ringBack = new Mesh(geos.playerRingBack);
+    return new Group([ringBack, body, ringFront, this.face, hands], {
       uid: 'player-group',
-      style: styles.emeraldGreen,
-      position: this.position
+      position: this.position,
+      // rotation: new Vector3(0, 0, Math.PI / 4),
+      style: styles.lilac
     });
   }
 
@@ -35,21 +49,33 @@ export class Player {
     const delta = this._movementSpeed;
     let needsUpdate = false;
     if (this.moveForward) {
+      this.face.rotation.z = Math.PI;
+      this.face.position.x = 0.5 - this._faceOffset;
+      this.face.position.y = 0.5 - this._faceOffset;
       this.position.x -= delta;
       this.position.y -= delta;
       needsUpdate = true;
     }
     if (this.moveBackward) {
+      this.face.rotation.z = 2 * Math.PI;
+      this.face.position.x = 0.5 + this._faceOffset;
+      this.face.position.y = 0.5 + this._faceOffset;
       this.position.x += delta;
       this.position.y += delta;
       needsUpdate = true;
     }
     if (this.moveLeft) {
+      this.face.rotation.z = Math.PI / 2;
+      this.face.position.x = 0.5 - this._faceOffset;
+      this.face.position.y = 0.5 + this._faceOffset;
       this.position.x -= this._movementSpeedHalf;
       this.position.y += this._movementSpeedHalf;
       needsUpdate = true;
     }
     if (this.moveRight) {
+      this.face.rotation.z = -Math.PI / 2;
+      this.face.position.x = 0.5 + this._faceOffset;
+      this.face.position.y = 0.5 - this._faceOffset;
       this.position.x += this._movementSpeedHalf;
       this.position.y -= this._movementSpeedHalf;
       needsUpdate = true;

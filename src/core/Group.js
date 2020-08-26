@@ -49,7 +49,7 @@ export class Group extends Entity {
         return child;
       }
       if (child.children && child.children.length) {
-        this.getChild(child.children);
+        return this.getChild(child.children);
       }
     });
   }

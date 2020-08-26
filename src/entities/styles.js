@@ -8,7 +8,7 @@ export const WHITE_OVERLAY_02 = 'rgba(255, 255, 255, .2)';
 
 export const baseLineStyle = new Style({
   strokeStyle: 'white',
-  lineWidth: 2,
+  lineWidth: 0.5,
   lineJoin: 'round',
   lineCap: 'round'
 });

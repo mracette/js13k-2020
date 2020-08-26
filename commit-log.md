@@ -79,3 +79,12 @@
 | Compressed Build (Adv Zip) | 7.66 kb | 7847 | -3% |
 
 
+**map and init + cache flow** - *Tue, 25 Aug 2020 14:19:08 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 40.10 kb | 41067 | NA |
+| Build | 20.76 kb | 21263 | -48% |
+| Compressed Build | 7.12 kb | 7292 | -66% |
+| Compressed Build (Adv Zip) | 6.88 kb | 7044 | -3% |
+
+

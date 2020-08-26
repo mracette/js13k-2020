@@ -7,6 +7,7 @@ export class Mesh extends Entity {
     super(opts);
     const defaults = {
       type: 'mesh',
+      uid: G.UID++,
       style: null,
       autoCache: true,
       enabled: true,

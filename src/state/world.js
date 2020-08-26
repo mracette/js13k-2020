@@ -7,7 +7,7 @@ import * as styles from '../entities/styles';
 
 export class Map {
   constructor() {
-    this.height = 31; // rows; must be odd
+    this.height = 196; // rows; must be odd
     this.width = 31; // columns; must be odd
     this.halfWidth = (this.width - 1) / 2;
     this.halfHeight = (this.height - 1) / 2;
@@ -119,17 +119,45 @@ export class Map {
       return new Group([trunk, tree003], opts);
     };
 
+    /* foliage */
+    const grass = new Mesh(geos.grass, { style: styles.emeraldGreen });
+    this._entities.grass = (opts) => {
+      return new Mesh(geos.grass, { ...opts, style: styles.emeraldGreen });
+    };
+
     /* rocks */
     const rock = new Mesh(geos.rock, { style: styles.grey });
     this._entities.rock = (opts) => {
       return new Mesh(geos.rock, { ...opts, style: styles.grey });
     };
 
+    /* stream */
+    const streamFull = new Mesh(geos.streamFull, { style: styles.lilac });
+    const streamSide = new Mesh(geos.streamSide, { style: styles.lilac });
+    const streamCorner = new Mesh(geos.streamCorner, { style: styles.lilac });
+    this._entities.streamFull = (opts) =>
+      new Mesh(geos.streamCorner, { ...opts, style: styles.lilac });
+    this._entities.streamSide = (opts) =>
+      new Mesh(geos.streamSide, { ...opts, style: styles.lilac });
+    this._entities.streamCorner = (opts) =>
+      new Mesh(geos.streamCorner, { ...opts, style: styles.lilac });
+
     /* tiles */
     const tile = this.initTileGroup();
 
     /* caching */
-    this._cachedEntities.push(trunk, tree001, tree002, tree003, rock, tile);
+    this._cachedEntities.push(
+      trunk,
+      tree001,
+      tree002,
+      tree003,
+      grass,
+      rock,
+      tile,
+      streamFull,
+      streamSide,
+      streamCorner
+    );
   }
 
   cacheEntities() {
@@ -159,11 +187,43 @@ export class Map {
       entity: this._entities.rock({ position }),
       blocks: true
     });
+    const grass = (position) => ({
+      entity: this._entities.grass({ position }),
+      blocks: false
+    });
+    const tree001 = (position) => ({
+      entity: this._entities.tree001({ position }),
+      blocks: false
+    });
+    const tree002 = (position) => ({
+      entity: this._entities.tree002({ position }),
+      blocks: false
+    });
+    const tree003 = (position) => ({
+      entity: this._entities.tree003({ position }),
+      blocks: false
+    });
+    const streamFull = (position) => ({
+      entity: this._entities.streamFull({ position }),
+      blocks: true
+    });
+    if (col > 8 && col < 12) {
+      return streamFull(position);
+    }
     if (row <= 2 || col <= 0 || col >= this.width - 1) {
       return rock(position);
     }
     if (rand < 0.25 && (row <= 6 || col <= 1 || col >= this.width - 2)) {
       return rock(position);
+    }
+    if (rand < 0.15) {
+      return grass(position);
+    } else if (rand < 0.2) {
+      return tree001(position);
+    } else if (rand < 0.25) {
+      return tree002(position);
+    } else if (rand < 0.3) {
+      return tree003(position);
     }
     return null;
   }
