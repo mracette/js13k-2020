@@ -32,23 +32,6 @@ export class Camera extends Entity {
     return G.COORDS.getWidth() / (x1.x - x0.x);
   }
 
-  isObjectVisible(object) {
-    if (object.type === 'point') {
-      const clone = object.clone();
-      this.project(clone);
-      return (
-        clone.x > 0 &&
-        clone.y > 0 &&
-        clone.x < G.COORDS.getWidth() * 0.98 &&
-        clone.y < G.COORDS.getHeight() * 0.95
-      );
-    }
-    // const objPos = object.getPosition();
-    // const xDiff = Math.abs(objPos - this.position.x);
-    // const mapWidth = this.getMapWidth();
-    // if xF
-  }
-
   getVisibleMapHeight() {
     // how many map units fit across the height of the canvas?
     const y0 = new Vector3(0, 0, 0);
@@ -217,11 +200,14 @@ export class Camera extends Entity {
       });
       ctx.closePath();
       if (fill) {
-        const baseStyle = ctx.fillStyle;
+        // save and primary fill
+        ctx.save();
         ctx.fill();
+        // darkened layer for flat shading
         ctx.fillStyle = `rgba(0, 0, 0, ${thetaAdjust * 0.5 + phiAdjust * 0.5})`;
         ctx.fill();
-        ctx.fillStyle = baseStyle;
+        // restore for next
+        ctx.restore();
       }
       ctx.stroke();
     });

@@ -97,3 +97,12 @@
 | Compressed Build (Adv Zip) | 8.32 kb | 8517 | -6% |
 
 
+**beginning player actions** - *Fri, 28 Aug 2020 04:13:49 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 48.29 kb | 49451 | NA |
+| Build | 29.52 kb | 30231 | -39% |
+| Compressed Build | 9.72 kb | 9953 | -67% |
+| Compressed Build (Adv Zip) | 9.17 kb | 9385 | -6% |
+
+

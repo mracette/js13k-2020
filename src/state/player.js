@@ -1,3 +1,4 @@
+import { rotatePoint } from 'crco-utils';
 import { G } from '../globals';
 import { Vector3 } from '../core/Vector3';
 import { Mesh } from '../core/Mesh';
@@ -22,7 +23,9 @@ export class Player {
     this.currentActions = [];
     // these control animations and gameplay
     this.actionParams = {
-      beamDuration: 500
+      beamDuration: 500,
+      beamLength: G.COORDS.getWidth() * 0.05,
+      beamRadius: Math.PI / 4
     };
 
     // movement / rotation params
@@ -110,29 +113,29 @@ export class Player {
     return next;
   }
 
-  updateActions(time) {
+  checkForActions(time) {
     // check for a new action
     if (this.currentActionTriggered) {
       this.initiateAction(this.currentAction, time);
       this.currentActionTriggered = false;
+      return true;
     }
+    return this.currentActions.length > 0;
+  }
+
+  updateActions(time) {
     // animate actions if necessary
-    let animationDidEnd;
-    const saveFillState = G.CTX.fillStyle;
-    const saveStrokeState = G.CTX.strokeStyle;
-    console.log('before', G.CTX.fillStyle);
     if (this.currentActions.length) {
       // save context state
+      G.CTX.save();
       for (let i = 0; i < this.currentActions.length; i++) {
-        this.animateAction(time, this.currentActions[i]) &&
-          (animationDidEnd = true);
+        this.animateAction(time, this.currentActions[i]);
       }
-      console.log('during', G.CTX.fillStyle);
+      G.CTX.restore();
+      return true;
+    } else {
+      return false;
     }
-    G.CTX.fillStyle = saveFillState;
-    console.log('after', G.CTX.fillStyle);
-    G.CTX.strokeStyle = saveStrokeState;
-    return animationDidEnd;
   }
 
   updatePosition(time) {
@@ -251,7 +254,8 @@ export class Player {
   animateAction(time, action) {
     switch (action.type) {
       case 'beam':
-        return this.animateBeam(time, action);
+        this.animateBeam(time, action);
+        break;
       default:
         break;
     }
@@ -264,18 +268,32 @@ export class Player {
       this.currentActions = this.currentActions.filter(
         (a) => a.id !== action.id
       );
-      return true;
     } else {
-      ctx.arc(
-        this.mesh.children[0].screenX,
-        this.mesh.children[0].screenY,
-        50,
-        0,
-        TAU
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta})`;
+      ctx.setTransform(2, 0, 0, 1, -G.COORDS.getWidth() / 2, 0);
+      const cx = this.mesh.children[0].screenX;
+      const cy = this.mesh.children[0].screenY;
+      const px = cx + this.actionParams.beamLength;
+      const p1 = rotatePoint(
+        px,
+        cy,
+        cx,
+        cy,
+        this.face.rotation.z + Math.PI / 2 + this.actionParams.beamRadius / 2
       );
-      ctx.fillStyle = 'green';
+      const p2 = rotatePoint(
+        px,
+        cy,
+        cx,
+        cy,
+        this.face.rotation.z + Math.PI / 2 - this.actionParams.beamRadius / 2
+      );
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.closePath();
       ctx.fill();
-      return false;
     }
   }
 }

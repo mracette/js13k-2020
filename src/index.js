@@ -64,7 +64,7 @@ const drawTileGroup = (time, clear = false) => {
 const drawWorld = (time, clear = true) => {
   clear && G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
   drawTileGroup();
-  let pHasRendered = false;
+  G.PLAYER.updateActions(time);
   let px = Math.floor(G.PLAYER.mesh.position.x);
   let py = Math.floor(G.PLAYER.mesh.position.y);
   const [gpr, gpc] = G.MAP.getGridFromTile(px, py);
@@ -84,36 +84,28 @@ const drawWorld = (time, clear = true) => {
         }
         // render the player in between other objects in the grid for proper overlap
         if (i === gpr && j === gpc) {
-          console.log('player render');
           G.PLAYER.mesh.render(G.CAMERA, G.CTX);
-          pHasRendered = true;
         }
       }
     }
   }
-  if (!pHasRendered) {
-    G.PLAYER.mesh.render(G.CAMERA, G.CTX);
-  }
-  // G.SCENE.render(G.CAMERA, G.CTX, G.ISO);
 };
 
-let forceRender = false;
+// let renderNextFrame = false;
 
 const animate = (time, clear = true) => {
   stats.begin();
   G.CURRENT_TIME = time;
-  // updates position or rotation
+  // updates player actions;
+  const actionsAreOngoing = G.PLAYER.checkForActions(time);
+  console.log(G.PLAYER.currentActions);
+  // updates position and rotation
   const playerPositionUpdated = G.PLAYER.updatePosition(time);
-  // if player updated, so must the world
-  if (forceRender) {
+  // if player updated, so must the world; ongoing actions also cause a re-render
+  if (playerPositionUpdated || actionsAreOngoing) {
     playerPositionUpdated && G.CAMERA.position.set(G.PLAYER.position);
     drawWorld(time);
-    forceRender = false;
-  } else if (playerPositionUpdated) {
-    G.CAMERA.position.set(G.PLAYER.position);
-    drawWorld(time);
   }
-  G.PLAYER.updateActions(time) && (forceRender = true);
   stats.end();
   G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
 };
