@@ -9,7 +9,8 @@ export class Group extends Entity {
       type: 'group',
       autoCache: true,
       style: null,
-      children: []
+      children: [],
+      drawOrder: []
     };
     Object.assign(this, { ...defaults, ...opts });
     children && this.add(children);
@@ -42,16 +43,17 @@ export class Group extends Entity {
     }
   }
 
-  getChild(uid, children = null) {
+  getChild(uid, children = null, recursive = false) {
     const list = children || this.children;
-    list.forEach((child) => {
+    for (let i = 0; i < list.length; i++) {
+      const child = list[i];
       if (child.uid === uid) {
         return child;
       }
-      if (child.children && child.children.length) {
+      if (recursive && child.children && child.children.length) {
         return this.getChild(child.children);
       }
-    });
+    }
   }
 
   getPosition() {
@@ -69,8 +71,20 @@ export class Group extends Entity {
 
   render(camera, ctx, iso = G.ISO) {
     if (this.enabled || this.needsUpdate) {
-      this.style && this.style.apply();
-      this.children.forEach((child) => child.render(camera, ctx, iso));
+      this.applyAllStyles(ctx);
+      if (this.drawOrder.length) {
+        this.drawOrder.forEach((uid) => {
+          const child = this.getChild(uid);
+          child.render(camera, ctx, iso);
+        });
+        this.children.forEach((child) => {
+          if (this.drawOrder.length && !this.drawOrder.includes(child.uid)) {
+            child.render(camera, ctx, iso);
+          }
+        });
+      } else {
+        this.children.forEach((child) => child.render(camera, ctx, iso));
+      }
     }
   }
 }

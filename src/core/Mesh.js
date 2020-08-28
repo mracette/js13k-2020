@@ -10,15 +10,14 @@ export class Mesh extends Entity {
       uid: G.UID++,
       style: null,
       autoCache: true,
+      cacheEnabled: true,
       enabled: true,
       needsUpdate: null,
       box: [] // minx, miny, maxx, maxy
     };
+    this.screenX = null;
+    this.screenY = null;
     Object.assign(this, { geometry, ...defaults, ...opts });
-  }
-
-  applyAllStyles(ctx = G.CTX) {
-    this.getStyleList().forEach((s) => s.apply(ctx));
   }
 
   getKey() {
@@ -72,12 +71,16 @@ export class Mesh extends Entity {
   render(camera, ctx, iso = G.ISO, position = null) {
     if (this.enabled || this.needsUpdate) {
       // check if cache is supported
-      if (G.SUPPORTS_OFFSCREEN && G.CACHE) {
+      if (G.SUPPORTS_OFFSCREEN && G.CACHE && this.cacheEnabled) {
         // check if the image is in the cache
         const cache = camera.getCache(this.getKey());
         if (cache) {
           // write from cache
           const position = this.getProjectedPosition(camera);
+          // store these for use elsewhere without recalculating
+          this.screenX = position.x;
+          this.screenY = position.y;
+          // draw from cache
           ctx.drawImage(
             cache,
             position.x - cache.width / 2,
@@ -86,12 +89,12 @@ export class Mesh extends Entity {
         } else if (this.isAutoCached()) {
           this.cache(camera, iso).then(() => this.render(camera, ctx, iso));
         } else {
-          this.style && this.style.apply(ctx);
+          this.applyAllStyles();
           camera.project(this, iso, ctx, false, true);
         }
       } else {
         // cpu render
-        this.style && this.style.apply(ctx);
+        this.applyAllStyles(ctx);
         camera.project(this, iso, ctx, false, true);
       }
     }

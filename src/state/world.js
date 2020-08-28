@@ -14,6 +14,14 @@ export class Map {
     this.visibleHeight = 9;
     this.visibleWidth = 3;
     this.grid = [];
+    this.visibleGridSize = this.getGridFromTile(
+      Math.round((-1 * G.VISIBLE_MAP_WIDTH) / 2),
+      Math.round((-1 * G.VISIBLE_MAP_HEIGHT) / 2)
+    );
+    this.visibleGridSizeHalf = [
+      Math.round(this.visibleGridSize[0] / 2),
+      Math.round(this.visibleGridSize[1] / 2)
+    ];
     this._entities = {};
     this._cachedEntities = [];
     this._initEntities();
@@ -48,11 +56,12 @@ export class Map {
     let row = -1 * [x + y];
     let col;
     let colOffset;
-    const midX = -1 * (row / 2);
     if (row % 2 === 0) {
+      const midX = -1 * (row / 2);
       colOffset = x - midX;
     } else {
-      colOffset = x;
+      const midX = (-1 * (row + 1)) / 2;
+      colOffset = x - midX;
     }
     col = this.halfWidth + colOffset;
     return [row, col];
@@ -60,15 +69,15 @@ export class Map {
 
   // this is beyond explanation, sorry
   // (the mapping of the map?)
-  getEntityOnTile(x, y) {
-    const [row, col] = this.getGridFromTile(x, y);
-    // console.log(x, y, row, col, this.grid);
-    if (row < 0 || row > this.height - 1 || col < 0 || col > this.width - 1) {
-      return null;
-    } else {
-      return this.grid[row][col].entity;
-    }
-  }
+  // getEntityOnTile(x, y) {
+  //   const [row, col] = this.getGridFromTile(x, y);
+  //   // console.log(x, y, row, col, this.grid);
+  //   if (row < 0 || row > this.height - 1 || col < 0 || col > this.width - 1) {
+  //     return null;
+  //   } else {
+  //     return this.grid[row][col].entity;
+  //   }
+  // }
 
   getEntity(name) {
     return this._entities[name];
@@ -77,7 +86,7 @@ export class Map {
   initTileGroup() {
     this._entities.tileGroup = new Group(null, {
       uid: 'tile-group',
-      style: styles.baseLineStyle
+      style: [styles.baseLine, styles.lightLine]
     });
     for (let i = 0; i < G.VISIBLE_MAP_WIDTH; i++) {
       for (let j = 0; j < G.VISIBLE_MAP_HEIGHT; j++) {
@@ -102,27 +111,47 @@ export class Map {
     const tree003 = new Mesh(geos.tree003, { style: styles.emeraldGreen });
     const tree001 = new Mesh(geos.tree001, { style: styles.emeraldGreen });
     const trunk = new Mesh(geos.trunk, { style: styles.brown });
+    const trunkBase = new Mesh(geos.shadow, {
+      scale: new Vector3(0.5, 0.5, 1),
+      position: new Vector3(0.25, 0.25, 0),
+      style: styles.ivoryBlack
+    });
 
     this._entities.tree001 = (opts) => {
+      const trunkBase = new Mesh(geos.shadow, {
+        scale: new Vector3(0.5, 0.5, 1),
+        position: new Vector3(0.25, 0.25, 0),
+        style: styles.ivoryBlack
+      });
       const trunk = new Mesh(geos.trunk, { style: styles.brown });
       const tree001 = new Mesh(geos.tree001, { style: styles.emeraldGreen });
-      return new Group([trunk, tree001], opts);
+      return new Group([trunkBase, trunk, tree001], opts);
     };
     this._entities.tree002 = (opts) => {
+      const trunkBase = new Mesh(geos.shadow, {
+        scale: new Vector3(0.5, 0.5, 1),
+        position: new Vector3(0.25, 0.25, 0),
+        style: styles.ivoryBlack
+      });
       const trunk = new Mesh(geos.trunk, { style: styles.brown });
       const tree002 = new Mesh(geos.tree002, { style: styles.emeraldGreen });
-      return new Group([trunk, tree002], opts);
+      return new Group([trunkBase, trunk, tree002], opts);
     };
     this._entities.tree003 = (opts) => {
+      const trunkBase = new Mesh(geos.shadow, {
+        scale: new Vector3(0.5, 0.5, 1),
+        position: new Vector3(0.25, 0.25, 0),
+        style: styles.ivoryBlack
+      });
       const trunk = new Mesh(geos.trunk, { style: styles.brown });
       const tree003 = new Mesh(geos.tree003, { style: styles.emeraldGreen });
-      return new Group([trunk, tree003], opts);
+      return new Group([trunkBase, trunk, tree003], opts);
     };
 
     /* foliage */
-    const grass = new Mesh(geos.grass, { style: styles.emeraldGreen });
+    const grass = new Mesh(geos.grass, { style: styles.grassGreen });
     this._entities.grass = (opts) => {
-      return new Mesh(geos.grass, { ...opts, style: styles.emeraldGreen });
+      return new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
     };
 
     /* rocks */
@@ -132,15 +161,14 @@ export class Map {
     };
 
     /* stream */
-    const streamFull = new Mesh(geos.streamFull, { style: styles.lilac });
-    const streamSide = new Mesh(geos.streamSide, { style: styles.lilac });
-    const streamCorner = new Mesh(geos.streamCorner, { style: styles.lilac });
+    const streamFull = new Mesh(geos.streamFull, {
+      style: [styles.noLine, styles.streamBlue]
+    });
     this._entities.streamFull = (opts) =>
-      new Mesh(geos.streamCorner, { ...opts, style: styles.lilac });
-    this._entities.streamSide = (opts) =>
-      new Mesh(geos.streamSide, { ...opts, style: styles.lilac });
-    this._entities.streamCorner = (opts) =>
-      new Mesh(geos.streamCorner, { ...opts, style: styles.lilac });
+      new Mesh(geos.streamFull, {
+        ...opts,
+        style: [styles.noLine, styles.streamBlue]
+      });
 
     /* tiles */
     const tile = this.initTileGroup();
@@ -148,15 +176,14 @@ export class Map {
     /* caching */
     this._cachedEntities.push(
       trunk,
+      trunkBase,
       tree001,
       tree002,
       tree003,
       grass,
       rock,
       tile,
-      streamFull,
-      streamSide,
-      streamCorner
+      streamFull
     );
   }
 

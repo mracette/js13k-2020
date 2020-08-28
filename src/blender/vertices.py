@@ -6,16 +6,8 @@ import math
 
 # blender /Users/markracette/Drive/Dev/blender/projects/js13k/2020/grass.blend --background --python /Users/markracette/Drive/Dev/projects/js13k/2020/src/blender/vertices.py
 # OBJECT_NAMES = ['stream_full', 'stream_side', 'stream_corner']
-OBJECT_NAMES = ['player_body', 'player_face_001',
-'player_face',
-# 'player_face_002',
-# 'player_face_003',
-# 'player_face_004',
-# 'player_face_005',
-# 'player_face_006',
-# 'player_face_007',
-# 'player_face_008',
-'player_ring_front', 'player_ring_back', 'player_hands']
+# OBJECT_NAMES = ['player_body','player_face_inner','player_face_outer','player_ring_front', 'player_ring_back', 'player_hands']
+OBJECT_NAMES = ['shadow']
 BLENDER_PROJECT_PATH = "/Users/markracette/Drive/Dev/blender/projects/js13k/2020/grass.blend"
 SAVE_PATH = "/Users/markracette/Drive/Dev/projects/js13k/2020/src/blender/raw"
 

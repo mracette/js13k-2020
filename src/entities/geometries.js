@@ -15,8 +15,7 @@ import playerRingFrontConfig from '../blender/raw/player_ring_front.json';
 import playerRingBackConfig from '../blender/raw/player_ring_back.json';
 import playerFaceConfig from '../blender/raw/player_face.json';
 import streamFullConfig from '../blender/raw/stream_full.json';
-import streamSideConfig from '../blender/raw/stream_side.json';
-import streamCornerConfig from '../blender/raw/stream_corner.json';
+import shadowConfig from '../blender/raw/shadow.json';
 
 export const tree001 = new BlenderGeometry(tree001Config, { name: 'tree_001' });
 export const tree002 = new BlenderGeometry(tree002Config, { name: 'tree_002' });
@@ -33,5 +32,4 @@ export const playerRingBack = new BlenderGeometry(playerRingBackConfig);
 export const playerBody = new BlenderGeometry(playerBodyConfig);
 export const playerFace = new BlenderGeometry(playerFaceConfig);
 export const streamFull = new BlenderGeometry(streamFullConfig);
-export const streamSide = new BlenderGeometry(streamSideConfig);
-export const streamCorner = new BlenderGeometry(streamCornerConfig);
+export const shadow = new BlenderGeometry(shadowConfig);

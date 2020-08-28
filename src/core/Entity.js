@@ -15,13 +15,23 @@ export class Entity {
   }
 
   getStyleList() {
-    const list = [];
+    let list = [];
     let obj = this;
     while (obj) {
-      obj.style && list.push(obj.style);
+      if (obj.style) {
+        if (Array.isArray(obj.style)) {
+          list = [...list, ...obj.style];
+        } else {
+          list.push(obj.style);
+        }
+      }
       obj = obj.parent || null;
     }
     return list;
+  }
+
+  applyAllStyles(ctx = G.CTX) {
+    this.getStyleList().forEach((s) => s.apply(ctx));
   }
 
   isAutoCached() {

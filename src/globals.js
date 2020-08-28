@@ -32,10 +32,7 @@ export const addScreenIndependentGlobals = (G) => {
   G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', { alpha: false });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.BORDER_WIDTH = 1;
-  // G.MAP_SIZE = {
-  //   x: 21,
-  //   y: 21
-  // };
+  G.BOTTOM_SCREEN_BUFFER = 8;
   G.ANIMATION_FRAME;
   G.CURRENT_TIME;
 };
