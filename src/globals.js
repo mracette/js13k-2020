@@ -1,5 +1,5 @@
 import { CanvasCoordinates } from 'crco-utils';
-import { WebGL } from './core/WebGL';
+import { WebGL2 } from './core/WebGL2';
 
 /**
  * @type {object} a single global object which other global values attach to
@@ -37,7 +37,7 @@ export const addScreenIndependentGlobals = (G) => {
     alpha: true,
     antialias: false
   });
-  G.WEBGL = new WebGL(G.WEBGL_CTX);
+  G.WEBGL = new WebGL2(G.WEBGL_CTX);
   G.BORDER_WIDTH = 1;
   G.BOTTOM_SCREEN_BUFFER = 8;
   G.ANIMATION_FRAME;

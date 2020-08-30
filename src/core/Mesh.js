@@ -51,17 +51,21 @@ export class Mesh extends Entity {
     const key = this.getKey();
     let offscreenCtx, offscreen;
     // TODO: implement power of two here?
-    if (G.SUPPORTS_OFFSCREEN) {
-      offscreen = new OffscreenCanvas(w, h);
-      offscreenCtx = offscreen.getContext('2d', { alpha: true });
-    } else {
-      offscreen = document.createElement('canvas');
-      offscreen.width = w;
-      offscreen.height = h;
-      offscreenCtx = offscreen.getContext('2d', { alpha: true });
-    }
+    // if (G.SUPPORTS_OFFSCREEN) {
+    //   offscreen = new OffscreenCanvas(w, h);
+    //   offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    // }
+    // else {
+    offscreen = document.createElement('canvas');
+    offscreen.width = w;
+    offscreen.height = h;
+    offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    // }
     this.applyAllStyles(offscreenCtx);
     // projects with boxToOrigin = true, meaning that the projection starts from the origin
+    camera.project(this, iso, offscreenCtx, this.box, true, true);
+    offscreen.width = this.box[2] - this.box[0];
+    offscreen.height = this.box[3] - this.box[1];
     camera.project(this, iso, offscreenCtx, this.box, true, true);
     const image = await createImageBitmap(
       offscreen,
@@ -90,7 +94,7 @@ export class Mesh extends Entity {
           this.screenX = position.x;
           this.screenY = position.y;
           // draw from cache
-          G.WEBGL.drawTexture(
+          G.WEBGL.drawImage(
             cache,
             position.x - cache.width / 2,
             position.y - cache.height

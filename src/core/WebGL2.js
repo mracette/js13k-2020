@@ -197,19 +197,18 @@ export class WebGL2 {
     return textureInfo;
   }
 
-  drawImage(time, textureInfo) {
+  drawImage(textureInfo, x, y) {
     const gl = this.gl;
-    this.resizeCanvasToDisplaySize(gl.canvas);
+    // this.resizeCanvasToDisplaySize(gl.canvas);
 
     // Tell WebGL how to convert from clip space to pixels
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // gl.clear(gl.COLOR_BUFFER_BIT);
 
     const { texture, width, height } = textureInfo;
 
-    const x = 50 + 50 * Math.sin(time / 1000);
-    const y = 50 + 50 * Math.sin(time / 1000);
+    // const x = 50 + 50 * Math.sin(time / 1000);
+    // const y = 50 + 50 * Math.sin(time / 1000);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -252,7 +251,7 @@ export class WebGL2 {
   }
 
   resizeCanvasToDisplaySize(canvas, multiplier) {
-    multiplier = multiplier || 1;
+    multiplier = multiplier || window.devicePixelRatio;
     const width = (canvas.clientWidth * multiplier) | 0;
     const height = (canvas.clientHeight * multiplier) | 0;
     if (canvas.width !== width || canvas.height !== height) {
