@@ -1,4 +1,5 @@
 import { CanvasCoordinates } from 'crco-utils';
+import { WebGL } from './core/WebGL';
 
 /**
  * @type {object} a single global object which other global values attach to
@@ -22,6 +23,7 @@ export const addScreenIndependentGlobals = (G) => {
     typeof OffscreenCanvasRenderingContext2D === 'function';
   G.DOM = {
     CANVAS: document.getElementById('viz'),
+    WEBGL_CANVAS: document.getElementById('webgl'),
     TILE_CANVAS: document.getElementById('tile'),
     POST_CANVAS: document.getElementById('post'),
     ROOT: document.getElementById('root'),
@@ -31,6 +33,11 @@ export const addScreenIndependentGlobals = (G) => {
   G.CTX = G.DOM.CANVAS.getContext('2d', { alpha: true });
   G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', { alpha: false });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
+  G.WEBGL_CTX = G.DOM.WEBGL_CANVAS.getContext('webgl', {
+    alpha: true,
+    antialias: false
+  });
+  G.WEBGL = new WebGL(G.WEBGL_CTX);
   G.BORDER_WIDTH = 1;
   G.BOTTOM_SCREEN_BUFFER = 8;
   G.ANIMATION_FRAME;

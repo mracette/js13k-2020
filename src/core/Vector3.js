@@ -24,7 +24,6 @@ export class Vector3 {
     return this;
   }
   vectorTo(vector) {
-    console.log(vector, this);
     return new Vector3(vector.x - this.x, vector.y - this.y, vector.z - this.z);
   }
   clone() {

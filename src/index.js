@@ -1,7 +1,8 @@
 import { Group } from './core/Group';
 import { Map } from './state/world';
-import { Camera } from './core/Camera';
 import { Player } from './state/player';
+import { Camera } from './core/Camera';
+import { WebGL } from './core/WebGL';
 import { initDom } from './setup/dom';
 import { baseLine } from './entities/styles';
 import { renderTileCoords } from './utils/screen';
@@ -20,6 +21,29 @@ document.body.appendChild(stats.dom);
 addScreenIndependentGlobals(G);
 initDom();
 addScreenDependentGlobals(G);
+
+// const webGl = new WebGL(G.WEBGL_CTX);
+
+// const offscreen = document.createElement('canvas');
+// offscreen.width = 100;
+// offscreen.height = 100;
+// const offscreenCtx = offscreen.getContext('2d', { alpha: true });
+// offscreenCtx.fillStyle = 'green';
+// offscreenCtx.fillRect(0, 0, 100, 100);
+// offscreenCtx.fillStyle = 'red';
+// offscreenCtx.fillRect(25, 25, 50, 50);
+
+// const img = new Image();
+// img.onload = () => {
+//   const texture = webGl.createTexture(img);
+//   console.log(texture);
+//   const draw = () => {
+//     webGl.drawTexture(texture, Math.random() * 1000, Math.random() * 1000);
+//     // window.requestAnimationFrame(draw);
+//   };
+//   window.requestAnimationFrame(draw);
+// };
+// img.src = 'tree.jpg';
 
 // init player
 G.PLAYER = new Player();
@@ -98,7 +122,6 @@ const animate = (time, clear = true) => {
   G.CURRENT_TIME = time;
   // updates player actions;
   const actionsAreOngoing = G.PLAYER.checkForActions(time);
-  console.log(G.PLAYER.currentActions);
   // updates position and rotation
   const playerPositionUpdated = G.PLAYER.updatePosition(time);
   // if player updated, so must the world; ongoing actions also cause a re-render

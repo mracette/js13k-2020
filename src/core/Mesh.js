@@ -49,9 +49,17 @@ export class Mesh extends Entity {
     h = G.DOM.CANVAS.height
   ) {
     const key = this.getKey();
-    // TODO: implement power of two here
-    let offscreen = new OffscreenCanvas(w, h);
-    let offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    let offscreenCtx, offscreen;
+    // TODO: implement power of two here?
+    if (G.SUPPORTS_OFFSCREEN) {
+      offscreen = new OffscreenCanvas(w, h);
+      offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    } else {
+      offscreen = document.createElement('canvas');
+      offscreen.width = w;
+      offscreen.height = h;
+      offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    }
     this.applyAllStyles(offscreenCtx);
     // projects with boxToOrigin = true, meaning that the projection starts from the origin
     camera.project(this, iso, offscreenCtx, this.box, true, true);
@@ -62,7 +70,8 @@ export class Mesh extends Entity {
       this.box[2] - this.box[0],
       this.box[3] - this.box[1]
     );
-    camera.setCache(key, image);
+    const texture = G.WEBGL.createTexture(image);
+    camera.setCache(key, texture);
     offscreen = null;
     offscreenCtx = null;
     return key;
@@ -71,7 +80,7 @@ export class Mesh extends Entity {
   render(camera, ctx, iso = G.ISO, position = null) {
     if (this.enabled || this.needsUpdate) {
       // check if cache is supported
-      if (G.SUPPORTS_OFFSCREEN && G.CACHE && this.cacheEnabled) {
+      if (G.CACHE && this.cacheEnabled) {
         // check if the image is in the cache
         const cache = camera.getCache(this.getKey());
         if (cache) {
@@ -81,7 +90,7 @@ export class Mesh extends Entity {
           this.screenX = position.x;
           this.screenY = position.y;
           // draw from cache
-          ctx.drawImage(
+          G.WEBGL.drawTexture(
             cache,
             position.x - cache.width / 2,
             position.y - cache.height

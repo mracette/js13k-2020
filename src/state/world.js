@@ -50,8 +50,6 @@ export class Map {
     return [baseX + colOffset, baseY - colOffset];
   }
 
-  // this is beyond explanation, sorry
-  // (the mapping of the map?)
   getGridFromTile(x, y) {
     let row = -1 * [x + y];
     let col;
@@ -66,18 +64,6 @@ export class Map {
     col = this.halfWidth + colOffset;
     return [row, col];
   }
-
-  // this is beyond explanation, sorry
-  // (the mapping of the map?)
-  // getEntityOnTile(x, y) {
-  //   const [row, col] = this.getGridFromTile(x, y);
-  //   // console.log(x, y, row, col, this.grid);
-  //   if (row < 0 || row > this.height - 1 || col < 0 || col > this.width - 1) {
-  //     return null;
-  //   } else {
-  //     return this.grid[row][col].entity;
-  //   }
-  // }
 
   getEntity(name) {
     return this._entities[name];
@@ -196,7 +182,6 @@ export class Map {
   }
 
   _initGrid() {
-    console.log(this._entities);
     for (let i = 0; i < this.height; i++) {
       this.grid.push([]);
       for (let j = 0; j < this.width; j++) {

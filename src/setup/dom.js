@@ -32,13 +32,16 @@ const initCanvas = () => {
   ]);
   setDomStyles(G.DOM.POST_CANVAS, ['position', 'absolute']);
   setDomStyles(G.DOM.TILE_CANVAS, ['position', 'absolute']);
+  setDomStyles(G.DOM.WEBGL_CANVAS, ['position', 'absolute']);
   const mainResize = cinematicResize(G.DOM.CANVAS, G.DOM.ROOT);
   const tileResize = cinematicResize(G.DOM.TILE_CANVAS, G.DOM.ROOT);
   const postResize = cinematicResize(G.DOM.POST_CANVAS, G.DOM.ROOT);
+  const webGlResize = cinematicResize(G.DOM.WEBGL_CANVAS, G.DOM.ROOT);
   const resizeAll = () => {
     mainResize();
     tileResize();
     postResize();
+    webGlResize();
   };
   // window.addEventListener('resize', resizeAll);
   resizeAll();
