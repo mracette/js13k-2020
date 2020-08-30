@@ -29,7 +29,7 @@ export const renderTileCoords = (tileGroup) => {
       tile.position.y + 0.5,
       0
     );
-    G.CAMERA.project(position, true, G.CTX);
+    G.CAMERA.project(position);
     const text = `${tile.position.x}, ${tile.position.y}`;
     G.CTX.fillText(text, position.x, position.y);
   });

@@ -56,24 +56,54 @@ export class Camera extends Entity {
     point.z = 0;
   }
 
-  projectTransform(point, iso) {
+  projectTransform(point) {
     // shift according to position of camera;
     point.x -= this.position.x;
     point.y -= this.position.y;
     // apply rotations
-    if (iso) {
-      rotate3d(point, 'z', degToRad(45));
-      rotate3d(point, 'x', degToRad(60));
-    }
+    rotate3d(point, 'z', degToRad(45));
+    rotate3d(point, 'x', degToRad(60));
+    // transform to screen coordinates
     this.mapToScreen(point);
   }
 
-  project(object, iso = G.ISO, ctx, bounding, fill = true, boxToOrigin = true) {
-    // isometric camera rotations
+  /**
+   * @param {Array} box - the objects bounding box [x0, y0, x1, y1]
+   * @param {Vector3} lowerBound - the baseline of the bounding box
+   * @param {Vector3} point - new point to consider
+   */
+  updateBoundingBox(box, lowerBound, point) {
+    if (!box[2] || point.x > box[2]) {
+      box[2] = point.x;
+    }
+    if (!box[3] || point.y > box[3]) {
+      // here the bounding lower bound is enforced for "floating" objects
+      // (on the max y of the bounding box due to the y-down convention)
+      box[3] = Math.max(point.y, lowerBound.y);
+    }
+    if (point.x < box[0] || !box[0]) {
+      box[0] = point.x;
+    }
+    if (point.y < box[1] || !box[1]) {
+      box[1] = point.y;
+    }
+  }
+
+  /**
+   * @param {Object} object either a mesh or point to project
+   * @param {boolean} bounding if projecting a mesh, setting to true will
+   * update its bounding box during the projection
+   * @returns {Array} returns an array of faces and normals that can be passed
+   * directly to this.drawLines()
+   */
+  project(object, bounding = true) {
+    // if the projected object is a mesh, the objects transformations must
+    // be baked into the geometry before it is projected to the screen
     if (object.type === 'mesh') {
-      const rotation = object.getRotation();
       const scale = object.getScale();
-      const normals = object.geometry.getNormals();
+      const rotation = object.getRotation();
+      const position = object.getPosition();
+      // use a copy to avoid modifying geometry
       const faceCopy = [...object.geometry.getFaces()];
       for (let i = 0; i < faceCopy.length; i++) {
         const face = faceCopy[i];
@@ -88,18 +118,18 @@ export class Camera extends Entity {
           rotation.y && rotate3d(point, 'y', rotation.y);
           rotation.z && rotate3d(point, 'z', rotation.z);
           // apply object translation
-          point.translate(object.getPosition());
+          point.translate(position);
           // reassign
           face[j] = point;
         }
       }
       // after the object translation, but before the camera projection,
-      // we sort the faces so they display back-to-front. we need to keep
-      // track of which normals correspond to which face as well, so we must
-      // combine them
+      // we sort the faces so they are display back-to-front. we need to keep
+      // track of which normals correspond to which face as well, so we must combine them
+      const normals = object.geometry.getNormals();
       let facesAndNormals = faceCopy.map((face, i) => {
         return {
-          face: face,
+          face,
           normal: normals[i]
         };
       });
@@ -110,66 +140,57 @@ export class Camera extends Entity {
         const bAvg =
           b.face.map((v) => v.x + v.y + v.z).reduce((a, b) => a + b) /
           b.face.length;
-        if (aAvg < bAvg) {
-          return -1;
-        } else {
-          return 1;
-        }
+        return aAvg < bAvg ? -1 : 1;
       });
-      // only render faces that face the camera
+      // we can also limit the render to just faces that the camera sees
       facesAndNormals = facesAndNormals.filter((face) => {
         return face.normal[0] >= -degToRad(45) && face.normal[1] >= 0;
       });
+
       // when we're updating the bounding box, we need to account for the
       // space in between the *bottom* (+1, +1) of the tile and the first line moving
       // up (basically if something is "floating"). otherwise it won't render
       // correctly off the cache
-      const boundingLowerBound = object
-        .getPosition()
-        .clone()
-        .translate(new Vector3(1, 1, 0));
-      this.projectTransform(boundingLowerBound, true, G.CTX);
+      let boundingLowerBound, box;
+      if (bounding) {
+        box = object.box;
+        boundingLowerBound = object
+          .getPosition()
+          .clone()
+          .translate(new Vector3(1, 1, 0));
+        this.projectTransform(boundingLowerBound);
+      }
 
       // final transformation is to use the camera projection
       for (let i = 0; i < facesAndNormals.length; i++) {
         const face = facesAndNormals[i].face;
         for (let j = 0; j < face.length; j++) {
           const point = face[j];
-          this.projectTransform(point, iso);
+          this.projectTransform(point);
           // update the bounding box if necessary (yes for each point)
           if (bounding) {
-            if (!bounding[2] || point.x > bounding[2]) {
-              bounding[2] = point.x;
-            }
-            if (!bounding[3] || point.y > bounding[3]) {
-              // here we enforce the bounding lower bound for "floating" objects
-              // we're doing on the max y of the bounding box due to the graphics y-down convention
-              bounding[3] = Math.max(point.y, boundingLowerBound.y);
-            }
-            if (point.x < bounding[0] || !bounding[0]) {
-              bounding[0] = point.x;
-            }
-            if (point.y < bounding[1] || !bounding[1]) {
-              bounding[1] = point.y;
-            }
+            this.updateBoundingBox(box, boundingLowerBound, point);
           }
         }
       }
-      if (bounding) {
-        // account for line width in bounding box
-        const lw = parseFloat(ctx.lineWidth || 0);
-        bounding[0] -= lw / 2;
-        bounding[1] -= lw / 2;
-        bounding[2] += lw / 2;
-        bounding[3] += lw / 2;
-      }
-      if (boxToOrigin) {
-        this.drawFaces(facesAndNormals, fill, ctx, bounding);
-      } else {
-        this.drawFaces(facesAndNormals, fill, ctx);
-      }
+
+      return facesAndNormals;
+      // if (bounding) {
+      //   // account for line width in bounding box
+      //   const lw = parseFloat(ctx.lineWidth || 0);
+      //   bounding[0] -= lw / 2;
+      //   bounding[1] -= lw / 2;
+      //   bounding[2] += lw / 2;
+      //   bounding[3] += lw / 2;
+      // }
+      // if (boxToOrigin) {
+      //   this.drawFaces(facesAndNormals, ctx, bounding);
+      // } else {
+      //   this.drawFaces(facesAndNormals, ctx);
+      // }
     } else if (object.type === 'point') {
-      this.projectTransform(object, iso);
+      // the projection of a point is much simpler, just use the camera's transforms
+      this.projectTransform(object);
     }
   }
 
@@ -184,10 +205,13 @@ export class Camera extends Entity {
     return point;
   }
 
-  drawFaces(faces, fill = false, ctx, boxToOrigin = false) {
-    const xAdj = boxToOrigin ? -1 * boxToOrigin[0] : 0;
-    const yAdj = boxToOrigin ? -1 * boxToOrigin[1] : 0;
-    faces.forEach((face, i) => {
+  drawFaces(faces, ctx, box = false, opts = {}) {
+    const fill = opts.fill || true;
+    const stroke = opts.stroke || true;
+    const shade = opts.shade || true;
+    const xAdj = box ? -1 * box[0] : 0;
+    const yAdj = box ? -1 * box[1] : 0;
+    faces.forEach((face) => {
       const thetaAdjust = face.normal[0] / Math.PI;
       const phiAdjust = face.normal[1] / Math.PI;
       ctx.beginPath();
@@ -198,18 +222,26 @@ export class Camera extends Entity {
           ctx.lineTo(point.x + xAdj, point.y + yAdj);
         }
       });
+      // always close the path
       ctx.closePath();
       if (fill) {
-        // save and primary fill
+        // save the base styles and apply them to the face
         ctx.save();
         ctx.fill();
-        // darkened layer for flat shading
-        ctx.fillStyle = `rgba(0, 0, 0, ${thetaAdjust * 0.5 + phiAdjust * 0.5})`;
-        ctx.fill();
-        // restore for next
+        if (shade) {
+          // use a darkened layer for flat shading
+          ctx.fillStyle = `rgba(0, 0, 0, ${
+            thetaAdjust * 0.5 + phiAdjust * 0.5
+          })`;
+          ctx.fill();
+        }
+        // restore for next iteration
         ctx.restore();
       }
-      ctx.stroke();
+      // apply stroke if needed
+      if (stroke) {
+        ctx.stroke();
+      }
     });
   }
 }

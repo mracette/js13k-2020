@@ -13,7 +13,7 @@ export class Mesh extends Entity {
       cacheEnabled: true,
       enabled: true,
       needsUpdate: null,
-      box: [] // minx, miny, maxx, maxy
+      box: [] // x0, y0, x1, y1
     };
     this.screenX = null;
     this.screenY = null;
@@ -38,50 +38,60 @@ export class Mesh extends Entity {
   getProjectedPosition(camera) {
     // add one to the position to get the point at the bottom center of the tile
     const position = this.getPosition().clone().translate(new Vector3(1, 1, 0));
-    camera.project(position, true, G.CTX);
+    camera.project(position);
     return position;
   }
 
   async cache(
-    camera = G.CAMERA,
-    iso = G.ISO,
-    w = G.DOM.CANVAS.width,
-    h = G.DOM.CANVAS.height
+    camera = G.CAMERA
+    // iso = G.ISO,
+    // w = G.DOM.CANVAS.width,
+    // h = G.DOM.CANVAS.height
   ) {
     const key = this.getKey();
+
+    // get the projection, and update the bounding box
+    const facesAndNormals = camera.project(this, true);
+    const w = this.box[2] - this.box[0];
+    const h = this.box[3] - this.box[1];
+
     let offscreenCtx, offscreen;
-    // TODO: implement power of two here?
-    // if (G.SUPPORTS_OFFSCREEN) {
-    //   offscreen = new OffscreenCanvas(w, h);
-    //   offscreenCtx = offscreen.getContext('2d', { alpha: true });
-    // }
-    // else {
-    offscreen = document.createElement('canvas');
-    offscreen.width = w;
-    offscreen.height = h;
-    offscreenCtx = offscreen.getContext('2d', { alpha: true });
-    // }
+    //TODO: implement power of two here?
+    if (G.SUPPORTS_OFFSCREEN) {
+      offscreen = new OffscreenCanvas(w, h);
+      offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    } else {
+      offscreen = document.createElement('canvas');
+      offscreen.width = w;
+      offscreen.height = h;
+      offscreenCtx = offscreen.getContext('2d', { alpha: true });
+    }
+
+    // apply all styles, and after doing so, update the bounding box
+    // to account for stroke width
     this.applyAllStyles(offscreenCtx);
-    // projects with boxToOrigin = true, meaning that the projection starts from the origin
-    camera.project(this, iso, offscreenCtx, this.box, true, true);
-    offscreen.width = this.box[2] - this.box[0];
-    offscreen.height = this.box[3] - this.box[1];
-    camera.project(this, iso, offscreenCtx, this.box, true, true);
-    const image = await createImageBitmap(
-      offscreen,
-      0,
-      0,
-      this.box[2] - this.box[0],
-      this.box[3] - this.box[1]
-    );
+    // const lw = parseFloat(offscreenCtx.lineWidth || 0);
+    // if (lw) {
+    //   this.box[0] -= lw / 2;
+    //   this.box[1] -= lw / 2;
+    //   this.box[2] += lw / 2;
+    //   this.box[3] += lw / 2;
+    // }
+
+    // draw the projection to the canvas, with boxToOrigin = true
+    camera.drawFaces(facesAndNormals, offscreenCtx, this.box);
+
+    // render the bitmap
+    const image = await createImageBitmap(offscreen, 0, 0, w, h);
     const texture = G.WEBGL.createTexture(image);
     camera.setCache(key, texture);
+    // camera.setCache(key, image);
     offscreen = null;
     offscreenCtx = null;
     return key;
   }
 
-  render(camera, ctx, iso = G.ISO, position = null) {
+  render(camera, ctx) {
     if (this.enabled || this.needsUpdate) {
       // check if cache is supported
       if (G.CACHE && this.cacheEnabled) {
@@ -90,7 +100,7 @@ export class Mesh extends Entity {
         if (cache) {
           // write from cache
           const position = this.getProjectedPosition(camera);
-          // store these for use elsewhere without recalculating
+          // store these for external use
           this.screenX = position.x;
           this.screenY = position.y;
           // draw from cache
@@ -99,16 +109,24 @@ export class Mesh extends Entity {
             position.x - cache.width / 2,
             position.y - cache.height
           );
+          // console.log(cache);
+          // ctx.drawImage(
+          //   cache,
+          //   position.x - cache.width / 2,
+          //   position.y - cache.height
+          // );
         } else if (this.isAutoCached()) {
-          this.cache(camera, iso).then(() => this.render(camera, ctx, iso));
+          this.cache().then(() => this.render(camera, ctx));
         } else {
-          this.applyAllStyles();
-          camera.project(this, iso, ctx, false, true);
+          // cpu render
+          // this.applyAllStyles();
+          // camera.project(this);
         }
       } else {
         // cpu render
         this.applyAllStyles(ctx);
-        camera.project(this, iso, ctx, false, true);
+        const faces = camera.project(this);
+        camera.drawFaces(faces, ctx, false);
       }
     }
   }

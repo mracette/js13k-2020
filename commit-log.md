@@ -142,3 +142,12 @@
 | Compressed Build (Adv Zip) | 5.83 kb | 5971 | -7% |
 
 
+**need to trim the size of offscreen canvas** - *Sun, 30 Aug 2020 15:11:32 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 66.90 kb | 68501 | NA |
+| Build | 33.47 kb | 34276 | -50% |
+| Compressed Build | 10.97 kb | 11237 | -67% |
+| Compressed Build (Adv Zip) | 10.41 kb | 10658 | -5% |
+
+
