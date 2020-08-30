@@ -1,6 +1,4 @@
-// adapted from https://webglfundamentals.org/webgl/lessons/webgl-image-processing.html
-
-export class m4 {
+class m4 {
   constructor() {}
   static orthographic(left, right, bottom, top, near, far, dst) {
     dst = dst || new Float32Array(16);
@@ -96,44 +94,40 @@ export class m4 {
   }
 }
 
-export class WebGL {
-  // just pass a webgl context
-  constructor(ctx) {
-    this.gl = ctx;
-    this.vertexShaderSrc = `
+export class WebGL2 {
+  constructor(gl) {
+    this.gl = gl;
+
+    const vertexShaderSrc = `
     attribute vec4 a_position;
     attribute vec2 a_texcoord;
-
+    
     uniform mat4 u_matrix;
-
+    
     varying vec2 v_texcoord;
-
+    
     void main() {
-    gl_Position = u_matrix * a_position;
-    v_texcoord = a_texcoord;
+       gl_Position = u_matrix * a_position;
+       v_texcoord = a_texcoord;
     }
     `;
-    this.fragmentShaderSrc = `
+
+    const fragmentShaderSrc = `
     precision mediump float;
-
+              
     varying vec2 v_texcoord;
-
+    
     uniform sampler2D u_texture;
-
+    
     void main() {
-    gl_FragColor = texture2D(u_texture, v_texcoord);
+       gl_FragColor = texture2D(u_texture, v_texcoord);
     }
     `;
-    this.unitQuad = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
-    this.setup(this.gl);
-  }
 
-  setup(gl) {
-    // set up shader from text source
     const vertShaderObj = gl.createShader(gl.VERTEX_SHADER);
     const fragShaderObj = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(vertShaderObj, this.vertexShaderSrc);
-    gl.shaderSource(fragShaderObj, this.fragmentShaderSrc);
+    gl.shaderSource(vertShaderObj, vertexShaderSrc);
+    gl.shaderSource(fragShaderObj, fragmentShaderSrc);
     gl.compileShader(vertShaderObj);
     gl.compileShader(fragShaderObj);
 
@@ -146,7 +140,7 @@ export class WebGL {
 
     // look up where the vertex data needs to go.
     this.positionLocation = gl.getAttribLocation(this.program, 'a_position');
-    this.texcoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
+    this.texcoordLocation = gl.getAttribLocation(this.program, 'a_texcoord');
 
     // lookup uniforms
     this.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
@@ -156,56 +150,66 @@ export class WebGL {
     this.positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
 
-    // put unit quad in buffer
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.unitQuad),
-      gl.STATIC_DRAW
-    );
+    // Put a unit quad in the buffer
+    var positions = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
     // Create a buffer for texture coords
     this.texcoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
 
     // Put texcoords in the buffer
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(this.unitQuad),
-      gl.STATIC_DRAW
-    );
+    var texcoords = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
   }
 
   createTexture(image) {
     const gl = this.gl;
     var tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
+    // Fill the texture with a 1x1 blue pixel.
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      1,
+      1,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      new Uint8Array([0, 0, 255, 255])
+    );
+
     // let's assume all images are not a power of 2
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    const textureInfo = {
-      width: image.width,
+
+    var textureInfo = {
+      width: image.width, // we don't know the size until it loads
       height: image.height,
       texture: tex
     };
+
     gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
     return textureInfo;
   }
 
-  drawImage(img, x, y) {
-    this.render(this.gl, img, x, y);
-  }
-
-  drawTexture(textureInfo, x, y) {
+  drawImage(time, textureInfo) {
     const gl = this.gl;
-    const { texture, width, height } = textureInfo;
-
     this.resizeCanvasToDisplaySize(gl.canvas);
 
+    // Tell WebGL how to convert from clip space to pixels
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.clear(gl.COLOR_BUFFER_BIT);
+
+    const { texture, width, height } = textureInfo;
+
+    const x = 50 + 50 * Math.sin(time / 1000);
+    const y = 50 + 50 * Math.sin(time / 1000);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -217,8 +221,8 @@ export class WebGL {
     gl.enableVertexAttribArray(this.positionLocation);
     gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.texcoordBuffer);
-    // gl.enableVertexAttribArray(this.texcoordLocation);
-    // gl.vertexAttribPointer(this.texcoordLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(this.texcoordLocation);
+    gl.vertexAttribPointer(this.texcoordLocation, 2, gl.FLOAT, false, 0, 0);
 
     // this matrix will convert from pixels to clip space
     var matrix = m4.orthographic(
@@ -232,9 +236,11 @@ export class WebGL {
 
     // this matrix will translate our quad to dstX, dstY
     matrix = m4.translate(matrix, x, y, 0);
+
     // this matrix will scale our 1 unit quad
     // from 1 unit to texWidth, texHeight units
     matrix = m4.scale(matrix, width, height, 1);
+
     // Set the matrix.
     gl.uniformMatrix4fv(this.matrixLocation, false, matrix);
 
@@ -246,7 +252,7 @@ export class WebGL {
   }
 
   resizeCanvasToDisplaySize(canvas, multiplier) {
-    multiplier = multiplier || window.devicePixelRatio;
+    multiplier = multiplier || 1;
     const width = (canvas.clientWidth * multiplier) | 0;
     const height = (canvas.clientHeight * multiplier) | 0;
     if (canvas.width !== width || canvas.height !== height) {
@@ -256,85 +262,4 @@ export class WebGL {
     }
     return false;
   }
-
-  //   render(gl, image, x, y) {
-  //     // Set a rectangle the same size as the image.
-  //     this.setRectangle(gl, x, y, image.width, image.height);
-
-  //     // provide texture coordinates for the rectangle.
-  //     var texcoordBuffer = gl.createBuffer();
-  //     gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
-  //     gl.bufferData(
-  //       gl.ARRAY_BUFFER,
-  //       new Float32Array(this.unitQuad),
-  //       gl.STATIC_DRAW
-  //     );
-
-  //     // Create a texture.
-  //     var texture = gl.createTexture();
-  //     gl.bindTexture(gl.TEXTURE_2D, texture);
-
-  //     // Set the parameters so we can render any size image.
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-  //     // Upload the image into the texture.
-  //     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-
-  //     // lookup uniforms
-  //     var resolutionLocation = gl.getUniformLocation(
-  //       this.program,
-  //       'u_resolution'
-  //     );
-
-  //     // Tell WebGL how to convert from clip space to pixels
-  //     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  //     // Clear the canvas
-  //     gl.clearColor(0, 0, 0, 0);
-  //     gl.clear(gl.COLOR_BUFFER_BIT);
-
-  //     // Tell it to use our program (pair of shaders)
-  //     gl.useProgram(this.program);
-
-  //     // Turn on the position attribute
-  //     gl.enableVertexAttribArray(this.positionLocation);
-
-  //     // Bind the position buffer.
-  //     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-
-  //     gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-  //     // Turn on the texcoord attribute
-  //     gl.enableVertexAttribArray(this.texcoordLocation);
-
-  //     // bind the texcoord buffer.
-  //     gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
-
-  //     // Tell the texcoord attribute how to get data out of texcoordBuffer (ARRAY_BUFFER)
-  //     gl.vertexAttribPointer(this.texcoordLocation, 2, gl.FLOAT, false, 0, 0);
-
-  //     // set the resolution
-  //     gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
-
-  //     // Draw the rectangle.
-  //     var primitiveType = gl.TRIANGLES;
-  //     var offset = 0;
-  //     var count = 6;
-  //     gl.drawArrays(primitiveType, offset, count);
-  //   }
-
-  //   setRectangle(gl, x, y, width, height) {
-  //     var x1 = x;
-  //     var x2 = x + width;
-  //     var y1 = y;
-  //     var y2 = y + height;
-  //     gl.bufferData(
-  //       gl.ARRAY_BUFFER,
-  //       new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]),
-  //       gl.STATIC_DRAW
-  //     );
-  //   }
 }

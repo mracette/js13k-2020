@@ -124,3 +124,12 @@
 | Compressed Build (Adv Zip) | 10.46 kb | 10713 | -5% |
 
 
+**with tree** - *Sun, 30 Aug 2020 06:03:03 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 60.00 kb | 61438 | NA |
+| Build | 2.35 kb | 2405 | -96% |
+| Compressed Build | 1.16 kb | 1191 | -50% |
+| Compressed Build (Adv Zip) | 1.10 kb | 1131 | -5% |
+
+
