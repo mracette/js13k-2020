@@ -1,19 +1,12 @@
+// adapted from https://webglfundamentals.org/webgl/lessons/webgl-2d-drawimage.html
+
 class m4 {
   constructor() {}
   static orthographic(left, right, bottom, top, near, far, dst) {
-    dst = dst || new Float32Array(16);
+    dst = dst || new Float32Array(16).fill(0);
     dst[0] = 2 / (right - left);
-    dst[1] = 0;
-    dst[2] = 0;
-    dst[3] = 0;
-    dst[4] = 0;
     dst[5] = 2 / (top - bottom);
-    dst[6] = 0;
-    dst[7] = 0;
-    dst[8] = 0;
-    dst[9] = 0;
     dst[10] = 2 / (near - far);
-    dst[11] = 0;
     dst[12] = (left + right) / (left - right);
     dst[13] = (bottom + top) / (bottom - top);
     dst[14] = (near + far) / (near - far);
@@ -21,10 +14,7 @@ class m4 {
     return dst;
   }
   static scale(m, sx, sy, sz, dst) {
-    // This is the optimized version of
-    // return multiply(m, scaling(sx, sy, sz), dst);
     dst = dst || new Float32Array(16);
-
     dst[0] = sx * m[0 * 4 + 0];
     dst[1] = sx * m[0 * 4 + 1];
     dst[2] = sx * m[0 * 4 + 2];
@@ -37,59 +27,34 @@ class m4 {
     dst[9] = sz * m[2 * 4 + 1];
     dst[10] = sz * m[2 * 4 + 2];
     dst[11] = sz * m[2 * 4 + 3];
-
     if (m !== dst) {
       dst[12] = m[12];
       dst[13] = m[13];
       dst[14] = m[14];
       dst[15] = m[15];
     }
-
     return dst;
   }
-
   static translate(m, tx, ty, tz, dst) {
-    // This is the optimized version of
-    // return multiply(m, translation(tx, ty, tz), dst);
-    dst = dst = dst || new Float32Array(16);
-
-    var m00 = m[0];
-    var m01 = m[1];
-    var m02 = m[2];
-    var m03 = m[3];
-    var m10 = m[1 * 4 + 0];
-    var m11 = m[1 * 4 + 1];
-    var m12 = m[1 * 4 + 2];
-    var m13 = m[1 * 4 + 3];
-    var m20 = m[2 * 4 + 0];
-    var m21 = m[2 * 4 + 1];
-    var m22 = m[2 * 4 + 2];
-    var m23 = m[2 * 4 + 3];
-    var m30 = m[3 * 4 + 0];
-    var m31 = m[3 * 4 + 1];
-    var m32 = m[3 * 4 + 2];
-    var m33 = m[3 * 4 + 3];
-
+    dst = new Float32Array(16);
     if (m !== dst) {
-      dst[0] = m00;
-      dst[1] = m01;
-      dst[2] = m02;
-      dst[3] = m03;
-      dst[4] = m10;
-      dst[5] = m11;
-      dst[6] = m12;
-      dst[7] = m13;
-      dst[8] = m20;
-      dst[9] = m21;
-      dst[10] = m22;
-      dst[11] = m23;
+      dst[0] = m[0];
+      dst[1] = m[1];
+      dst[2] = m[2];
+      dst[3] = m[3];
+      dst[4] = m[1 * 4 + 0];
+      dst[5] = m[1 * 4 + 1];
+      dst[6] = m[1 * 4 + 2];
+      dst[7] = m[1 * 4 + 3];
+      dst[8] = m[2 * 4 + 0];
+      dst[9] = m[2 * 4 + 1];
+      dst[10] = m[2 * 4 + 2];
+      dst[11] = m[2 * 4 + 3];
     }
-
-    dst[12] = m00 * tx + m10 * ty + m20 * tz + m30;
-    dst[13] = m01 * tx + m11 * ty + m21 * tz + m31;
-    dst[14] = m02 * tx + m12 * ty + m22 * tz + m32;
-    dst[15] = m03 * tx + m13 * ty + m23 * tz + m33;
-
+    dst[12] = dst[0] * tx + dst[4] * ty + m[2 * 4 + 0] * tz + m[3 * 4 + 0];
+    dst[13] = dst[1] * tx + dst[5] * ty + m[2 * 4 + 1] * tz + m[3 * 4 + 1];
+    dst[14] = dst[2] * tx + dst[6] * ty + m[2 * 4 + 2] * tz + m[3 * 4 + 2];
+    dst[15] = dst[3] * tx + dst[7] * ty + m[2 * 4 + 3] * tz + m[3 * 4 + 3];
     return dst;
   }
 }
@@ -161,6 +126,10 @@ export class WebGL2 {
     // Put texcoords in the buffer
     var texcoords = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
+
+    // enable alpha
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   }
 
   createTexture(image) {
@@ -203,12 +172,8 @@ export class WebGL2 {
 
     // Tell WebGL how to convert from clip space to pixels
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    // gl.clear(gl.COLOR_BUFFER_BIT);
 
     const { texture, width, height } = textureInfo;
-
-    // const x = 50 + 50 * Math.sin(time / 1000);
-    // const y = 50 + 50 * Math.sin(time / 1000);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
 

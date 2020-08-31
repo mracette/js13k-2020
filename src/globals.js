@@ -30,11 +30,13 @@ export const addScreenIndependentGlobals = (G) => {
     BODY: document.body,
     HTML: document.documentElement
   };
+  G.DOM.WEBGL_CANVAS.style.background = 'rgba(0, 0, 0, 0)';
   G.CTX = G.DOM.CANVAS.getContext('2d', { alpha: true });
   G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', { alpha: false });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.WEBGL_CTX = G.DOM.WEBGL_CANVAS.getContext('webgl', {
     alpha: true,
+    premultipliedAlpha: false,
     antialias: false
   });
   G.WEBGL = new WebGL2(G.WEBGL_CTX);
