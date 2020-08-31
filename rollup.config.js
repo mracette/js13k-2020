@@ -13,7 +13,26 @@ export default {
       file: 'build/bundle.min.js',
       format: 'iife',
       name: 'bundle',
-      plugins: [terser()],
+      plugins: [
+        terser({
+          mangle: {
+            toplevel: true,
+            properties: {
+              reserved: [
+                // 'getElementById',
+                // 'getContext',
+                // 'drawImage',
+                // 'fill',
+                // 'moveTo',
+                // 'lineTo',
+                // 'linearRampToValueAtTime',
+                // 'createOscillator'
+                // ... lots more lines ...
+              ]
+            }
+          }
+        })
+      ],
       sourceMaps: env === 'production' ? false : 'inline'
     }
   ],

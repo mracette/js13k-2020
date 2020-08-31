@@ -13,10 +13,10 @@ import {
 } from './globals';
 
 // TODO: remove
-import Stats from 'stats.js/src/Stats';
-var stats = new Stats();
-stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild(stats.dom);
+// import Stats from 'stats.js/src/Stats';
+// var stats = new Stats();
+// stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+// document.body.appendChild(stats.dom);
 
 addScreenIndependentGlobals(G);
 initDom();
