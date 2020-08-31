@@ -2,7 +2,7 @@ import { Group } from './core/Group';
 import { Map } from './state/world';
 import { Player } from './state/player';
 import { Camera } from './core/Camera';
-import { WebGL2 } from './core/WebGL2';
+import { WebGL } from './core/WebGL';
 import { initDom } from './setup/dom';
 import { baseLine } from './entities/styles';
 import { renderTileCoords } from './utils/screen';
@@ -21,39 +21,6 @@ document.body.appendChild(stats.dom);
 addScreenIndependentGlobals(G);
 initDom();
 addScreenDependentGlobals(G);
-
-// const promises = [];
-
-// let offscreen = document.createElement('canvas');
-// let offscreenCtx = offscreen.getContext('2d');
-// offscreenCtx.fillStyle = 'green';
-// offscreenCtx.fillRect(0, 0, 100, 100);
-// offscreenCtx.fillStyle = 'blue';
-// offscreenCtx.fillRect(25, 25, 50, 50);
-// promises.push(createImageBitmap(offscreen));
-
-// offscreen = document.createElement('canvas');
-// offscreenCtx = offscreen.getContext('2d');
-// offscreenCtx.fillStyle = 'purple';
-// offscreenCtx.fillRect(0, 0, 100, 100);
-// offscreenCtx.fillStyle = 'cyan';
-// offscreenCtx.fillRect(25, 25, 50, 50);
-// promises.push(createImageBitmap(offscreen));
-
-// Promise.all(promises).then((images) => {
-//   const texture1 = G.WEBGL.createTexture(images[0]);
-//   const texture2 = G.WEBGL.createTexture(images[1]);
-
-//   const draw = (time) => {
-//     const x = 50 + 50 * Math.sin(time / 1000);
-//     const y = 50 + 50 * Math.sin(time / 1000);
-//     G.WEBGL.drawImage(texture1, x, y);
-//     G.WEBGL.drawImage(texture2, x + 100, y + 100);
-//     window.requestAnimationFrame(draw);
-//   };
-
-//   window.requestAnimationFrame(draw);
-// });
 
 // init player
 G.PLAYER = new Player();

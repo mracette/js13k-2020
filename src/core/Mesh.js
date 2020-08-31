@@ -42,16 +42,32 @@ export class Mesh extends Entity {
     return position;
   }
 
-  async cache(
-    camera = G.CAMERA
-    // iso = G.ISO,
-    // w = G.DOM.CANVAS.width,
-    // h = G.DOM.CANVAS.height
-  ) {
+  async cache(camera = G.CAMERA) {
     const key = this.getKey();
 
     // get the projection, and update the bounding box
     const facesAndNormals = camera.project(this, true);
+
+    // let lw = null;
+    // this.getStyleList().forEach((s) => {
+    //   const lineWidth = s.styles['lineWidth'];
+    //   console.log(lineWidth);
+    //   if (typeof lineWidth === 'function') {
+    //     lw = parseFloat(lineWidth());
+    //   } else if (typeof lineWidth !== 'undefined') {
+    //     lw = parseFloat(lineWidth);
+    //   }
+    // });
+
+    // console.log(lw);
+
+    // update the bounding box to account for stroke width
+    // if (lw !== null) {
+    //   this.box[0] -= lw / 2;
+    //   this.box[1] -= lw / 2;
+    //   this.box[2] += lw / 2;
+    //   this.box[3] += lw / 2;
+    // }
     const w = this.box[2] - this.box[0];
     const h = this.box[3] - this.box[1];
 
@@ -59,24 +75,22 @@ export class Mesh extends Entity {
     //TODO: implement power of two here?
     if (G.SUPPORTS_OFFSCREEN) {
       offscreen = new OffscreenCanvas(w, h);
-      offscreenCtx = offscreen.getContext('2d', { alpha: true });
+      offscreenCtx = offscreen.getContext('2d', {
+        alpha: true,
+        antialias: false
+      });
     } else {
       offscreen = document.createElement('canvas');
       offscreen.width = w;
       offscreen.height = h;
-      offscreenCtx = offscreen.getContext('2d', { alpha: true });
+      offscreenCtx = offscreen.getContext('2d', {
+        alpha: true,
+        antialias: false
+      });
     }
 
-    // apply all styles, and after doing so, update the bounding box
-    // to account for stroke width
+    // apply all styles
     this.applyAllStyles(offscreenCtx);
-    // const lw = parseFloat(offscreenCtx.lineWidth || 0);
-    // if (lw) {
-    //   this.box[0] -= lw / 2;
-    //   this.box[1] -= lw / 2;
-    //   this.box[2] += lw / 2;
-    //   this.box[3] += lw / 2;
-    // }
 
     // draw the projection to the canvas, with boxToOrigin = true
     camera.drawFaces(facesAndNormals, offscreenCtx, this.box);
@@ -93,6 +107,7 @@ export class Mesh extends Entity {
 
   render(camera, ctx) {
     if (this.enabled || this.needsUpdate) {
+      ctx.save();
       // check if cache is supported
       if (G.CACHE && this.cacheEnabled) {
         // check if the image is in the cache
@@ -128,6 +143,7 @@ export class Mesh extends Entity {
         const faces = camera.project(this);
         camera.drawFaces(faces, ctx, false);
       }
+      ctx.restore();
     }
   }
 }

@@ -240,7 +240,9 @@ export class Camera extends Entity {
       }
       // apply stroke if needed
       if (stroke) {
-        ctx.stroke();
+        ctx.lineWidth = 0;
+        ctx.strokeStyle = 'green';
+        // ctx.stroke();
       }
     });
   }

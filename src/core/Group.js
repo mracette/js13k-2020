@@ -56,21 +56,9 @@ export class Group extends Entity {
     }
   }
 
-  getPosition() {
-    if (this.parent) {
-      const parentPosition = this.parent.getPosition();
-      return new Vector3(
-        parentPosition.x + this.position.x,
-        parentPosition.y + this.position.y,
-        parentPosition.z + this.position.z
-      );
-    } else {
-      return this.position;
-    }
-  }
-
   render(camera, ctx, iso = G.ISO) {
     if (this.enabled || this.needsUpdate) {
+      ctx.save();
       this.applyAllStyles(ctx);
       if (this.drawOrder.length) {
         this.drawOrder.forEach((uid) => {
@@ -85,6 +73,7 @@ export class Group extends Entity {
       } else {
         this.children.forEach((child) => child.render(camera, ctx, iso));
       }
+      ctx.restore();
     }
   }
 }

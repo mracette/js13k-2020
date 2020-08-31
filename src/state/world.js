@@ -1,9 +1,7 @@
 import { G } from '../globals';
-import { Mesh } from '../core/Mesh';
-import { Group } from '../core/Group';
 import { Vector3 } from '../core/Vector3';
-import * as geos from '../entities/geometries';
-import * as styles from '../entities/styles';
+import { globalStyles } from '../entities/styles';
+import * as make from '../entities/generators';
 
 export class Map {
   constructor() {
@@ -23,13 +21,7 @@ export class Map {
       Math.round(this.visibleGridSize[1] / 2)
     ];
     this._entities = {};
-    this._cachedEntities = [];
-    this._initEntities();
-    this._initGrid();
-  }
-
-  getVisibleRange(position) {
-    this.getTileFromGrid;
+    this._initWorld();
   }
 
   getTileFromGrid(row, col) {
@@ -69,119 +61,21 @@ export class Map {
     return this._entities[name];
   }
 
-  initTileGroup() {
-    this._entities.tileGroup = new Group(null, {
-      uid: 'tile-group',
-      style: [styles.baseLine, styles.lightLine]
-    });
-    for (let i = 0; i < G.VISIBLE_MAP_WIDTH; i++) {
-      for (let j = 0; j < G.VISIBLE_MAP_HEIGHT; j++) {
-        this._entities.tileGroup.add(
-          new Mesh(geos.square, {
-            style: styles.raisinBlack,
-            position: new Vector3(
-              i - G.VISIBLE_MAP_WIDTH / 2,
-              j - G.VISIBLE_MAP_HEIGHT / 2,
-              0
-            )
-          })
-        );
-      }
-    }
-    return this._entities.tileGroup.children[0];
-  }
-
-  _initEntities() {
-    /* trees */
-    const tree002 = new Mesh(geos.tree002, { style: styles.emeraldGreen });
-    const tree003 = new Mesh(geos.tree003, { style: styles.emeraldGreen });
-    const tree001 = new Mesh(geos.tree001, { style: styles.emeraldGreen });
-    const trunk = new Mesh(geos.trunk, { style: styles.brown });
-    const trunkBase = new Mesh(geos.shadow, {
-      scale: new Vector3(0.5, 0.5, 1),
-      position: new Vector3(0.25, 0.25, 0),
-      style: styles.ivoryBlack
-    });
-
-    this._entities.tree001 = (opts) => {
-      const trunkBase = new Mesh(geos.shadow, {
-        scale: new Vector3(0.5, 0.5, 1),
-        position: new Vector3(0.25, 0.25, 0),
-        style: styles.ivoryBlack
-      });
-      const trunk = new Mesh(geos.trunk, { style: styles.brown });
-      const tree001 = new Mesh(geos.tree001, { style: styles.emeraldGreen });
-      return new Group([trunkBase, trunk, tree001], opts);
-    };
-    this._entities.tree002 = (opts) => {
-      const trunkBase = new Mesh(geos.shadow, {
-        scale: new Vector3(0.5, 0.5, 1),
-        position: new Vector3(0.25, 0.25, 0),
-        style: styles.ivoryBlack
-      });
-      const trunk = new Mesh(geos.trunk, { style: styles.brown });
-      const tree002 = new Mesh(geos.tree002, { style: styles.emeraldGreen });
-      return new Group([trunkBase, trunk, tree002], opts);
-    };
-    this._entities.tree003 = (opts) => {
-      const trunkBase = new Mesh(geos.shadow, {
-        scale: new Vector3(0.5, 0.5, 1),
-        position: new Vector3(0.25, 0.25, 0),
-        style: styles.ivoryBlack
-      });
-      const trunk = new Mesh(geos.trunk, { style: styles.brown });
-      const tree003 = new Mesh(geos.tree003, { style: styles.emeraldGreen });
-      return new Group([trunkBase, trunk, tree003], opts);
-    };
-
-    /* foliage */
-    const grass = new Mesh(geos.grass, { style: styles.grassGreen });
-    this._entities.grass = (opts) => {
-      return new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
-    };
-
-    /* rocks */
-    const rock = new Mesh(geos.rock, { style: styles.grey });
-    this._entities.rock = (opts) => {
-      return new Mesh(geos.rock, { ...opts, style: styles.grey });
-    };
-
-    /* stream */
-    const streamFull = new Mesh(geos.streamFull, {
-      style: [styles.noLine, styles.streamBlue]
-    });
-    this._entities.streamFull = (opts) =>
-      new Mesh(geos.streamFull, {
-        ...opts,
-        style: [styles.noLine, styles.streamBlue]
-      });
-
-    /* tiles */
-    const tile = this.initTileGroup();
-
-    /* caching */
-    this._cachedEntities.push(
-      trunk,
-      trunkBase,
-      tree001,
-      tree002,
-      tree003,
-      grass,
-      rock,
-      tile,
-      streamFull
-    );
-  }
-
   cacheEntities() {
     const promises = [];
-    this._cachedEntities.forEach((ent) => {
-      promises.push(ent.cache());
+    Object.entries(make).forEach((generator) => {
+      const entityName = generator[0];
+      const entity = generator[1]();
+      entity && globalStyles.add(entity);
+      this._entities[entityName] = entity;
+      if (entity.type === 'mesh') {
+        promises.push(entity.cache());
+      }
     });
     return Promise.all(promises);
   }
 
-  _initGrid() {
+  _initWorld() {
     for (let i = 0; i < this.height; i++) {
       this.grid.push([]);
       for (let j = 0; j < this.width; j++) {
@@ -191,51 +85,34 @@ export class Map {
     }
   }
 
+  _initEntity(name, position, blocks) {
+    return {
+      entity: make[name]({ position }),
+      blocks
+    };
+  }
+
   _initEntityOnGrid(row, col) {
     const rand = Math.random();
     const [x, y] = this.getTileFromGrid(row, col);
     const position = new Vector3(x, y, 0);
-    const rock = (position) => ({
-      entity: this._entities.rock({ position }),
-      blocks: true
-    });
-    const grass = (position) => ({
-      entity: this._entities.grass({ position }),
-      blocks: false
-    });
-    const tree001 = (position) => ({
-      entity: this._entities.tree001({ position }),
-      blocks: false
-    });
-    const tree002 = (position) => ({
-      entity: this._entities.tree002({ position }),
-      blocks: false
-    });
-    const tree003 = (position) => ({
-      entity: this._entities.tree003({ position }),
-      blocks: false
-    });
-    const streamFull = (position) => ({
-      entity: this._entities.streamFull({ position }),
-      blocks: true
-    });
     if (col > 8 && col < 12) {
-      return streamFull(position);
+      return this._initEntity('stream', position, true);
     }
     if (row <= 2 || col <= 0 || col >= this.width - 1) {
-      return rock(position);
+      return this._initEntity('rock', position, true);
     }
     if (rand < 0.25 && (row <= 6 || col <= 1 || col >= this.width - 2)) {
-      return rock(position);
+      return this._initEntity('rock', position, true);
     }
     if (rand < 0.15) {
-      return grass(position);
+      return this._initEntity('grass', position, true);
     } else if (rand < 0.2) {
-      return tree001(position);
+      return this._initEntity('tree1', position, true);
     } else if (rand < 0.25) {
-      return tree002(position);
+      return this._initEntity('tree2', position, true);
     } else if (rand < 0.3) {
-      return tree003(position);
+      return this._initEntity('tree3', position, true);
     }
     return null;
   }

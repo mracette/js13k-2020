@@ -59,7 +59,7 @@ export class Player {
   _initMesh() {
     const shadow = new Mesh(geos.shadow, {
       uid: 'player-shadow',
-      style: [styles.transparentBlack, styles.noLine]
+      style: [styles.transparentBlack, styles.clearLine]
     });
     const body = new Mesh(geos.playerBody, {
       uid: 'player-body',

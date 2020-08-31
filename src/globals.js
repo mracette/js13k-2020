@@ -1,5 +1,5 @@
 import { CanvasCoordinates } from 'crco-utils';
-import { WebGL2 } from './core/WebGL2';
+import { WebGL } from './core/WebGL';
 
 /**
  * @type {object} a single global object which other global values attach to
@@ -32,14 +32,17 @@ export const addScreenIndependentGlobals = (G) => {
   };
   G.DOM.WEBGL_CANVAS.style.background = 'rgba(0, 0, 0, 0)';
   G.CTX = G.DOM.CANVAS.getContext('2d', { alpha: true });
-  G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', { alpha: false });
+  G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', {
+    alpha: false,
+    antialias: true
+  });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.WEBGL_CTX = G.DOM.WEBGL_CANVAS.getContext('webgl', {
     alpha: true,
-    premultipliedAlpha: false,
+    // premultipliedAlpha: false,
     antialias: false
   });
-  G.WEBGL = new WebGL2(G.WEBGL_CTX);
+  G.WEBGL = new WebGL(G.WEBGL_CTX);
   G.BORDER_WIDTH = 1;
   G.BOTTOM_SCREEN_BUFFER = 8;
   G.ANIMATION_FRAME;
