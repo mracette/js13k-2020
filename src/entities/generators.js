@@ -4,7 +4,6 @@ import { Vector3 } from '../core/Vector3';
 import { Group } from '../core/Group';
 import * as styles from './styles';
 import * as geos from './geometries';
-
 export const make = {};
 make.trunk = () => new Mesh(geos.trunk, { style: styles.brown });
 make.trunkBase = () =>

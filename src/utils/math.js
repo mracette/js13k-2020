@@ -1,5 +1,10 @@
 import { Rx, Ry, Rz } from '../core/Matrix';
-
+export const rotatePoint = (px, py, cx, cy, angle) => {
+  return {
+    x: Math.cos(angle) * (px - cx) - Math.sin(angle) * (py - cy) + cx,
+    y: Math.sin(angle) * (px - cx) + Math.cos(angle) * (py - cy) + cy
+  };
+};
 export const nearestPow2 = (size) => {
   return Math.pow(2, Math.round(Math.log(size) / Math.log(2)));
 };

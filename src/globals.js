@@ -17,7 +17,6 @@ export const G = {
 
 export const addScreenIndependentGlobals = (G) => {
   G.ISO = true;
-  G.RATIO = { x: 2, y: 1 };
   G.CACHE = true;
   G.USE_WEBGL = true;
   G.SUPPORTS_OFFSCREEN =

@@ -1,13 +1,15 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-
+const htmlMin = require('htmlmin');
 const ROOT_FOLDER = path.join(__dirname, '..');
 const SOURCE_FOLDER = path.join(ROOT_FOLDER, 'src');
 const BUILD_FOLDER = path.join(ROOT_FOLDER, 'build');
 const COMPRESSED_BUILD_FOLDER = path.join(ROOT_FOLDER, 'build-min');
 const COMPRESSED_BUILD_FILE = path.join(COMPRESSED_BUILD_FOLDER, 'build.zip');
 const COMMIT_LOG_PATH = path.join(ROOT_FOLDER, 'commit-log.md');
+const HTML_INDEX = path.join(ROOT_FOLDER, 'index.html');
+const HTML_INDEX_BUILD = path.join(BUILD_FOLDER, 'index.html');
 
 function getFolderSize(path) {
   const stout = execSync(`ls -l ${path} | awk '{sum+=$5} END {printf sum}'`, {
@@ -22,6 +24,14 @@ function checkExists(path) {
   if (!fs.existsSync(path)) {
     fs.mkdirSync(path);
   }
+}
+
+function buildHtml() {
+  const index = fs.readFileSync(HTML_INDEX, { encoding: 'utf8' });
+  fs.writeFileSync(
+    HTML_INDEX_BUILD,
+    htmlMin(index.replace('/build/bundle.min.js', './bundle.min.js'))
+  );
 }
 
 function runHook(args) {
@@ -51,6 +61,7 @@ function runHook(args) {
   // perform the production build and log new size
   execSync(`rm -rf ${path.join(BUILD_FOLDER, '/*')}`);
   execSync('rollup -c --environment BUILD:production');
+  buildHtml();
   const [kb1, bytes1] = getFolderSize(path.join(BUILD_FOLDER, '/*'));
   LOG_MESSAGE += `| Build | ${kb1} kb | ${bytes1} | ${
     bytes1 < bytes0 ? '-' : '+'
@@ -81,5 +92,7 @@ function runHook(args) {
     });
   });
 }
+
+runHook();
 
 module.exports = runHook;

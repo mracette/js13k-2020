@@ -1,9 +1,8 @@
-import { rotatePoint } from 'crco-utils';
 import { G } from '../globals';
+import { rotatePoint } from '../utils/math';
 import { Vector3 } from '../core/Vector3';
 import { Mesh } from '../core/Mesh';
 import { Group } from '../core/Group';
-import { TAU } from 'crco-utils';
 import * as geos from '../entities/geometries';
 import * as styles from '../entities/styles';
 
@@ -99,12 +98,12 @@ export class Player {
   updateRotation(anchor, current, delta) {
     let diff = anchor - current;
     if (diff > Math.PI) {
-      diff = anchor - TAU - current;
+      diff = anchor - Math.PI - current;
     } else if (diff < -Math.PI) {
-      diff = anchor + TAU - current;
+      diff = anchor + Math.PI - current;
     }
     const next = current + diff * delta;
-    const quad = Math.abs((next / TAU) % 1);
+    const quad = Math.abs((next / Math.PI) % 1);
     if (quad > 0.36 && quad < 0.64) {
       this.mesh.drawOrder = this.drawOrderForwards;
     } else {
