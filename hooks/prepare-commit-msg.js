@@ -93,6 +93,4 @@ function runHook(args) {
   });
 }
 
-runHook();
-
 module.exports = runHook;

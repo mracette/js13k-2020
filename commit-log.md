@@ -205,3 +205,21 @@
 | Compressed Build (Adv Zip) | 8.77 kb | 8977 | -6% |
 
 
+**no commit** - *Tue, 01 Sep 2020 05:04:01 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 53.05 kb | 54319 | NA |
+| Build | 26.38 kb | 27010 | -50% |
+| Compressed Build | 9.76 kb | 9991 | -63% |
+| Compressed Build (Adv Zip) | 9.17 kb | 9390 | -6% |
+
+
+**let there be music** - *Tue, 01 Sep 2020 05:04:07 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 53.05 kb | 54319 | NA |
+| Build | 26.38 kb | 27010 | -50% |
+| Compressed Build | 9.76 kb | 9991 | -63% |
+| Compressed Build (Adv Zip) | 9.17 kb | 9390 | -6% |
+
+
