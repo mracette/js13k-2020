@@ -196,39 +196,12 @@
 | Compressed Build (Adv Zip) | 8.47 kb | 8677 | -6% |
 
 
-**no commit** - *Tue, 01 Sep 2020 03:23:54 GMT*
+**cleaned up styles and added html build step** - *Tue, 01 Sep 2020 03:42:10 GMT*
 | Measure | Size (kb) | Size (bytes) | Reduction |
 | --- | --- | --- | --- |
-| Raw Source Code | 51.75 kb | 52993 | NA |
-| Build | 25.12 kb | 25721 | -51% |
-| Compressed Build | 9.26 kb | 9479 | -63% |
-| Compressed Build (Adv Zip) | 8.69 kb | 8902 | -6% |
-
-
-**no commit** - *Tue, 01 Sep 2020 03:24:26 GMT*
-| Measure | Size (kb) | Size (bytes) | Reduction |
-| --- | --- | --- | --- |
-| Raw Source Code | 51.75 kb | 52993 | NA |
-| Build | 24.94 kb | 25535 | -52% |
-| Compressed Build | 8.99 kb | 9201 | -64% |
-| Compressed Build (Adv Zip) | 8.47 kb | 8677 | -6% |
-
-
-**no commit** - *Tue, 01 Sep 2020 03:25:26 GMT*
-| Measure | Size (kb) | Size (bytes) | Reduction |
-| --- | --- | --- | --- |
-| Raw Source Code | 51.75 kb | 52993 | NA |
-| Build | 25.36 kb | 25965 | -51% |
-| Compressed Build | 9.38 kb | 9606 | -63% |
-| Compressed Build (Adv Zip) | 8.81 kb | 9023 | -6% |
-
-
-**no commit** - *Tue, 01 Sep 2020 03:27:22 GMT*
-| Measure | Size (kb) | Size (bytes) | Reduction |
-| --- | --- | --- | --- |
-| Raw Source Code | 51.68 kb | 52917 | NA |
-| Build | 25.26 kb | 25869 | -51% |
-| Compressed Build | 9.36 kb | 9584 | -63% |
-| Compressed Build (Adv Zip) | 8.79 kb | 9004 | -6% |
+| Raw Source Code | 50.65 kb | 51863 | NA |
+| Build | 25.16 kb | 25767 | -50% |
+| Compressed Build | 9.32 kb | 9547 | -63% |
+| Compressed Build (Adv Zip) | 8.77 kb | 8977 | -6% |
 
 

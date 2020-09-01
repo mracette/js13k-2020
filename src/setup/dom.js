@@ -5,7 +5,6 @@ export const setDomStyles = (elements, styles) => {
     styles.forEach((style) => {
       const [name, value] = style;
       el.style[name] = [value];
-      console.log(el, el.style);
     });
   });
 };

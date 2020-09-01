@@ -1,3 +1,4 @@
+import { Audio } from './core/Audio';
 import { Group } from './core/Group';
 import { Map } from './state/world';
 import { Player } from './state/player';
@@ -10,6 +11,10 @@ import {
   addScreenDependentGlobals,
   addScreenIndependentGlobals
 } from './globals';
+
+const audio = new Audio();
+
+window.addEventListener('mousedown', () => audio.start());
 
 // TODO: remove
 // import Stats from 'stats.js/src/Stats';
