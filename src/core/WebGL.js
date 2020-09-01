@@ -146,7 +146,7 @@ export class WebGL {
       0,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      new Uint8Array([0, 0, 255, 255])
+      new Uint8Array([0, 0, 0, 0])
     );
 
     // let's assume all images are not a power of 2

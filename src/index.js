@@ -2,10 +2,9 @@ import { Group } from './core/Group';
 import { Map } from './state/world';
 import { Player } from './state/player';
 import { Camera } from './core/Camera';
-import { WebGL } from './core/WebGL';
 import { initDom } from './setup/dom';
 import { baseLine } from './entities/styles';
-import { renderTileCoords } from './utils/screen';
+// import { renderTileCoords } from './utils/screen';
 import {
   G,
   addScreenDependentGlobals,
@@ -26,9 +25,7 @@ addScreenDependentGlobals(G);
 G.PLAYER = new Player();
 
 // init camera
-G.CAMERA = new Camera({
-  magnification: 10
-});
+G.CAMERA = new Camera({ magnification: 8 });
 G.CAMERA.position.set(G.PLAYER.position);
 
 // init map
@@ -40,7 +37,7 @@ G.MAP = new Map();
 G.SCENE = new Group(null, { style: baseLine });
 
 const postProcess = () => {
-  const args = [0, 0, G.COORDS.getWidth(), G.COORDS.getHeight()];
+  const args = [0, 0, G.COORDS.width(), G.COORDS.height()];
   G.POST_CTX.clearRect(...args);
   G.POST_CTX.setTransform(2, 0, 0, 1, -G.DOM.POST_CANVAS.width / 2, 0);
   G.POST_CTX.fillStyle = G.GRADIENT;
@@ -92,10 +89,8 @@ const drawWorld = (time, clear = true) => {
   }
 };
 
-// let renderNextFrame = false;
-
 const animate = (time, clear = true) => {
-  stats.begin();
+  // stats.begin();
   G.CURRENT_TIME = time;
   // updates player actions;
   const actionsAreOngoing = G.PLAYER.checkForActions(time);
@@ -106,7 +101,7 @@ const animate = (time, clear = true) => {
     playerPositionUpdated && G.CAMERA.position.set(G.PLAYER.position);
     drawWorld(time);
   }
-  stats.end();
+  // stats.end();
   G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
 };
 

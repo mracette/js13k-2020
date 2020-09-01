@@ -18,19 +18,19 @@ export const cinematicResize = (element, container, ratio = G.RATIO) => {
   };
 };
 
-export const renderTileCoords = (tileGroup) => {
-  G.CTX.textAlign = 'center';
-  G.CTX.textBaseline = 'middle';
-  G.CTX.fillStyle = 'white';
-  G.CTX.font = `${G.COORDS.getWidth() * 0.007}px sans-serif`;
-  tileGroup.children.forEach((tile) => {
-    const position = new Vector3(
-      tile.position.x + 0.5,
-      tile.position.y + 0.5,
-      0
-    );
-    G.CAMERA.project(position);
-    const text = `${tile.position.x}, ${tile.position.y}`;
-    G.CTX.fillText(text, position.x, position.y);
-  });
-};
+// export const renderTileCoords = (tileGroup) => {
+//   G.CTX.textAlign = 'center';
+//   G.CTX.textBaseline = 'middle';
+//   G.CTX.fillStyle = 'white';
+//   G.CTX.font = `${G.COORDS.width(0.007)}px sans-serif`;
+//   tileGroup.children.forEach((tile) => {
+//     const position = new Vector3(
+//       tile.position.x + 0.5,
+//       tile.position.y + 0.5,
+//       0
+//     );
+//     G.CAMERA.project(position);
+//     const text = `${tile.position.x}, ${tile.position.y}`;
+//     G.CTX.fillText(text, position.x, position.y);
+//   });
+// };

@@ -9,8 +9,8 @@ export const EMERALD_GREEN = '#5BBA6F';
 export const WHITE_OVERLAY_02 = 'rgba(255, 255, 255, .2)';
 
 export const baseLine = new Style({
-  lineWidth: () => G.COORDS.getWidth() * 0.1,
-  strokeStyle: 'rgba(255,0,0,1)',
+  lineWidth: () => G.COORDS.width(0.001),
+  strokeStyle: 'rgba(255,255,255,0)',
   lineJoin: 'round',
   lineCap: 'round'
 });

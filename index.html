@@ -3,13 +3,10 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
-        <title>Title</title>
+        <title>Four, oh Four...</title>
     </head>
     <style>
-        * {
-            padding: 0;
-            margin: 0;
-        }
+        * {padding: 0; margin: 0;}
     </style>
     <body>
         <div id="root">
@@ -18,32 +15,6 @@
             <canvas id="post" style="position: absolute"></canvas>
             <canvas id="webgl" style="position: absolute"></canvas>
         </div>
-        <!-- <script  id="drawImage-vertex-shader" type="x-shader/x-vertex">
-            attribute vec4 a_position;
-            attribute vec2 a_texcoord;
-            
-            uniform mat4 u_matrix;
-            
-            varying vec2 v_texcoord;
-            
-            void main() {
-               gl_Position = u_matrix * a_position;
-               v_texcoord = a_texcoord;
-            }
-            </script>
-            <script  id="drawImage-fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
-            
-            varying vec2 v_texcoord;
-            
-            uniform sampler2D u_texture;
-            
-            void main() {
-               gl_FragColor = texture2D(u_texture, v_texcoord);
-            }
-            </script> -->
-        <!-- <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script> -->
-        <!-- <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script> -->
-        <script src="./build/bundle.min.js"></script>
+        <script src="/build/bundle.min.js"></script>
     </body>
 </html>

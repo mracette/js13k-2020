@@ -29,7 +29,7 @@ export class Camera extends Entity {
     const x1 = new Vector3(1, 0, 0);
     this.project(x0);
     this.project(x1);
-    return G.COORDS.getWidth() / (x1.x - x0.x);
+    return G.COORDS.width() / (x1.x - x0.x);
   }
 
   getVisibleMapHeight() {
@@ -38,19 +38,19 @@ export class Camera extends Entity {
     const y1 = new Vector3(0, 1, 0);
     this.project(y0);
     this.project(y1);
-    return G.COORDS.getHeight() / (y1.y - y0.y);
+    return G.COORDS.height() / (y1.y - y0.y);
   }
 
   mapToScreen(point) {
     // how many map units fit across the height of the canvas?
-    const scale = G.COORDS.getHeight() / (this.magnification || 1);
+    const scale = G.COORDS.height() / (this.magnification || 1);
     point.x = G.COORDS.nx(0) + point.x * scale;
     point.y = G.COORDS.ny(0) + point.y * scale;
     point.z = 0;
   }
 
   screenToMap(point) {
-    const scale = G.COORDS.getHeight() / (this.magnification || 1);
+    const scale = G.COORDS.height() / (this.magnification || 1);
     point.x = (point.x - G.COORDS.nx(0)) / scale;
     point.y = (point.y - G.COORDS.ny(0)) / (scale / 4);
     point.z = 0;
@@ -240,9 +240,7 @@ export class Camera extends Entity {
       }
       // apply stroke if needed
       if (stroke) {
-        ctx.lineWidth = 0;
-        ctx.strokeStyle = 'green';
-        // ctx.stroke();
+        ctx.stroke();
       }
     });
   }

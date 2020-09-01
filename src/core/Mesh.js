@@ -77,7 +77,7 @@ export class Mesh extends Entity {
       offscreen = new OffscreenCanvas(w, h);
       offscreenCtx = offscreen.getContext('2d', {
         alpha: true,
-        antialias: false
+        antialias: true
       });
     } else {
       offscreen = document.createElement('canvas');
@@ -85,7 +85,7 @@ export class Mesh extends Entity {
       offscreen.height = h;
       offscreenCtx = offscreen.getContext('2d', {
         alpha: true,
-        antialias: false
+        antialias: true
       });
     }
 
@@ -98,8 +98,11 @@ export class Mesh extends Entity {
     // render the bitmap
     const image = await createImageBitmap(offscreen, 0, 0, w, h);
     const texture = G.WEBGL.createTexture(image);
-    camera.setCache(key, texture);
-    // camera.setCache(key, image);
+    if (G.USE_WEBGL) {
+      camera.setCache(key, texture);
+    } else {
+      camera.setCache(key, image);
+    }
     offscreen = null;
     offscreenCtx = null;
     return key;
@@ -119,23 +122,21 @@ export class Mesh extends Entity {
           this.screenX = position.x;
           this.screenY = position.y;
           // draw from cache
-          G.WEBGL.drawImage(
-            cache,
-            position.x - cache.width / 2,
-            position.y - cache.height
-          );
-          // console.log(cache);
-          // ctx.drawImage(
-          //   cache,
-          //   position.x - cache.width / 2,
-          //   position.y - cache.height
-          // );
+          if (G.USE_WEBGL) {
+            G.WEBGL.drawImage(
+              cache,
+              position.x - cache.width / 2,
+              position.y - cache.height
+            );
+          } else {
+            ctx.drawImage(
+              cache,
+              position.x - cache.width / 2,
+              position.y - cache.height
+            );
+          }
         } else if (this.isAutoCached()) {
           this.cache().then(() => this.render(camera, ctx));
-        } else {
-          // cpu render
-          // this.applyAllStyles();
-          // camera.project(this);
         }
       } else {
         // cpu render

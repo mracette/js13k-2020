@@ -5,34 +5,31 @@ import { Group } from '../core/Group';
 import * as styles from './styles';
 import * as geos from './geometries';
 
-export const trunk = () => new Mesh(geos.trunk, { style: styles.brown });
-export const trunkBase = () =>
+export const make = {};
+make.trunk = () => new Mesh(geos.trunk, { style: styles.brown });
+make.trunkBase = () =>
   new Mesh(geos.shadow, {
     position: new Vector3(0, 0, 0),
     style: styles.ivoryBlack
   });
-export const treeTop1 = () =>
-  new Mesh(geos.tree1, { style: styles.emeraldGreen });
-export const treeTop2 = () =>
-  new Mesh(geos.tree2, { style: styles.emeraldGreen });
-export const treeTop3 = () =>
-  new Mesh(geos.tree3, { style: styles.emeraldGreen });
-export const tree1 = (opts) =>
-  new Group([trunkBase(), trunk(), treeTop1()], opts);
-export const tree2 = (opts) =>
-  new Group([trunkBase(), trunk(), treeTop2()], opts);
-export const tree3 = (opts) =>
-  new Group([trunkBase(), trunk(), treeTop3()], opts);
-export const grass = (opts) =>
+make.treeTop1 = () => new Mesh(geos.tree1, { style: styles.emeraldGreen });
+make.treeTop2 = () => new Mesh(geos.tree2, { style: styles.emeraldGreen });
+make.treeTop3 = () => new Mesh(geos.tree3, { style: styles.emeraldGreen });
+make.tree1 = (opts) =>
+  new Group([make.trunkBase(), make.trunk(), make.treeTop1()], opts);
+make.tree2 = (opts) =>
+  new Group([make.trunkBase(), make.trunk(), make.treeTop2()], opts);
+make.tree3 = (opts) =>
+  new Group([make.trunkBase(), make.trunk(), make.treeTop3()], opts);
+make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
-export const rock = (opts) =>
-  new Mesh(geos.rock, { ...opts, style: styles.grey });
-export const stream = (opts) =>
+make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey });
+make.stream = (opts) =>
   new Mesh(geos.streamFull, {
     ...opts,
     style: [styles.clearLine, styles.streamBlue]
   });
-export const tileGroup = () => {
+make.tileGroup = () => {
   const group = new Group(null, {
     style: [styles.raisinBlack, styles.lightLine]
   });

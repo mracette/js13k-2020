@@ -1,4 +1,4 @@
-import { CanvasCoordinates } from 'crco-utils';
+import { CanvasCoordinates } from './core/Coords';
 import { WebGL } from './core/WebGL';
 
 /**
@@ -19,6 +19,7 @@ export const addScreenIndependentGlobals = (G) => {
   G.ISO = true;
   G.RATIO = { x: 2, y: 1 };
   G.CACHE = true;
+  G.USE_WEBGL = true;
   G.SUPPORTS_OFFSCREEN =
     typeof OffscreenCanvasRenderingContext2D === 'function';
   G.DOM = {
@@ -30,7 +31,8 @@ export const addScreenIndependentGlobals = (G) => {
     BODY: document.body,
     HTML: document.documentElement
   };
-  G.DOM.WEBGL_CANVAS.style.background = 'rgba(0, 0, 0, 0)';
+  G.DOM.WEBGL_CANVAS.style.background = 'rgba(255, 0, 0, 0)';
+  G.DOM.WEBGL_CANVAS.style.backgroundColor = 'rgba(255,0,0,0)';
   G.CTX = G.DOM.CANVAS.getContext('2d', { alpha: true });
   G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', {
     alpha: false,
@@ -39,7 +41,7 @@ export const addScreenIndependentGlobals = (G) => {
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.WEBGL_CTX = G.DOM.WEBGL_CANVAS.getContext('webgl', {
     alpha: true,
-    // premultipliedAlpha: false,
+    premultipliedAlpha: true,
     antialias: false
   });
   G.WEBGL = new WebGL(G.WEBGL_CTX);
@@ -57,14 +59,14 @@ export const addScreenIndependentGlobals = (G) => {
 
 export const addScreenDependentGlobals = (G) => {
   G.DPR = window.devicePixelRatio || 1;
-  G.COORDS = new CanvasCoordinates({ canvas: G.DOM.CANVAS });
+  G.COORDS = new CanvasCoordinates(G.DOM.CANVAS);
   G.GRADIENT = G.CTX.createRadialGradient(
     G.COORDS.nx(0),
     G.COORDS.ny(0),
-    G.COORDS.getHeight() / 4,
+    G.COORDS.height(0.25),
     G.COORDS.nx(0),
     G.COORDS.ny(0),
-    G.COORDS.getHeight()
+    G.COORDS.height()
   );
   G.GRADIENT.addColorStop(0, 'rgba(255, 255, 255, 0)');
   G.GRADIENT.addColorStop(0.5, 'rgba(255, 255, 255, .15)');

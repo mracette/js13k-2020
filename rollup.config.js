@@ -18,16 +18,16 @@ export default {
           mangle: {
             toplevel: true,
             properties: {
+              debug: env === 'dev',
               reserved: [
-                // 'getElementById',
-                // 'getContext',
-                // 'drawImage',
-                // 'fill',
-                // 'moveTo',
-                // 'lineTo',
-                // 'linearRampToValueAtTime',
-                // 'createOscillator'
-                // ... lots more lines ...
+                // protect these because they're called by name in world.js
+                'tree1',
+                'tree2',
+                'tree3',
+                'grass',
+                'rock',
+                'stream',
+                'tileGroup'
               ]
             }
           }

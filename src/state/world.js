@@ -1,7 +1,7 @@
 import { G } from '../globals';
 import { Vector3 } from '../core/Vector3';
 import { globalStyles } from '../entities/styles';
-import * as make from '../entities/generators';
+import { make } from '../entities/generators';
 
 export class Map {
   constructor() {

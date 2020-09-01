@@ -24,7 +24,7 @@ export class Player {
     // these control animations and gameplay
     this.actionParams = {
       beamDuration: 500,
-      beamLength: G.COORDS.getWidth() * 0.05,
+      beamLength: G.COORDS.width(0.05),
       beamRadius: Math.PI / 4
     };
 
@@ -270,7 +270,7 @@ export class Player {
       );
     } else {
       ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta})`;
-      ctx.setTransform(2, 0, 0, 1, -G.COORDS.getWidth() / 2, 0);
+      ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);
       const cx = this.mesh.children[0].screenX;
       const cy = this.mesh.children[0].screenY;
       const px = cx + this.actionParams.beamLength;
