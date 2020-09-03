@@ -15,8 +15,11 @@ export class Mesh extends Entity {
       needsUpdate: null,
       box: [] // x0, y0, x1, y1
     };
-    this.screenX = null;
-    this.screenY = null;
+    // this.screenX = null;
+    // this.screenY = null;
+    this.stylesId = this.getStyleList()
+      .map((s) => s.uid)
+      .join('-');
     Object.assign(this, { geometry, ...defaults, ...opts });
   }
 
@@ -25,7 +28,7 @@ export class Mesh extends Entity {
     // the screen (not counting it's position)
     return [
       this.geometry.name,
-      this.style ? this.style.uid : '-',
+      this.stylesId,
       's' + this.scale.x,
       's' + this.scale.y,
       's' + this.scale.z,
@@ -44,6 +47,7 @@ export class Mesh extends Entity {
 
   async cache(camera = G.CAMERA) {
     const key = this.getKey();
+    console.log(key);
 
     // get the projection, and update the bounding box
     const facesAndNormals = camera.project(this, true);
@@ -118,9 +122,9 @@ export class Mesh extends Entity {
         if (cache) {
           // write from cache
           const position = this.getProjectedPosition(camera);
-          // store these for external use
-          this.screenX = position.x;
-          this.screenY = position.y;
+          // // store these for external use
+          // this.screenX = position.x;
+          // this.screenY = position.y;
           // draw from cache
           if (G.USE_WEBGL) {
             G.WEBGL.drawImage(

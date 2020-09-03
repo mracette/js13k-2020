@@ -5,23 +5,26 @@ import { make } from '../entities/generators';
 
 export class Map {
   constructor() {
-    this.height = 196; // rows; must be odd
+    this.height = 195; // rows; must be odd
     this.width = 31; // columns; must be odd
     this.halfWidth = (this.width - 1) / 2;
     this.halfHeight = (this.height - 1) / 2;
     this.visibleHeight = 9;
     this.visibleWidth = 3;
     this.grid = [];
-    this.visibleGridSize = this.getGridFromTile(
-      Math.round((-1 * G.VISIBLE_MAP_WIDTH) / 2),
-      Math.round((-1 * G.VISIBLE_MAP_HEIGHT) / 2)
+    this.visibleGridSizeHalf = this.getGridFromTile(
+      Math.round((-1 * G.CAMERA.getVisibleMapWidth()) / 4),
+      Math.round((-1 * G.CAMERA.getVisibleMapHeight()) / 4)
     );
-    this.visibleGridSizeHalf = [
-      Math.round(this.visibleGridSize[0] / 2),
-      Math.round(this.visibleGridSize[1] / 2)
-    ];
     this._entities = {};
     this._initWorld();
+  }
+
+  getEntityOnGrid(i, j) {
+    if (i >= 0 && i < G.MAP.height && j >= 0 && j < G.MAP.width) {
+      return this.grid[i][j];
+    }
+    return false;
   }
 
   getTileFromGrid(row, col) {
@@ -36,8 +39,8 @@ export class Map {
       baseY = baseX;
     } else {
       // floor vs ceil determines the "tilt"
-      baseX = -1 * Math.floor(halfWay);
-      baseY = -1 * Math.ceil(halfWay);
+      baseX = -1 * Math.ceil(halfWay);
+      baseY = -1 * Math.floor(halfWay);
     }
     return [baseX + colOffset, baseY - colOffset];
   }
@@ -66,7 +69,7 @@ export class Map {
     Object.entries(make).forEach((generator) => {
       const entityName = generator[0];
       const entity = generator[1]();
-      entity && globalStyles.add(entity);
+      globalStyles.add(entity);
       this._entities[entityName] = entity;
       if (entity.type === 'mesh') {
         promises.push(entity.cache());
@@ -96,24 +99,13 @@ export class Map {
     const rand = Math.random();
     const [x, y] = this.getTileFromGrid(row, col);
     const position = new Vector3(x, y, 0);
-    if (col > 8 && col < 12) {
-      return this._initEntity('stream', position, true);
-    }
-    if (row <= 2 || col <= 0 || col >= this.width - 1) {
+    if (row <= 15) return this._initEntity('water', position, true);
+    if (row <= 30 && col > 1 && col <= this.width - 3)
+      return this._initEntity('sand', position, false);
+    if (row <= 34 && (col < 14 || col > 16))
       return this._initEntity('rock', position, true);
-    }
-    if (rand < 0.25 && (row <= 6 || col <= 1 || col >= this.width - 2)) {
+    if (col <= 1 || col >= this.width - 2)
       return this._initEntity('rock', position, true);
-    }
-    if (rand < 0.15) {
-      return this._initEntity('grass', position, true);
-    } else if (rand < 0.2) {
-      return this._initEntity('tree1', position, true);
-    } else if (rand < 0.25) {
-      return this._initEntity('tree2', position, true);
-    } else if (rand < 0.3) {
-      return this._initEntity('tree3', position, true);
-    }
     return null;
   }
 }

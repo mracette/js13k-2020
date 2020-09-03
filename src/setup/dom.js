@@ -31,13 +31,11 @@ const initBody = () => {
   setDomStyles(
     [G.DOM.BODY],
     [
-      // ['backgroundColor', colors.RAISIN_BLACK],
       ['position', 'absolute'],
       ['top', '0'],
       ['left', '0'],
       ['width', '100vw'],
       ['height', '100vh']
-      // ['padding', '5vh 5vw']
     ]
   );
 };
@@ -56,12 +54,7 @@ const initRoot = () => {
 };
 
 const initCanvas = () => {
-  const canvasElements = [
-    G.DOM.CANVAS,
-    G.DOM.POST_CANVAS,
-    G.DOM.TILE_CANVAS,
-    G.DOM.WEBGL_CANVAS
-  ];
+  const canvasElements = [G.DOM.CANVAS, G.DOM.POST_CANVAS, G.DOM.WEBGL_CANVAS];
   const canvasStyles = [['position', 'absolute']];
   setDomStyles(canvasElements, canvasStyles);
   cinematicResize(canvasElements, G.DOM.ROOT);

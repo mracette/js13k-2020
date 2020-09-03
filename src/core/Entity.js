@@ -20,7 +20,8 @@ export class Entity {
     while (obj) {
       if (obj.style) {
         if (Array.isArray(obj.style)) {
-          list = [...list, ...obj.style];
+          // order is important so that child styles overrider parent styles
+          list = [...obj.style, ...list];
         } else {
           list.push(obj.style);
         }

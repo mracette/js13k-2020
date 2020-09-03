@@ -1,3 +1,4 @@
+import { GameAudio } from './core/GameAudio';
 import { CanvasCoordinates } from './core/Coords';
 import { WebGL } from './core/WebGL';
 
@@ -24,7 +25,6 @@ export const addScreenIndependentGlobals = (G) => {
   G.DOM = {
     CANVAS: document.getElementById('viz'),
     WEBGL_CANVAS: document.getElementById('webgl'),
-    TILE_CANVAS: document.getElementById('tile'),
     POST_CANVAS: document.getElementById('post'),
     ROOT: document.getElementById('root'),
     BODY: document.body,
@@ -33,13 +33,9 @@ export const addScreenIndependentGlobals = (G) => {
   G.DOM.WEBGL_CANVAS.style.background = 'rgba(255, 0, 0, 0)';
   G.DOM.WEBGL_CANVAS.style.backgroundColor = 'rgba(255,0,0,0)';
   G.CTX = G.DOM.CANVAS.getContext('2d', { alpha: true });
-  G.TILE_CTX = G.DOM.TILE_CANVAS.getContext('2d', {
-    alpha: false,
-    antialias: true
-  });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.WEBGL_CTX = G.DOM.WEBGL_CANVAS.getContext('webgl', {
-    alpha: true,
+    alpha: false,
     premultipliedAlpha: true,
     antialias: false
   });
@@ -48,6 +44,7 @@ export const addScreenIndependentGlobals = (G) => {
   G.BOTTOM_SCREEN_BUFFER = 8;
   G.ANIMATION_FRAME;
   G.CURRENT_TIME;
+  G.AUDIO = new GameAudio();
 };
 
 /**

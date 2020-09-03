@@ -1,8 +1,8 @@
 import { G } from '../globals';
 
 export class Style {
-  constructor(styles) {
-    this.uid = G.UID++;
+  constructor(styles, uid) {
+    this.uid = uid || G.UID++;
     this.styles = styles;
   }
   apply(ctx = G.CTX) {

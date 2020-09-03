@@ -26,8 +26,13 @@ export default {
                 'tree3',
                 'grass',
                 'rock',
-                'stream',
-                'tileGroup'
+                'water',
+                'sand',
+                'tileGroup',
+                // protect the note types!
+                'quarter',
+                'eighth',
+                'triplet'
               ]
             }
           }

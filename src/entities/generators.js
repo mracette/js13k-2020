@@ -3,6 +3,7 @@ import { Mesh } from '../core/Mesh';
 import { Vector3 } from '../core/Vector3';
 import { Group } from '../core/Group';
 import * as styles from './styles';
+console.log(styles.magnolia);
 import * as geos from './geometries';
 export const make = {};
 make.trunk = () => new Mesh(geos.trunk, { style: styles.brown });
@@ -23,24 +24,28 @@ make.tree3 = (opts) =>
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey });
-make.stream = (opts) =>
-  new Mesh(geos.streamFull, {
+make.water = (opts) =>
+  new Mesh(geos.square, {
     ...opts,
-    style: [styles.clearLine, styles.streamBlue]
+    style: styles.waterBlue
   });
-make.tileGroup = () => {
-  const group = new Group(null, {
+make.sand = (opts) =>
+  new Mesh(geos.square, {
+    ...opts,
+    style: styles.sand
+  });
+make.tile = (opts) =>
+  new Mesh(geos.square, {
+    ...opts,
     style: [styles.raisinBlack, styles.lightLine]
   });
-  for (let i = 0; i < G.VISIBLE_MAP_WIDTH; i++) {
-    for (let j = 0; j < G.VISIBLE_MAP_HEIGHT; j++) {
+make.tileGroup = () => {
+  const group = new Group();
+  for (let i = 0, w = G.CAMERA.getVisibleMapWidth(); i <= w; i++) {
+    for (let j = 0, h = G.CAMERA.getVisibleMapHeight(); j <= h; j++) {
       group.add(
-        new Mesh(geos.square, {
-          position: new Vector3(
-            i - G.VISIBLE_MAP_WIDTH / 2,
-            j - G.VISIBLE_MAP_HEIGHT / 2,
-            0
-          )
+        make.tile({
+          position: new Vector3(i - w / 2 - 0.5, j - h / 2 - 0.5, 0)
         })
       );
     }

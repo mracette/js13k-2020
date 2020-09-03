@@ -14,7 +14,6 @@ import playerBodyConfig from './geometries/player_body.json';
 import playerRingFrontConfig from './geometries/player_ring_front.json';
 import playerRingBackConfig from './geometries/player_ring_back.json';
 import playerFaceConfig from './geometries/player_face.json';
-import streamFullConfig from './geometries/stream_full.json';
 import shadowConfig from './geometries/shadow.json';
 
 export const tree1 = new BlenderGeometry(tree1Config, { name: 'tree_1' });
@@ -31,5 +30,4 @@ export const playerRingFront = new BlenderGeometry(playerRingFrontConfig);
 export const playerRingBack = new BlenderGeometry(playerRingBackConfig);
 export const playerBody = new BlenderGeometry(playerBodyConfig);
 export const playerFace = new BlenderGeometry(playerFaceConfig);
-export const streamFull = new BlenderGeometry(streamFullConfig);
 export const shadow = new BlenderGeometry(shadowConfig);

@@ -29,7 +29,7 @@ export class Camera extends Entity {
     const x1 = new Vector3(1, 0, 0);
     this.project(x0);
     this.project(x1);
-    return G.COORDS.width() / (x1.x - x0.x);
+    return Math.ceil(G.COORDS.width() / (x1.x - x0.x));
   }
 
   getVisibleMapHeight() {
@@ -38,7 +38,7 @@ export class Camera extends Entity {
     const y1 = new Vector3(0, 1, 0);
     this.project(y0);
     this.project(y1);
-    return G.COORDS.height() / (y1.y - y0.y);
+    return Math.ceil(G.COORDS.height() / (y1.y - y0.y));
   }
 
   mapToScreen(point) {

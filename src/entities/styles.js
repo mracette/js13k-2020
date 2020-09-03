@@ -10,7 +10,6 @@ export const WHITE_OVERLAY_02 = 'rgba(255, 255, 255, .2)';
 
 export const baseLine = new Style({
   lineWidth: () => G.COORDS.width(0.001),
-  strokeStyle: 'rgba(255,255,255,0)',
   lineJoin: 'round',
   lineCap: 'round'
 });
@@ -18,7 +17,7 @@ export const clearLine = new Style({
   strokeStyle: 'rgba(0,0,0,0)'
 });
 export const lightLine = new Style({
-  strokeStyle: 'rgba(0,0,0,.25)'
+  strokeStyle: 'rgba(55,55,55,1)'
 });
 export const transparentBlack = new Style({
   fillStyle: 'rgba(0,0,0,.25)'
@@ -26,8 +25,9 @@ export const transparentBlack = new Style({
 export const spaceCadet = new Style({
   fillStyle: '#94C595'
 });
-export const streamBlue = new Style({
-  fillStyle: '#2E86AB'
+export const waterBlue = new Style({
+  fillStyle: '#2E86AB',
+  uid: 'waterBlue'
 });
 export const emeraldGreen = new Style({
   fillStyle: EMERALD_GREEN
@@ -42,7 +42,8 @@ export const raisinBlack = new Style({
   fillStyle: RAISIN_BLACK
 });
 export const magnolia = new Style({
-  fillStyle: '#F7F0F5'
+  fillStyle: '#F7F0F5',
+  uid: 'magnolia'
 });
 export const brown = new Style({
   fillStyle: '#8B5742'
@@ -56,7 +57,10 @@ export const ivoryBlack = new Style({
 export const grey = new Style({
   fillStyle: 'grey'
 });
+export const sand = new Style({
+  fillStyle: '#E7C496'
+});
 
 export const globalStyles = new Group(null, {
-  style: [baseLine]
+  style: [baseLine, clearLine]
 });

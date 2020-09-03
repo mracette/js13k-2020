@@ -29,8 +29,8 @@ export class Player {
 
     // movement / rotation params
     this._lastUpdateTime = null;
-    this._movementSpeed = 0.075;
-    this._rotationSpeed = 0.15;
+    this._movementSpeed = 0.03;
+    this._rotationSpeed = 0.005;
     this._movementSpeedHalf = this._movementSpeed / 2;
     this._faceOffset = 0.1;
     this.isMoving = false;
@@ -98,12 +98,12 @@ export class Player {
   updateRotation(anchor, current, delta) {
     let diff = anchor - current;
     if (diff > Math.PI) {
-      diff = anchor - Math.PI - current;
+      diff = anchor - Math.PI * 2 - current;
     } else if (diff < -Math.PI) {
-      diff = anchor + Math.PI - current;
+      diff = anchor + Math.PI * 2 - current;
     }
     const next = current + diff * delta;
-    const quad = Math.abs((next / Math.PI) % 1);
+    const quad = Math.abs((next / (Math.PI * 2)) % 1);
     if (quad > 0.36 && quad < 0.64) {
       this.mesh.drawOrder = this.drawOrderForwards;
     } else {
@@ -137,10 +137,22 @@ export class Player {
     }
   }
 
-  updatePosition(time) {
-    // TODO: make this frame rate independent
-    const delta = this._movementSpeed;
-    const rotDelta = this._rotationSpeed;
+  adjustForBlocking(deltaX, deltaY) {
+    if (!deltaX && !deltaY) return [0, 0];
+    const newX = Math.trunc(this.position.x + deltaX - 0.5);
+    const newY = Math.trunc(this.position.y + deltaY - 0.5);
+    const [i, j] = G.MAP.getGridFromTile(newX, newY);
+    const entity = G.MAP.getEntityOnGrid(i, j);
+    if (entity && entity.blocks) {
+      return [0, 0];
+    } else {
+      return [deltaX, deltaY];
+    }
+  }
+
+  updatePosition() {
+    const delta = G.TIME_DELTA * this._movementSpeed;
+    const rotDelta = G.TIME_DELTA * this._rotationSpeed;
 
     let deltaX = 0;
     let deltaY = 0;
@@ -176,6 +188,7 @@ export class Player {
       direction = -Math.PI / 2;
     }
 
+    [deltaX, deltaY] = this.adjustForBlocking(deltaX, deltaY);
     const needsUpdate = deltaX !== 0 || deltaY !== 0;
 
     if (needsUpdate) {
@@ -270,8 +283,10 @@ export class Player {
     } else {
       ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta})`;
       ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);
-      const cx = this.mesh.children[0].screenX;
-      const cy = this.mesh.children[0].screenY;
+      const c = this.position.clone().translate(new Vector3(0.5, 0.5, 0));
+      G.CAMERA.project(c);
+      const cx = c.x;
+      const cy = c.y;
       const px = cx + this.actionParams.beamLength;
       const p1 = rotatePoint(
         px,
