@@ -14,10 +14,10 @@ import {
 window.addEventListener('mousedown', () => G.AUDIO.start());
 
 // TODO: remove
-import Stats from 'stats.js/src/Stats';
-var stats = new Stats();
-stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild(stats.dom);
+// import Stats from 'stats.js/src/Stats';
+// var stats = new Stats();
+// stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+// document.body.appendChild(stats.dom);
 
 addScreenIndependentGlobals(G);
 initDom();
@@ -104,7 +104,7 @@ const drawWorld = (time, clear = true) => {
 
 const animate = (time, clear = true) => {
   // G.AUDIO.update(time);
-  stats.begin();
+  // stats.begin();
   G.CURRENT_TIME = time;
   G.TIME_DELTA = time - G.PREVIOUS_TIME;
   // updates player actions;
@@ -117,7 +117,7 @@ const animate = (time, clear = true) => {
     drawWorld(time);
   }
   G.PREVIOUS_TIME = time;
-  stats.end();
+  // stats.end();
   G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
 };
 
