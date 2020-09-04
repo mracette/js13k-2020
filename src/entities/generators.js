@@ -3,8 +3,8 @@ import { Mesh } from '../core/Mesh';
 import { Vector3 } from '../core/Vector3';
 import { Group } from '../core/Group';
 import * as styles from './styles';
-console.log(styles.magnolia);
 import * as geos from './geometries';
+
 export const make = {};
 make.trunk = () => new Mesh(geos.trunk, { style: styles.brown });
 make.trunkBase = () =>
@@ -24,6 +24,7 @@ make.tree3 = (opts) =>
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey });
+make.box = (opts) => new Mesh(geos.box, { ...opts, style: styles.lilac });
 make.water = (opts) =>
   new Mesh(geos.square, {
     ...opts,
@@ -34,6 +35,31 @@ make.sand = (opts) =>
     ...opts,
     style: styles.sand
   });
+make.field = (opts) =>
+  new Mesh(geos.square, {
+    ...opts,
+    style: styles.emeraldGreen
+  });
+make.starfish = (opts) =>
+  new Group(
+    [
+      make.sand(),
+      new Mesh(geos.starfish, {
+        style: styles.lilac
+      })
+    ],
+    opts
+  );
+make.shell = (opts) =>
+  new Group(
+    [
+      make.sand(),
+      new Mesh(geos.shell, {
+        style: styles.lilac
+      })
+    ],
+    opts
+  );
 make.tile = (opts) =>
   new Mesh(geos.square, {
     ...opts,

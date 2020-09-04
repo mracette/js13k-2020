@@ -88,9 +88,9 @@ export class Map {
     }
   }
 
-  _initEntity(name, position, blocks) {
+  _initEntity(name, opts, blocks) {
     return {
-      entity: make[name]({ position }),
+      entity: make[name](opts),
       blocks
     };
   }
@@ -99,13 +99,37 @@ export class Map {
     const rand = Math.random();
     const [x, y] = this.getTileFromGrid(row, col);
     const position = new Vector3(x, y, 0);
-    if (row <= 15) return this._initEntity('water', position, true);
-    if (row <= 30 && col > 1 && col <= this.width - 3)
-      return this._initEntity('sand', position, false);
-    if (row <= 34 && (col < 14 || col > 16))
-      return this._initEntity('rock', position, true);
+
+    /* THE BEACH */
+    if (row <= 15) return this._initEntity('water', { position }, true);
+    if (row <= 25 && col !== 15 && col > 1 && col < this.width - 2) {
+      if (rand < 0.015)
+        return this._initEntity('starfish', { position }, false);
+      if (rand < 0.03) return this._initEntity('shell', { position }, false);
+    }
+    if (row <= 26 && col > 1 && col <= this.width - 3)
+      return this._initEntity('sand', { position }, false);
+    if (row <= 30 && (col < 14 || col > 16))
+      return this._initEntity('rock', { position }, true);
+
+    /* THE TOWN */
+    // inn
+    if (row === 53 && col === 13)
+      return this._initEntity('box', { position }, true);
+    if (row === 53 && col === 12)
+      return this._initEntity(
+        'box',
+        { position, scale: new Vector3(2, 2, 2) },
+        true
+      );
+    if (row <= 56 && col > 1 && col <= this.width - 3)
+      return this._initEntity('field', { position }, false);
+    if (row <= 60 && (col < 14 || col > 16))
+      return this._initEntity('rock', { position }, true);
+
+    // world-wide rock border (L + R)
     if (col <= 1 || col >= this.width - 2)
-      return this._initEntity('rock', position, true);
+      return this._initEntity('rock', { position }, true);
     return null;
   }
 }

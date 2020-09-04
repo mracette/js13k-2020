@@ -29,6 +29,11 @@ export default {
                 'water',
                 'sand',
                 'tileGroup',
+                'starfish',
+                'shell',
+                'field',
+                'box',
+                'enemy1',
                 // protect the note types!
                 'quarter',
                 'eighth',
