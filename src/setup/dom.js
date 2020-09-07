@@ -12,7 +12,7 @@ export const setDomStyles = (elements, styles) => {
 export const cinematicResize = (
   elements,
   container,
-  ratio = { x: 2, y: 1 }
+  ratio = { x: 16, y: 9 }
 ) => {
   const { width, height } = container.getBoundingClientRect();
   const resizeRatio = Math.min(width / ratio.x, height / ratio.y);

@@ -2,10 +2,7 @@ import { G } from '../globals';
 import { Style } from '../core/Style';
 import { Group } from '../core/Group';
 
-export const RAISIN_BLACK = '#272838';
 export const LIGHT_GRAY = '#CCCCCC';
-export const LILAC = '#7C77B9';
-export const EMERALD_GREEN = '#5BBA6F';
 export const WHITE_OVERLAY_02 = 'rgba(255, 255, 255, .2)';
 
 export const baseLine = new Style({
@@ -22,24 +19,18 @@ export const lightLine = new Style({
 export const transparentBlack = new Style({
   fillStyle: 'rgba(0,0,0,.25)'
 });
-export const spaceCadet = new Style({
-  fillStyle: '#94C595'
-});
 export const waterBlue = new Style({
   fillStyle: '#2E86AB',
   uid: 'waterBlue'
 });
 export const emeraldGreen = new Style({
-  fillStyle: EMERALD_GREEN
+  fillStyle: '#5BBA6F'
 });
 export const grassGreen = new Style({
   fillStyle: '#137547'
 });
-export const lilac = new Style({
-  fillStyle: LILAC
-});
 export const raisinBlack = new Style({
-  fillStyle: RAISIN_BLACK
+  fillStyle: '#272838'
 });
 export const magnolia = new Style({
   fillStyle: '#F7F0F5',
@@ -54,11 +45,35 @@ export const darkBrown = new Style({
 export const ivoryBlack = new Style({
   fillStyle: '#292421'
 });
-export const grey = new Style({
-  fillStyle: 'grey'
-});
 export const sand = new Style({
   fillStyle: '#E7C496'
+});
+export const orange1 = new Style({
+  fillStyle: '#F47749'
+});
+export const grey1 = new Style({
+  fillStyle: '#F7F8F8'
+});
+export const grey2 = new Style({
+  fillStyle: 'grey'
+});
+export const grey3 = new Style({
+  fillStyle: '#52595F'
+});
+export const green1 = new Style({
+  fillStyle: '#94C595'
+});
+export const green2 = new Style({
+  fillStyle: '#3ECAAC'
+});
+export const green3 = new Style({
+  fillStyle: '#2D675F'
+});
+export const purple1 = new Style({
+  fillStyle: '#7C77B9'
+});
+export const purple2 = new Style({
+  fillStyle: '#8B5DCE'
 });
 
 export const globalStyles = new Group(null, {

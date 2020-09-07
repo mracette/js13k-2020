@@ -23,8 +23,8 @@ make.tree3 = (opts) =>
   new Group([make.trunkBase(), make.trunk(), make.treeTop3()], opts);
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
-make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey });
-make.box = (opts) => new Mesh(geos.box, { ...opts, style: styles.lilac });
+make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey2 });
+make.box = (opts) => new Mesh(geos.box, { ...opts, style: styles.purple1 });
 make.water = (opts) =>
   new Mesh(geos.square, {
     ...opts,
@@ -45,7 +45,7 @@ make.starfish = (opts) =>
     [
       make.sand(),
       new Mesh(geos.starfish, {
-        style: styles.lilac
+        style: styles.orange1
       })
     ],
     opts
@@ -55,7 +55,7 @@ make.shell = (opts) =>
     [
       make.sand(),
       new Mesh(geos.shell, {
-        style: styles.lilac
+        style: styles.grey1
       })
     ],
     opts

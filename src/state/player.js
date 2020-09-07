@@ -29,7 +29,7 @@ export class Player {
 
     // movement / rotation params
     this._lastUpdateTime = null;
-    this._movementSpeed = 0.03;
+    this._movementSpeed = 0.003;
     this._rotationSpeed = 0.005;
     this._movementSpeedHalf = this._movementSpeed / 2;
     this._faceOffset = 0.1;
@@ -62,7 +62,7 @@ export class Player {
     });
     const body = new Mesh(geos.playerBody, {
       uid: 'player-body',
-      style: styles.lilac
+      style: styles.purple1
     });
     this.face = new Mesh(geos.playerFace, {
       uid: 'player-face',
@@ -72,13 +72,11 @@ export class Player {
     });
     const ringFront = new Mesh(geos.playerRingFront, {
       uid: 'player-ring-front',
-      // style: [styles.whiteLines, styles.spaceCadet]
-      style: [styles.spaceCadet]
+      style: [styles.green1]
     });
     const ringBack = new Mesh(geos.playerRingBack, {
       uid: 'player-ring-back',
-      // style: [styles.whiteLines, styles.spaceCadet]
-      style: [styles.spaceCadet]
+      style: [styles.green1]
     });
     return new Group([shadow, ringBack, body, ringFront, this.face], {
       uid: 'player-group',

@@ -27,7 +27,7 @@ addScreenDependentGlobals(G);
 G.PLAYER = new Player();
 
 // init camera
-G.CAMERA = new Camera({ magnification: 8 });
+G.CAMERA = new Camera();
 G.CAMERA.position.set(G.PLAYER.position);
 
 // init map
@@ -103,7 +103,7 @@ const drawWorld = (time, clear = true) => {
 };
 
 const animate = (time, clear = true) => {
-  // G.AUDIO.update(time);
+  G.AUDIO.update(time);
   // stats.begin();
   G.CURRENT_TIME = time;
   G.TIME_DELTA = time - G.PREVIOUS_TIME;

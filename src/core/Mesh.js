@@ -47,8 +47,6 @@ export class Mesh extends Entity {
 
   async cache(camera = G.CAMERA) {
     const key = this.getKey();
-    console.log(key);
-
     // get the projection, and update the bounding box
     const facesAndNormals = camera.project(this, true);
 

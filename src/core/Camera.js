@@ -4,14 +4,9 @@ import { Vector3 } from './Vector3';
 import { Entity } from './Entity';
 
 export class Camera extends Entity {
-  constructor(opts) {
-    super(opts);
-    const defaults = { magnification: 12 };
-    Object.assign(this, { ...defaults, ...opts });
-    this._cache = {};
-  }
-
-  clearCache() {
+  constructor() {
+    super();
+    this.magnification = 8;
     this._cache = {};
   }
 
