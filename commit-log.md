@@ -295,3 +295,12 @@
 | Compressed Build (Adv Zip) | 10.06 kb | 10304 | -6% |
 
 
+**cross browser audio and no more webgl** - *Tue, 08 Sep 2020 21:09:54 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 49.90 kb | 51099 | NA |
+| Build | 25.51 kb | 26120 | -49% |
+| Compressed Build | 9.62 kb | 9848 | -62% |
+| Compressed Build (Adv Zip) | 8.99 kb | 9206 | -7% |
+
+

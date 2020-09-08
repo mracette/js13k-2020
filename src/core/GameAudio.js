@@ -139,7 +139,6 @@ export class GameAudio {
     offline.startRendering();
 
     offline.oncomplete = (buffer) => {
-      console.log(buffer.renderedBuffer);
       callback(buffer.renderedBuffer);
     };
   }

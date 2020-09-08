@@ -22,7 +22,7 @@ export class Entity {
           // order is important so that child styles overrider parent styles
           list = [...obj.style, ...list];
         } else {
-          list.push(obj.style);
+          list.unshift(obj.style);
         }
       }
       obj = obj.parent || null;

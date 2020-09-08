@@ -17,6 +17,7 @@ export const G = {
  */
 
 export const addScreenIndependentGlobals = (G) => {
+  G.MAGNIFICATION = 8;
   G.CACHE = true;
   G.SUPPORTS_OFFSCREEN =
     typeof OffscreenCanvasRenderingContext2D === 'function';

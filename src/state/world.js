@@ -3,6 +3,7 @@ import { Vector3 } from '../core/Vector3';
 import { globalStyles } from '../entities/styles';
 import { RAND } from '../utils/functions';
 import { make } from '../entities/generators';
+import * as styles from '../entities/styles';
 
 export class Map {
   constructor() {
@@ -91,45 +92,42 @@ export class Map {
     }
   }
 
-  _initEntity(name, opts, blocks) {
+  _initEntity(name, opts, type) {
     return {
       entity: make[name](opts),
-      blocks
+      type
     };
   }
 
   _initEntityOnGrid(row, col) {
-    const rand = RAND();
+    const r = RAND();
     const [x, y] = this.getTileFromGrid(row, col);
     const position = new Vector3(x, y, 0);
 
-    // if ((row === 15 || row === 16) && (col === 16 || col === 17)) {
-    //   return this._initEntity('sand', { position }, false);
-    // }
-
-    /* THE BEACH */
-    if (row <= 15) return this._initEntity('water', { position }, true);
-    if (row <= 25 && col !== 15 && col > 1 && col < this.width - 2) {
-      if (rand < 0.015)
-        return this._initEntity('starfish', { position }, false);
-      if (rand < 0.03) return this._initEntity('shell', { position }, false);
-    }
-    if (row <= 26 && col > 1 && col <= this.width - 3)
-      return this._initEntity('sand', { position }, false);
-    if (row <= 30 && (col < 14 || col > 16))
-      return this._initEntity('rock', { position }, true);
+    // world-wide rock border (L + R)
+    if (col <= 1 || col >= this.width - 2 || row <= 2)
+      return this._initEntity('rock', { position }, 'blocks');
 
     /* THE TOWN */
-    if (row === 53 && col === 13)
-      return this._initEntity('inn', { position }, true);
-    if (row <= 56 && col > 1 && col <= this.width - 3)
-      return this._initEntity('field', { position }, false);
-    if (row <= 60 && (col < 14 || col > 16))
-      return this._initEntity('rock', { position }, true);
+    // house
+    if (row === 25 && col === 11)
+      return this._initEntity(
+        'building',
+        { position, style: styles.green1 },
+        false
+      );
+    if ((row === 25 && col === 12) || (row === 24 && col === 11))
+      return this._initEntity('whiteTile', { position }, 'home');
 
-    // world-wide rock border (L + R)
-    if (col <= 1 || col >= this.width - 2)
-      return this._initEntity('rock', { position }, true);
+    // rock border
+    if (row <= 30 && row > 27 && (col < 14 || col > 16))
+      return this._initEntity('rock', { position }, 'blocks');
+
+    // random grass
+    if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.03) {
+      return this._initEntity('grass', { position });
+    }
+
     return null;
   }
 }

@@ -40,12 +40,26 @@ const postProcess = () => {
   G.POST_CTX.fillRect(...args);
 };
 
+let prevTileX = null;
+let prevTileY = null;
+const drawTileGroup = () => {
+  // centers the tiles around the player
+  const newTileX = Math.floor(G.PLAYER.position.x);
+  const newTileY = Math.ceil(G.PLAYER.position.y);
+  if (newTileX !== prevTileX || newTileY !== prevTileY) {
+    G.MAP.getEntity('tileGroup').position.x = newTileX;
+    G.MAP.getEntity('tileGroup').position.y = newTileY;
+    G.MAP.getEntity('tileGroup').render(G.CAMERA, G.CTX);
+  }
+};
+
 const drawWorld = (time) => {
   G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
+  drawTileGroup();
   G.PLAYER.updateActions(time);
   // identify the players position on the map to only render a certain area around them
-  let px = Math.floor(G.PLAYER.mesh.position.x);
-  let py = Math.floor(G.PLAYER.mesh.position.y);
+  let px = Math.ceil(G.PLAYER.mesh.position.x);
+  let py = Math.ceil(G.PLAYER.mesh.position.y);
   const [gpr, gpc] = G.MAP.getGridFromTile(px, py);
   const [vgr, vgc] = G.MAP.visibleGridSizeHalf;
   // render back to front; G.BOTTOM_SCREEN_BUFFER renders rows offscreen to prevent
@@ -64,7 +78,7 @@ const drawWorld = (time) => {
       // render the player in between other objects in the grid for proper overlap
       if (i === gpr && j === gpc) {
         let order = [0, 1];
-        G.PLAYER.orientation === 'down' && (order = [1, 0]);
+        G.PLAYER.orientation === 'up' && (order = [1, 0]);
         G.PLAYER.mesh.children[order[0]].render(G.CAMERA, G.CTX);
         G.PLAYER.mesh.children[order[1]].render(G.CAMERA, G.CTX);
       }
@@ -101,8 +115,14 @@ window.addEventListener('keyup', (e) => {
   G.PLAYER.onKeyUp(e);
 });
 
+window.addEventListener('wheel', (e) => {
+  G.CAMERA.magnification += e.deltaY / 100;
+  drawWorld(G.CURRENT_TIME);
+  postProcess();
+});
+
 G.MAP.cacheEntities().then(() => {
-  drawWorld(0, true);
+  drawWorld(0);
   postProcess();
   G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
 });

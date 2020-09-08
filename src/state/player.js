@@ -1,13 +1,14 @@
 import { G } from '../globals';
-import { rotatePoint, PI, TAU } from '../utils/math';
+import { rotatePoint, boundedSin, PI, TAU } from '../utils/math';
 import { Vector3 } from '../core/Vector3';
 import { make } from '../entities/generators';
+//import { drawWorld } from '../index';
 
 export class Player {
   constructor() {
     // this is a "virtual" position, because the mesh will always be at the center of the screen
-    this.position = new Vector3(-28, -28, 0);
-    // this.position = new Vector3(-8, -8, 0);
+    // this.position = new Vector3(-28, -28, 0);
+    this.position = new Vector3(-8, -8, 0);
 
     // identifies actions in the queue
     this._actionId = 0;
@@ -25,16 +26,23 @@ export class Player {
     this.actionParams = {
       beamDuration: 500,
       beamLength: G.COORDS.width(0.05),
-      beamRadius: Math.PI / 4
+      beamRadius: Math.PI / 4,
+      restLength: 1000
     };
 
     // movement / rotation params
     this._lastUpdateTime = null;
-    this._movementSpeed = 0.003;
+    this._movementSpeed = 0.03;
     this._rotationSpeed = 0.005;
     this._movementSpeedHalf = this._movementSpeed / 2;
     this._faceOffset = 0.1;
     this.isMoving = false;
+
+    // life
+    this._maxLife = 10;
+    this._currentLife = 9;
+    this._isResting = false;
+    this.restSin = boundedSin(this.actionParams.restLength * 2, -5, 5);
 
     // the action group + meshes
     this.mesh = this._initMesh();
@@ -86,20 +94,28 @@ export class Player {
     }
   }
 
-  adjustForBlocking(deltaX, deltaY) {
+  performTileAction(deltaX, deltaY) {
     if (!deltaX && !deltaY) return [0, 0];
     const newX = Math.trunc(this.position.x + deltaX - 0.5);
     const newY = Math.trunc(this.position.y + deltaY - 0.5);
     const [i, j] = G.MAP.getGridFromTile(newX, newY);
     const entity = G.MAP.getEntityOnGrid(i, j);
-    if (entity && entity.blocks) {
-      return [0, 0];
-    } else {
-      return [deltaX, deltaY];
+    if (entity) {
+      if (entity.type === 'blocks') {
+        return [0, 0];
+      }
+      if (entity.type === 'home' && this._currentLife !== this._maxLife) {
+        this._isResting = true;
+        this.initiateAction('rest', G.CURRENT_TIME);
+      }
     }
+    return [deltaX, deltaY];
   }
 
   updatePosition() {
+    if (this._isResting) {
+      return false;
+    }
     const delta = G.TIME_DELTA * this._movementSpeed;
     const rotDelta = G.TIME_DELTA * this._rotationSpeed;
 
@@ -141,7 +157,7 @@ export class Player {
       direction = 2 * PI;
     }
 
-    [deltaX, deltaY] = this.adjustForBlocking(deltaX, deltaY);
+    [deltaX, deltaY] = this.performTileAction(deltaX, deltaY);
 
     const needsUpdate = deltaX !== 0 || deltaY !== 0;
 
@@ -223,18 +239,33 @@ export class Player {
       case 'beam':
         this.animateBeam(time, action);
         break;
+      case 'rest':
+        this.animateRest(time, action);
+        break;
       default:
         break;
     }
+  }
+
+  removeAction(id) {
+    this.currentActions = this.currentActions.filter((a) => a.id !== id);
+  }
+
+  animateRest(time, action) {
+    const delta = (time - action.start) / 5;
+    if (delta > this.actionParams.restLength) {
+      this.removeAction(action.id);
+      this._isResting = false;
+      return;
+    }
+    G.CAMERA.magnification = G.MAGNIFICATION - this.restSin(delta);
   }
 
   animateBeam(time, action, ctx = G.CTX) {
     const delta = (time - action.start) / this.actionParams.beamDuration;
     // remove the action from the queue
     if (delta > 1) {
-      this.currentActions = this.currentActions.filter(
-        (a) => a.id !== action.id
-      );
+      this.removeAction(action.id);
     } else {
       ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta})`;
       ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);

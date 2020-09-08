@@ -7,6 +7,36 @@ import * as geos from './geometries';
 
 export const make = {};
 
+/* primitives */
+make.pyramid = (opts) => new Mesh(geos.pyramid, opts);
+make.square = (opts) => new Mesh(geos.square, opts);
+make.box = (opts) => new Mesh(geos.box, opts);
+make.tile = (opts) =>
+  new Mesh(geos.square, {
+    ...opts,
+    style: [styles.raisinBlack, styles.lightLine]
+  });
+make.tileGroup = () => {
+  const group = new Group();
+  for (let i = 0, w = G.CAMERA.getVisibleMapWidth(); i <= w; i++) {
+    for (let j = 0, h = G.CAMERA.getVisibleMapHeight(); j <= h; j++) {
+      group.add(
+        make.tile({
+          position: new Vector3(i - w / 2 - 0.5, j - h / 2 - 0.5, 0)
+        })
+      );
+    }
+  }
+  return group;
+};
+
+/* special tiles */
+make.whiteTile = (opts) =>
+  new Mesh(geos.square, {
+    ...opts,
+    style: [styles.transparentWhite, styles.lightLine]
+  });
+
 /* trees */
 make.trunk = () => new Mesh(geos.trunk, { style: styles.brown });
 make.trunkBase = () =>
@@ -28,33 +58,6 @@ make.tree3 = (opts) =>
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey2 });
-make.water = (opts) =>
-  new Mesh(geos.square, {
-    ...opts,
-    style: styles.waterBlue
-  });
-make.sand = (opts) =>
-  new Mesh(geos.square, {
-    ...opts,
-    style: styles.sand
-  });
-make.field = (opts) =>
-  new Mesh(geos.square, {
-    ...opts,
-    style: styles.emeraldGreen
-  });
-
-/* beach objects */
-make.starfishMesh = () =>
-  new Mesh(geos.starfish, {
-    style: styles.orange1
-  });
-make.starfish = (opts) => new Group([make.sand(), make.starfishMesh()], opts);
-make.shellMesh = () =>
-  new Mesh(geos.shell, {
-    style: styles.grey1
-  });
-make.shell = (opts) => new Group([make.sand(), make.shellMesh()], opts);
 
 /* player */
 make.playerShadow = () =>
@@ -92,14 +95,15 @@ make.player = (opts) =>
   });
 
 /* town */
-make.boxOne = () =>
-  new Mesh(geos.box, {
-    scale: new Vector3(2, 2, 1)
-    // position: new Vector3(3, 3, 0)
-  });
-make.boxTwo = () => new Mesh(geos.box, { scale: new Vector3(2, 2, 2) });
-make.inn = (opts) =>
-  new Group([make.boxOne()], {
-    style: styles.purple2,
-    ...opts
-  });
+make.building = (opts) =>
+  new Group(
+    [
+      make.box({ scale: new Vector3(2, 2, 2) }),
+      make.pyramid({
+        scale: new Vector3(2, 2, 1),
+        position: new Vector3(0, 0, 2),
+        style: styles.brown
+      })
+    ],
+    opts
+  );

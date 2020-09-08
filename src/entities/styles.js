@@ -2,20 +2,27 @@ import { G } from '../globals';
 import { Style } from '../core/Style';
 import { Group } from '../core/Group';
 
-export const LIGHT_GRAY = '#CCCCCC';
-export const WHITE_OVERLAY_02 = 'rgba(255, 255, 255, .2)';
-
+/* LINES */
 export const baseLine = new Style({
-  lineWidth: () => G.COORDS.width(0),
+  lineWidth: () => G.COORDS.width(0.001),
   lineJoin: 'round',
   lineCap: 'round'
+});
+export const lightLine = new Style({
+  strokeStyle: 'white'
 });
 export const clearLine = new Style({
   strokeStyle: 'rgba(0,0,0,0)'
 });
+
+/* OVERLAYS */
 export const transparentBlack = new Style({
   fillStyle: 'rgba(0,0,0,.25)'
 });
+export const transparentWhite = new Style({
+  fillStyle: 'rgba(255,255,255,.25)'
+});
+
 export const waterBlue = new Style({
   fillStyle: '#2E86AB',
   uid: 'waterBlue'

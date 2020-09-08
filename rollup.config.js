@@ -29,15 +29,14 @@ export default {
                 'tree3',
                 'grass',
                 'rock',
-                'water',
-                'sand',
                 'tileGroup',
-                'starfish',
-                'shell',
-                'field',
                 'box',
                 'enemy1',
-                'inn'
+                'box',
+                'square',
+                'whiteTile',
+                'pyramid',
+                'building'
                 // // protect the note types!
                 // 'q',
                 // 'e'

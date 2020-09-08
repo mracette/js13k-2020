@@ -115,6 +115,8 @@ export class Mesh extends Entity {
           position.x - cache.width / 2,
           position.y - cache.height
         );
+      } else {
+        this.cache(camera).then(() => this.render(camera, ctx));
       }
     } else {
       // cpu render
