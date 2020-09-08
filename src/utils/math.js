@@ -1,5 +1,10 @@
 import { Rx, Ry, Rz } from '../core/Matrix';
 
+export const PI = Math.PI;
+export const TAU = Math.PI * 2;
+export const RAND = () => Math.random();
+
+// TODO: cut some params here
 export const boundedSin = (
   period = 1,
   yMin = -1,
@@ -25,19 +30,7 @@ export const rotatePoint = (px, py, cx, cy, angle) => {
   };
 };
 
-export const nearestPow2 = (size) => {
-  return Math.pow(2, Math.round(Math.log(size) / Math.log(2)));
-};
-
 export const degToRad = (deg) => (deg * Math.PI) / 180;
-export const radToDeg = (rad) => (rad * 180) / Math.PI;
-
-export const rotateVector3 = (px, py, cx, cy, angle) => {
-  return [
-    Math.cos(angle) * (px - cx) - Math.sin(angle) * (py - cy) + cx,
-    Math.sin(angle) * (px - cx) + Math.cos(angle) * (py - cy) + cy
-  ];
-};
 
 export const rotate3d = (point, axis, amount, inverse) => {
   let rot;

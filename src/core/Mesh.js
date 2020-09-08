@@ -9,14 +9,9 @@ export class Mesh extends Entity {
       type: 'mesh',
       uid: G.UID++,
       style: null,
-      autoCache: true,
       cacheEnabled: true,
-      enabled: true,
-      needsUpdate: null,
       box: [] // x0, y0, x1, y1
     };
-    // this.screenX = null;
-    // this.screenY = null;
     this.stylesId = this.getStyleList()
       .map((s) => s.uid)
       .join('-');
@@ -29,12 +24,12 @@ export class Mesh extends Entity {
     return [
       this.geometry.name,
       this.stylesId,
-      's' + this.scale.x,
-      's' + this.scale.y,
-      's' + this.scale.z,
-      'r' + this.rotation.x,
-      'r' + this.rotation.y,
-      'r' + this.rotation.z
+      this.scale.x,
+      this.scale.y,
+      this.scale.z,
+      this.rotation.x,
+      this.rotation.y,
+      this.rotation.z
     ].join('~');
   }
 
@@ -47,64 +42,42 @@ export class Mesh extends Entity {
 
   async cache(camera = G.CAMERA) {
     const key = this.getKey();
+
     // get the projection, and update the bounding box
-    const facesAndNormals = camera.project(this, true);
+    const facesAndNormals = camera.project(this);
 
-    // let lw = null;
-    // this.getStyleList().forEach((s) => {
-    //   const lineWidth = s.styles['lineWidth'];
-    //   console.log(lineWidth);
-    //   if (typeof lineWidth === 'function') {
-    //     lw = parseFloat(lineWidth());
-    //   } else if (typeof lineWidth !== 'undefined') {
-    //     lw = parseFloat(lineWidth);
-    //   }
-    // });
-
-    // console.log(lw);
-
-    // update the bounding box to account for stroke width
-    // if (lw !== null) {
-    //   this.box[0] -= lw / 2;
-    //   this.box[1] -= lw / 2;
-    //   this.box[2] += lw / 2;
-    //   this.box[3] += lw / 2;
-    // }
-    const w = this.box[2] - this.box[0];
-    const h = this.box[3] - this.box[1];
-
-    let offscreenCtx, offscreen;
-    //TODO: implement power of two here?
-    if (G.SUPPORTS_OFFSCREEN) {
-      offscreen = new OffscreenCanvas(w, h);
-      offscreenCtx = offscreen.getContext('2d', {
-        alpha: true,
-        antialias: true
-      });
-    } else {
-      offscreen = document.createElement('canvas');
-      offscreen.width = w;
-      offscreen.height = h;
-      offscreenCtx = offscreen.getContext('2d', {
-        alpha: true,
-        antialias: true
-      });
-    }
+    // draw the object offscreen (booo firefox not supporting OffscreenCanvas)
+    let offscreen = document.createElement('canvas');
+    let offscreenCtx = offscreen.getContext('2d', {
+      alpha: true
+      // imageSmoothingEnabled: true,
+      // antialias: true
+    });
+    offscreen.width = this.box[2] - this.box[0];
+    offscreen.height = this.box[3] - this.box[1];
 
     // apply all styles
     this.applyAllStyles(offscreenCtx);
 
-    // draw the projection to the canvas, with boxToOrigin = true
+    // draw the projection to the canvas
     camera.drawFaces(facesAndNormals, offscreenCtx, this.box);
 
     // render the bitmap
-    const image = await createImageBitmap(offscreen, 0, 0, w, h);
+    const image = await createImageBitmap(
+      offscreen,
+      0,
+      0,
+      offscreen.width,
+      offscreen.height
+    );
     const texture = G.WEBGL.createTexture(image);
     if (G.USE_WEBGL) {
       camera.setCache(key, texture);
     } else {
       camera.setCache(key, image);
     }
+
+    // garbage collect
     offscreen = null;
     offscreenCtx = null;
     return key;
@@ -120,9 +93,6 @@ export class Mesh extends Entity {
         if (cache) {
           // write from cache
           const position = this.getProjectedPosition(camera);
-          // // store these for external use
-          // this.screenX = position.x;
-          // this.screenY = position.y;
           // draw from cache
           if (G.USE_WEBGL) {
             G.WEBGL.drawImage(
@@ -137,8 +107,6 @@ export class Mesh extends Entity {
               position.y - cache.height
             );
           }
-        } else if (this.isAutoCached()) {
-          this.cache().then(() => this.render(camera, ctx));
         }
       } else {
         // cpu render

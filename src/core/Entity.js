@@ -5,7 +5,6 @@ export class Entity {
   constructor(opts = {}) {
     const defaults = {
       enabled: true,
-      needsUpdate: null,
       position: new Vector3(0, 0, 0),
       rotation: new Vector3(0, 0, 0),
       scale: new Vector3(1, 1, 1)
@@ -33,10 +32,6 @@ export class Entity {
 
   applyAllStyles(ctx = G.CTX) {
     this.getStyleList().forEach((s) => s.apply(ctx));
-  }
-
-  isAutoCached() {
-    return this.autoCache || (this.parent && this.parent.isAutoCached());
   }
 
   getPosition() {

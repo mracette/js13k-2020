@@ -1,13 +1,12 @@
-import { boundedSin } from '../utils/math';
+import { boundedSin, RAND } from '../utils/math';
 
 const generateNoise = (audioCtx) => {
-  const length = 5;
-  const samples = length * audioCtx.sampleRate;
+  const samples = 5 * audioCtx.sampleRate;
   const lBuffer = new Float32Array(samples);
   const rBuffer = new Float32Array(samples);
   for (let i = 0; i < samples; i++) {
-    lBuffer[i] = 1 - 2 * Math.random();
-    rBuffer[i] = 1 - 2 * Math.random();
+    lBuffer[i] = 1 - 2 * RAND();
+    rBuffer[i] = 1 - 2 * RAND();
   }
   const buffer = audioCtx.createBuffer(2, samples, audioCtx.sampleRate);
   buffer.copyToChannel(lBuffer, 0);
@@ -19,15 +18,17 @@ export class GameAudio {
   constructor() {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    const bps = 65 / 60;
+
     const props = {
-      sequenceStartTime: null,
+      audioStartTime: null,
       state: 'stopped',
-      noteTypes: ['quarter', 'eighth'], // quarter, eighth, triplet
+      noteTypes: ['q', 'e'],
       noteType: 1,
       previousNote: null,
       audioCtx,
       sampleRate: audioCtx.sampleRate,
-      bps: 65 / 60,
+      bps,
       baseNote: 392 / 2, // G4
       modes: [
         [0, 3, 5, 7, 10], // I7-
@@ -35,7 +36,7 @@ export class GameAudio {
         [-9, -7, -5, -2, 2, 3], // IVmaj7
         [-7, -3, 0, 3, 5, 7] // V7
       ],
-      measures: [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3],
+      measures: [0, 1, 0, 1, 0, 1, 2, 3],
       attack: 0.15,
       sustain: 0.03,
       sustainAmount: 0.75,
@@ -43,7 +44,9 @@ export class GameAudio {
       filterMin: 90,
       filterMax: 900,
       reverbTime: 3.5,
+      premasterFilterFreq: boundedSin(32 * bps, 350, 6500, 8 * bps),
       premaster: audioCtx.createGain(),
+      premasterFilter: audioCtx.createBiquadFilter(),
       filter: audioCtx.createBiquadFilter(),
       square: audioCtx.createOscillator(),
       squareEnv: audioCtx.createGain(),
@@ -54,7 +57,11 @@ export class GameAudio {
 
     Object.assign(this, props);
 
-    this.premaster.connect(audioCtx.destination);
+    this.premasterFilter.type = 'lowpass';
+    this.premasterFilter.Q.value = 1;
+    this.premasterFilter.connect(audioCtx.destination);
+
+    this.premaster.connect(this.premasterFilter);
     this.premaster.gain.value = 0.5;
 
     this.reverb.normalize = true;
@@ -117,7 +124,6 @@ export class GameAudio {
     );
 
     const noise = generateNoise(this.audioCtx);
-    this.noise = noise;
     const noiseSource = offline.createBufferSource();
     noiseSource.buffer = noise;
     noiseSource.connect(tailHPFilter);
@@ -156,8 +162,8 @@ export class GameAudio {
           this.squareEnv,
           'gain',
           0,
-          1 - Math.random() / 4,
-          0.25 + Math.random() / 2
+          1 - RAND() / 4,
+          0.25 + RAND() / 2
         );
         this.applyEnvelop(
           time,
@@ -183,7 +189,7 @@ export class GameAudio {
         wet.gain.value = 0.2 * opts.gain || 1;
         dry.gain.value = 0.6 * opts.gain || 1;
         source.detune.value = opts.detune || 0;
-        source.start(0, 0, opts.duration || 0.1);
+        source.start(0, 0, opts.duration || 2.75);
         break;
       }
     }
@@ -192,50 +198,52 @@ export class GameAudio {
   update(gameTime) {
     if (this.state === 'started') {
       const gameSeconds = gameTime / 1000;
-      this.sequenceStartTime === null && (this.sequenceStartTime = gameSeconds);
-      const elapsed = gameSeconds - this.sequenceStartTime;
+      this.audioStartTime === null && (this.audioStartTime = gameSeconds);
+      const elapsed = gameSeconds - this.audioStartTime;
+      this.premasterFilter.frequency.value = this.premasterFilterFreq(elapsed);
       const divisions = {
-        half: Math.floor((elapsed * this.bps) / 2),
-        quarter: Math.floor(elapsed * this.bps),
-        eighth: Math.floor(elapsed * this.bps * 2),
-        triplet: Math.floor((elapsed * this.bps * 3) / 2),
-        measure: Math.floor((elapsed * this.bps) / 4)
+        e: ~~(elapsed * this.bps * 2),
+        t: ~~((elapsed * this.bps * 3) / 2),
+        q: ~~(elapsed * this.bps),
+        h: ~~((elapsed * this.bps) / 2),
+        measure: ~~((elapsed * this.bps) / 4),
+        twoMeasures: ~~((elapsed * this.bps) / 8)
       };
-      if (this.previousQuarter !== divisions.quarter) {
+      if (this.previousQuarter !== divisions.q) {
         // "snare"
-        divisions.quarter % 2 === 1 &&
-          this.trigger(null, 'noise', { detune: -600, gain: 0.25 });
-        this.previousQuarter = divisions.quarter;
+        divisions.q % 2 === 1 &&
+          this.trigger(null, 'noise', { detune: -1200, gain: 0.15 });
+        this.previousQuarter = divisions.q;
       }
-      if (this.previousTriplet !== divisions.triplet) {
+      if (this.previousTriplet !== divisions.t) {
         // "hats"
         this.trigger(null, 'noise', {
-          detune: 3600,
-          gain: 0.33,
-          duration: 0.02
+          detune: 2400,
+          gain: 0.2,
+          duration: 0.01
         });
-        this.previousTriplet = divisions.triplet;
+        this.previousTriplet = divisions.t;
       }
       // play bass every half note
-      if (this.previousHalf !== divisions.half) {
-        const modeIndex = this.measures[divisions.measure % 16];
+      if (this.previousHalf !== divisions.h) {
+        const modeIndex = this.measures[divisions.twoMeasures % 8];
         const mode = this.modes[modeIndex];
         this.trigger(mode[0] - 12, 'sine'); // expected to always be the bass note
-        this.previousHalf = divisions.half;
+        this.previousHalf = divisions.h;
       }
       // change note types every bar
       if (divisions.measure !== this.previousMeasure) {
         this.noteType = this.noteTypes[
-          Math.floor(Math.random() * this.noteTypes.length)
+          Math.floor(RAND() * this.noteTypes.length)
         ];
         this.previousMeasure = divisions.measure;
       }
       // trigger square on every noteType division
       const noteIndex = divisions[this.noteType];
       if (this.previousNote !== noteIndex) {
-        const modeIndex = this.measures[divisions.measure % 16];
+        const modeIndex = this.measures[divisions.twoMeasures % 8];
         const mode = this.modes[modeIndex];
-        this.trigger(mode[Math.floor(Math.random() * mode.length)], 'square');
+        this.trigger(mode[Math.floor(RAND() * mode.length)], 'square');
         this.previousNote = noteIndex;
       }
     }

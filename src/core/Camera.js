@@ -20,35 +20,23 @@ export class Camera extends Entity {
 
   getVisibleMapWidth() {
     // how many map units fit across the width of the canvas?
-    const x0 = new Vector3(0, 0, 0);
-    const x1 = new Vector3(1, 0, 0);
-    this.project(x0);
-    this.project(x1);
+    const x0 = this.project(new Vector3(0, 0, 0));
+    const x1 = this.project(new Vector3(1, 0, 0));
     return Math.ceil(G.COORDS.width() / (x1.x - x0.x));
   }
 
   getVisibleMapHeight() {
     // how many map units fit across the height of the canvas?
-    const y0 = new Vector3(0, 0, 0);
-    const y1 = new Vector3(0, 1, 0);
-    this.project(y0);
-    this.project(y1);
+    const y0 = this.project(new Vector3(0, 0, 0));
+    const y1 = this.project(new Vector3(0, 1, 0));
     return Math.ceil(G.COORDS.height() / (y1.y - y0.y));
   }
 
   mapToScreen(point) {
     // how many map units fit across the height of the canvas?
-    const scale = G.COORDS.height() / (this.magnification || 1);
+    const scale = G.COORDS.height() / this.magnification;
     point.x = G.COORDS.nx(0) + point.x * scale;
     point.y = G.COORDS.ny(0) + point.y * scale;
-    point.z = 0;
-  }
-
-  screenToMap(point) {
-    const scale = G.COORDS.height() / (this.magnification || 1);
-    point.x = (point.x - G.COORDS.nx(0)) / scale;
-    point.y = (point.y - G.COORDS.ny(0)) / (scale / 4);
-    point.z = 0;
   }
 
   projectTransform(point) {
@@ -91,7 +79,7 @@ export class Camera extends Entity {
    * @returns {Array} returns an array of faces and normals that can be passed
    * directly to this.drawLines()
    */
-  project(object, bounding = true) {
+  project(object) {
     // if the projected object is a mesh, the objects transformations must
     // be baked into the geometry before it is projected to the screen
     if (object.type === 'mesh') {
@@ -147,14 +135,12 @@ export class Camera extends Entity {
       // up (basically if something is "floating"). otherwise it won't render
       // correctly off the cache
       let boundingLowerBound, box;
-      if (bounding) {
-        box = object.box;
-        boundingLowerBound = object
-          .getPosition()
-          .clone()
-          .translate(new Vector3(1, 1, 0));
-        this.projectTransform(boundingLowerBound);
-      }
+      box = object.box;
+      boundingLowerBound = object
+        .getPosition()
+        .clone()
+        .translate(new Vector3(1, 1, 0));
+      this.projectTransform(boundingLowerBound);
 
       // final transformation is to use the camera projection
       for (let i = 0; i < facesAndNormals.length; i++) {
@@ -162,47 +148,27 @@ export class Camera extends Entity {
         for (let j = 0; j < face.length; j++) {
           const point = face[j];
           this.projectTransform(point);
-          // update the bounding box if necessary (yes for each point)
-          if (bounding) {
-            this.updateBoundingBox(box, boundingLowerBound, point);
-          }
+          // for each point, check for updates to the bounding box
+          this.updateBoundingBox(box, boundingLowerBound, point);
         }
       }
-
+      // account for line width in bounding box
+      // const lw = parseFloat(G.CTX.lineWidth || 0);
+      // box[0] -= lw / 2;
+      // box[1] -= lw / 2;
+      // box[2] += lw / 2;
+      // box[3] += lw / 2;
       return facesAndNormals;
-      // if (bounding) {
-      //   // account for line width in bounding box
-      //   const lw = parseFloat(ctx.lineWidth || 0);
-      //   bounding[0] -= lw / 2;
-      //   bounding[1] -= lw / 2;
-      //   bounding[2] += lw / 2;
-      //   bounding[3] += lw / 2;
-      // }
-      // if (boxToOrigin) {
-      //   this.drawFaces(facesAndNormals, ctx, bounding);
-      // } else {
-      //   this.drawFaces(facesAndNormals, ctx);
-      // }
     } else if (object.type === 'point') {
       // the projection of a point is much simpler, just use the camera's transforms
       this.projectTransform(object);
+      return object;
     }
-  }
-
-  unproject(point, iso = G.ISO) {
-    this.screenToMap(point);
-    if (iso) {
-      rotate3d(point, 'x', degToRad(60), true);
-      rotate3d(point, 'z', degToRad(45), true);
-    }
-    point.x += 1 * this.position.x;
-    point.y += 1 * this.position.y;
-    return point;
   }
 
   drawFaces(faces, ctx, box = false, opts = {}) {
     const fill = opts.fill || true;
-    const stroke = opts.stroke || true;
+    const stroke = opts.stroke || false;
     const shade = opts.shade || true;
     const xAdj = box ? -1 * box[0] : 0;
     const yAdj = box ? -1 * box[1] : 0;
@@ -223,6 +189,10 @@ export class Camera extends Entity {
         // save the base styles and apply them to the face
         ctx.save();
         ctx.fill();
+        // use a thin border to compensate for sub pixel gaps
+        // ctx.lineWidth = 0.1;
+        // ctx.strokeStyle = ctx.fillStyle;
+        // ctx.stroke();
         if (shade) {
           // use a darkened layer for flat shading
           ctx.fillStyle = `rgba(0, 0, 0, ${

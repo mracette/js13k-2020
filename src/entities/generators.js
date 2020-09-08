@@ -6,6 +6,8 @@ import * as styles from './styles';
 import * as geos from './geometries';
 
 export const make = {};
+
+/* trees */
 make.trunk = () => new Mesh(geos.trunk, { style: styles.brown });
 make.trunkBase = () =>
   new Mesh(geos.shadow, {
@@ -21,10 +23,11 @@ make.tree2 = (opts) =>
   new Group([make.trunkBase(), make.trunk(), make.treeTop2()], opts);
 make.tree3 = (opts) =>
   new Group([make.trunkBase(), make.trunk(), make.treeTop3()], opts);
+
+/* environment */
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey2 });
-make.box = (opts) => new Mesh(geos.box, { ...opts, style: styles.purple1 });
 make.water = (opts) =>
   new Mesh(geos.square, {
     ...opts,
@@ -40,41 +43,70 @@ make.field = (opts) =>
     ...opts,
     style: styles.emeraldGreen
   });
-make.starfish = (opts) =>
-  new Group(
-    [
-      make.sand(),
-      new Mesh(geos.starfish, {
-        style: styles.orange1
-      })
-    ],
-    opts
-  );
-make.shell = (opts) =>
-  new Group(
-    [
-      make.sand(),
-      new Mesh(geos.shell, {
-        style: styles.grey1
-      })
-    ],
-    opts
-  );
-make.tile = (opts) =>
-  new Mesh(geos.square, {
-    ...opts,
-    style: [styles.raisinBlack, styles.lightLine]
+
+/* beach objects */
+make.starfishMesh = () =>
+  new Mesh(geos.starfish, {
+    style: styles.orange1
   });
-make.tileGroup = () => {
-  const group = new Group();
-  for (let i = 0, w = G.CAMERA.getVisibleMapWidth(); i <= w; i++) {
-    for (let j = 0, h = G.CAMERA.getVisibleMapHeight(); j <= h; j++) {
-      group.add(
-        make.tile({
-          position: new Vector3(i - w / 2 - 0.5, j - h / 2 - 0.5, 0)
-        })
-      );
+make.starfish = (opts) => new Group([make.sand(), make.starfishMesh()], opts);
+make.shellMesh = () =>
+  new Mesh(geos.shell, {
+    style: styles.grey1
+  });
+make.shell = (opts) => new Group([make.sand(), make.shellMesh()], opts);
+
+/* player */
+make.playerShadow = () =>
+  new Mesh(geos.shadow, {
+    uid: 'player-shadow',
+    style: [styles.transparentBlack, styles.clearLine]
+  });
+make.playerBody = () =>
+  new Mesh(geos.playerBody, {
+    uid: 'player-body',
+    style: styles.purple1
+  });
+make.playerFace = () =>
+  new Mesh(geos.playerFace, {
+    uid: 'player-face',
+    style: styles.magnolia,
+    position: new Vector3(0.5, 0.5, 0),
+    cacheEnabled: false
+  });
+make.playerRingFront = () =>
+  new Mesh(geos.playerRingFront, {
+    uid: 'player-ring-front',
+    style: [styles.green1]
+  });
+make.playerRingBack = () =>
+  new Mesh(geos.playerRingBack, {
+    uid: 'player-ring-back',
+    style: [styles.green1]
+  });
+make.player = (opts) =>
+  new Group(
+    [
+      make.playerShadow(),
+      make.playerRingBack(),
+      make.playerBody(),
+      make.playerRingFront()
+    ],
+    {
+      uid: 'player-group',
+      ...opts
     }
-  }
-  return group;
-};
+  );
+
+/* town */
+make.boxOne = () =>
+  new Mesh(geos.box, {
+    scale: new Vector3(2, 2, 1)
+    // position: new Vector3(3, 3, 0)
+  });
+make.boxTwo = () => new Mesh(geos.box, { scale: new Vector3(2, 2, 2) });
+make.inn = (opts) =>
+  new Group([make.boxOne()], {
+    style: styles.purple2,
+    ...opts
+  });

@@ -6,15 +6,12 @@ export const LIGHT_GRAY = '#CCCCCC';
 export const WHITE_OVERLAY_02 = 'rgba(255, 255, 255, .2)';
 
 export const baseLine = new Style({
-  lineWidth: () => G.COORDS.width(0.001),
+  lineWidth: () => G.COORDS.width(0),
   lineJoin: 'round',
   lineCap: 'round'
 });
 export const clearLine = new Style({
   strokeStyle: 'rgba(0,0,0,0)'
-});
-export const lightLine = new Style({
-  strokeStyle: 'rgba(55,55,55,1)'
 });
 export const transparentBlack = new Style({
   fillStyle: 'rgba(0,0,0,.25)'

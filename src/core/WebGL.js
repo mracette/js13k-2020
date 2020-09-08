@@ -62,33 +62,8 @@ class m4 {
 export class WebGL {
   constructor(gl) {
     this.gl = gl;
-
-    const vertexShaderSrc = `
-    attribute vec4 a_position;
-    attribute vec2 a_texcoord;
-    
-    uniform mat4 u_matrix;
-    
-    varying vec2 v_texcoord;
-    
-    void main() {
-       gl_Position = u_matrix * a_position;
-       v_texcoord = a_texcoord;
-    }
-    `;
-
-    const fragmentShaderSrc = `
-    precision mediump float;
-              
-    varying vec2 v_texcoord;
-    
-    uniform sampler2D u_texture;
-    
-    void main() {
-       gl_FragColor = texture2D(u_texture, v_texcoord);
-    }
-    `;
-
+    const vertexShaderSrc = `attribute vec4 a_position;attribute vec2 a_texcoord;uniform mat4 u_matrix;varying vec2 v_texcoord;void main() {gl_Position = u_matrix * a_position;v_texcoord = a_texcoord;}`;
+    const fragmentShaderSrc = `precision mediump float;varying vec2 v_texcoord;uniform sampler2D u_texture;void main(){gl_FragColor=texture2D(u_texture, v_texcoord);}`;
     const vertShaderObj = gl.createShader(gl.VERTEX_SHADER);
     const fragShaderObj = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(vertShaderObj, vertexShaderSrc);
@@ -132,6 +107,13 @@ export class WebGL {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   }
 
+  clear() {
+    const gl = this.gl;
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(0.1, 0.1, 0.15, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  }
+
   createTexture(image) {
     const gl = this.gl;
     var tex = gl.createTexture();
@@ -172,6 +154,8 @@ export class WebGL {
 
     // Tell WebGL how to convert from clip space to pixels
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    // gl.clearColor(0, 0, 0, 1);
+    // gl.clear(gl.COLOR_BUFFER_BIT);
 
     const { texture, width, height } = textureInfo;
 

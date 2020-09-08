@@ -1,25 +1,26 @@
 import { G } from '../globals';
-import { rotatePoint } from '../utils/math';
+import { rotatePoint, PI, TAU } from '../utils/math';
 import { Vector3 } from '../core/Vector3';
-import { Mesh } from '../core/Mesh';
-import { Group } from '../core/Group';
-import * as geos from '../entities/geometries';
-import * as styles from '../entities/styles';
+import { make } from '../entities/generators';
 
 export class Player {
   constructor() {
     // this is a "virtual" position, because the mesh will always be at the center of the screen
-    this.position = new Vector3(-8, -8, 0);
-    this.prevPosition = null;
+    this.position = new Vector3(-28, -28, 0);
+    // this.position = new Vector3(-8, -8, 0);
 
     // identifies actions in the queue
     this._actionId = 0;
+
     // the action that will be triggered by space bar
     this.currentAction = 'beam';
-    // if an action has been triggered by not added to the action list
+
+    // if an action has been triggered but not added to the action list
     this.currentActionTriggered = false;
+
     // the current list of active actions
     this.currentActions = [];
+
     // these control animations and gameplay
     this.actionParams = {
       beamDuration: 500,
@@ -35,83 +36,32 @@ export class Player {
     this._faceOffset = 0.1;
     this.isMoving = false;
 
-    // draw order for face placement
-    this.drawOrderForwards = [
-      'player-shadow',
-      'player-face',
-      'player-ring-back',
-      'player-body',
-      'player-ring-front'
-    ];
-    this.drawOrderBackwards = [
-      'player-shadow',
-      'player-ring-back',
-      'player-body',
-      'player-ring-front',
-      'player-face'
-    ];
-
     // the action group + meshes
     this.mesh = this._initMesh();
   }
 
   _initMesh() {
-    const shadow = new Mesh(geos.shadow, {
-      uid: 'player-shadow',
-      style: [styles.transparentBlack, styles.clearLine]
-    });
-    const body = new Mesh(geos.playerBody, {
-      uid: 'player-body',
-      style: styles.purple1
-    });
-    this.face = new Mesh(geos.playerFace, {
-      uid: 'player-face',
-      style: styles.magnolia,
-      position: new Vector3(0.5, 0.5, 0),
-      cacheEnabled: false
-    });
-    const ringFront = new Mesh(geos.playerRingFront, {
-      uid: 'player-ring-front',
-      style: [styles.green1]
-    });
-    const ringBack = new Mesh(geos.playerRingBack, {
-      uid: 'player-ring-back',
-      style: [styles.green1]
-    });
-    return new Group([shadow, ringBack, body, ringFront, this.face], {
-      uid: 'player-group',
-      position: this.position
-    });
-  }
-
-  getNeighborMapCoords() {
-    return [
-      Math.round(this.position.x - 1),
-      Math.round(-1 * this.position.y - 3),
-      Math.round(this.position.x + 1),
-      Math.round(-1 * this.position.y + 3)
-    ];
+    this.face = make.playerFace();
+    return make.player({ position: this.position });
   }
 
   updateRotation(anchor, current, delta) {
     let diff = anchor - current;
-    if (diff > Math.PI) {
-      diff = anchor - Math.PI * 2 - current;
-    } else if (diff < -Math.PI) {
-      diff = anchor + Math.PI * 2 - current;
+    if (diff > PI) {
+      diff = anchor - TAU - current;
+    } else if (diff < -PI) {
+      diff = anchor + TAU - current;
     }
     const next = current + diff * delta;
-    const quad = Math.abs((next / (Math.PI * 2)) % 1);
-    if (quad > 0.36 && quad < 0.64) {
-      this.mesh.drawOrder = this.drawOrderForwards;
-    } else {
-      this.mesh.drawOrder = this.drawOrderBackwards;
-    }
+    const quad = Math.abs((next / TAU) % 1);
+    quad > 0.36 && quad < 0.64
+      ? (this.orientation = 'up')
+      : (this.orientation = 'down');
     return next;
   }
 
   checkForActions(time) {
-    // check for a new action
+    // check for a *new* action
     if (this.currentActionTriggered) {
       this.initiateAction(this.currentAction, time);
       this.currentActionTriggered = false;
@@ -123,7 +73,7 @@ export class Player {
   updateActions(time) {
     // animate actions if necessary
     if (this.currentActions.length) {
-      // save context state
+      // save context state prior to each animatino
       G.CTX.save();
       for (let i = 0; i < this.currentActions.length; i++) {
         this.animateAction(time, this.currentActions[i]);
@@ -156,37 +106,42 @@ export class Player {
     let deltaY = 0;
     let direction = 0;
 
-    if (this.moveForward && this.moveLeft) {
-      deltaX = -delta;
-      direction = (3 * Math.PI) / 4;
-    } else if (this.moveForward && this.moveRight) {
-      deltaY = -delta;
-      direction = (5 * Math.PI) / 4;
+    if (this.moveLeft && !this.moveRight) {
+      if (this.moveForward) {
+        deltaX = -delta;
+        direction = (3 * PI) / 4;
+      } else if (this.moveBackward) {
+        deltaY = delta;
+        direction = PI / 4;
+      } else {
+        deltaX = -delta / 2;
+        deltaY = delta / 2;
+        direction = PI / 2;
+      }
+    } else if (this.moveRight && !this.moveLeft) {
+      if (this.moveForward) {
+        deltaY = -delta;
+        direction = (5 * PI) / 4;
+      } else if (this.moveBackward) {
+        deltaX = delta;
+        direction = (7 * PI) / 4;
+      } else {
+        deltaX = +delta / 2;
+        deltaY = -delta / 2;
+        direction = -PI / 2;
+      }
     } else if (this.moveForward && !this.moveBackward) {
       deltaX = -delta;
       deltaY = -delta;
-      direction = Math.PI;
-    } else if (this.moveBackward && this.moveLeft) {
-      deltaY = delta;
-      direction = Math.PI / 4;
-    } else if (this.moveBackward && this.moveRight) {
-      deltaX = delta;
-      direction = (7 * Math.PI) / 4;
+      direction = PI;
     } else if (this.moveBackward && !this.moveForward) {
       deltaX = delta;
       deltaY = delta;
-      direction = 2 * Math.PI;
-    } else if (this.moveLeft && !this.moveRight) {
-      deltaX = -delta / 2;
-      deltaY = delta / 2;
-      direction = Math.PI / 2;
-    } else if (this.moveRight && !this.moveLeft) {
-      deltaX = +delta / 2;
-      deltaY = -delta / 2;
-      direction = -Math.PI / 2;
+      direction = 2 * PI;
     }
 
     [deltaX, deltaY] = this.adjustForBlocking(deltaX, deltaY);
+
     const needsUpdate = deltaX !== 0 || deltaY !== 0;
 
     if (needsUpdate) {
@@ -204,6 +159,7 @@ export class Player {
       this.face.position.y =
         0.5 + this._faceOffset * Math.sin(Math.PI / 4 + this.face.rotation.z);
     }
+
     return needsUpdate;
   }
 
@@ -286,20 +242,10 @@ export class Player {
       const cx = c.x;
       const cy = c.y;
       const px = cx + this.actionParams.beamLength;
-      const p1 = rotatePoint(
-        px,
-        cy,
-        cx,
-        cy,
-        this.face.rotation.z + Math.PI / 2 + this.actionParams.beamRadius / 2
-      );
-      const p2 = rotatePoint(
-        px,
-        cy,
-        cx,
-        cy,
-        this.face.rotation.z + Math.PI / 2 - this.actionParams.beamRadius / 2
-      );
+      const baseRot = this.face.rotation.z + PI / 2;
+      const addRot = this.actionParams.beamRadius / 2;
+      const p1 = rotatePoint(px, cy, cx, cy, baseRot + addRot);
+      const p2 = rotatePoint(px, cy, cx, cy, baseRot - addRot);
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(p1.x, p1.y);

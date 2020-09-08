@@ -34,6 +34,8 @@ export const playerRingBack = new BlenderGeometry(playerRingBackConfig);
 export const playerBody = new BlenderGeometry(playerBodyConfig);
 export const playerFace = new BlenderGeometry(playerFaceConfig);
 export const shadow = new BlenderGeometry(shadowConfig);
-export const starfish = new BlenderGeometry(starfishConfig);
-export const shell = new BlenderGeometry(shellConfig);
+export const starfish = new BlenderGeometry(starfishConfig, {
+  name: 'starfish'
+});
+export const shell = new BlenderGeometry(shellConfig, { name: 'shell' });
 export const enemy1 = new BlenderGeometry(enemy1Config);

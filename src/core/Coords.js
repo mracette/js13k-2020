@@ -14,7 +14,7 @@ export class CanvasCoordinates {
 
   width(n) {
     let w = this._baseWidth;
-    if (typeof n !== 'undefined') {
+    if (n) {
       return w * n;
     }
     return w;
@@ -22,14 +22,14 @@ export class CanvasCoordinates {
 
   height(n) {
     let h = this._baseHeight;
-    if (typeof n !== 'undefined') {
+    if (n) {
       return h * n;
     }
     return h;
   }
 
-  resize() {
-    this._baseWidth = this.baseWidth || this.canvas.width;
-    this._baseHeight = this.baseHeight || this.canvas.height;
-  }
+  // resize() {
+  //   this._baseWidth = this.baseWidth || this.canvas.width;
+  //   this._baseHeight = this.baseHeight || this.canvas.height;
+  // }
 }

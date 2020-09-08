@@ -35,9 +35,8 @@ export default {
                 'box',
                 'enemy1',
                 // protect the note types!
-                'quarter',
-                'eighth',
-                'triplet'
+                'q',
+                'e'
               ]
             }
           }

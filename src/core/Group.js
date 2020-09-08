@@ -7,10 +7,8 @@ export class Group extends Entity {
     super(opts);
     const defaults = {
       type: 'group',
-      autoCache: true,
       style: null,
-      children: [],
-      drawOrder: []
+      children: []
     };
     Object.assign(this, { ...defaults, ...opts });
     children && this.add(children);
@@ -28,51 +26,39 @@ export class Group extends Entity {
     }
   }
 
-  remove(object) {
-    let index = null;
-    let count = 0;
-    while (index === null && count < this.children.length) {
-      if (this.children[index].uid === object.uid) {
-        index = count;
-      } else {
-        count++;
-      }
-    }
-    if (index !== null) {
-      this.children.splice(index, 1);
-    }
-  }
+  // remove(object) {
+  //   let index = null;
+  //   let count = 0;
+  //   while (index === null && count < this.children.length) {
+  //     if (this.children[index].uid === object.uid) {
+  //       index = count;
+  //     } else {
+  //       count++;
+  //     }
+  //   }
+  //   if (index !== null) {
+  //     this.children.splice(index, 1);
+  //   }
+  // }
 
-  getChild(uid, children = null, recursive = false) {
-    const list = children || this.children;
-    for (let i = 0; i < list.length; i++) {
-      const child = list[i];
-      if (child.uid === uid) {
-        return child;
-      }
-      if (recursive && child.children && child.children.length) {
-        return this.getChild(child.children);
-      }
-    }
-  }
+  // getChild(uid, children = null, recursive = false) {
+  //   const list = children || this.children;
+  //   for (let i = 0; i < list.length; i++) {
+  //     const child = list[i];
+  //     if (child.uid === uid) {
+  //       return child;
+  //     }
+  //     if (recursive && child.children && child.children.length) {
+  //       return this.getChild(child.children);
+  //     }
+  //   }
+  // }
 
   render(camera, ctx, iso = G.ISO) {
     if (this.enabled || this.needsUpdate) {
       ctx.save();
       this.applyAllStyles(ctx);
-      if (this.drawOrder.length) {
-        this.drawOrder.forEach((uid) => {
-          const child = this.getChild(uid);
-          child.render(camera, ctx, iso);
-        });
-        this.children.forEach((child) => {
-          if (this.drawOrder.length && !this.drawOrder.includes(child.uid)) {
-            child.render(camera, ctx, iso);
-          }
-        });
-      } else {
-        this.children.forEach((child) => child.render(camera, ctx, iso));
-      }
+      this.children.forEach((child) => child.render(camera, ctx, iso));
       ctx.restore();
     }
   }

@@ -1,6 +1,7 @@
 import { G } from '../globals';
 import { Vector3 } from '../core/Vector3';
 import { globalStyles } from '../entities/styles';
+import { RAND } from '../utils/math';
 import { make } from '../entities/generators';
 
 export class Map {
@@ -96,9 +97,13 @@ export class Map {
   }
 
   _initEntityOnGrid(row, col) {
-    const rand = Math.random();
+    const rand = RAND();
     const [x, y] = this.getTileFromGrid(row, col);
     const position = new Vector3(x, y, 0);
+
+    // if ((row === 15 || row === 16) && (col === 16 || col === 17)) {
+    //   return this._initEntity('sand', { position }, false);
+    // }
 
     /* THE BEACH */
     if (row <= 15) return this._initEntity('water', { position }, true);
@@ -113,15 +118,8 @@ export class Map {
       return this._initEntity('rock', { position }, true);
 
     /* THE TOWN */
-    // inn
     if (row === 53 && col === 13)
-      return this._initEntity('box', { position }, true);
-    if (row === 53 && col === 12)
-      return this._initEntity(
-        'box',
-        { position, scale: new Vector3(2, 2, 2) },
-        true
-      );
+      return this._initEntity('inn', { position }, true);
     if (row <= 56 && col > 1 && col <= this.width - 3)
       return this._initEntity('field', { position }, false);
     if (row <= 60 && (col < 14 || col > 16))

@@ -1,9 +1,8 @@
-import { Vector3 } from './core/Vector3';
 import { Map } from './state/world';
 import { Player } from './state/player';
 import { Camera } from './core/Camera';
 import { initDom } from './setup/dom';
-import { baseLine } from './entities/styles';
+// import { baseLine } from './entities/styles';
 // import { renderTileCoords } from './utils/screen';
 import {
   G,
@@ -41,22 +40,9 @@ const postProcess = () => {
   G.POST_CTX.fillRect(...args);
 };
 
-let prevTileX = null;
-let prevTileY = null;
-const drawTileGroup = (time, clear = false) => {
-  // centers the tiles around the player
-  const newTileX = Math.floor(G.PLAYER.position.x);
-  const newTileY = Math.ceil(G.PLAYER.position.y);
-  if (newTileX !== prevTileX || newTileY !== prevTileY) {
-    G.MAP.getEntity('tileGroup').position.x = newTileX;
-    G.MAP.getEntity('tileGroup').position.y = newTileY;
-    G.MAP.getEntity('tileGroup').render(G.CAMERA, G.CTX);
-  }
-};
-
-const drawWorld = (time, clear = true) => {
-  clear && G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
-  drawTileGroup();
+const drawWorld = (time) => {
+  G.WEBGL.clear();
+  G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
   G.PLAYER.updateActions(time);
   // identify the players position on the map to only render a certain area around them
   let px = Math.floor(G.PLAYER.mesh.position.x);
@@ -75,34 +61,17 @@ const drawWorld = (time, clear = true) => {
       // entity && entity.entity.render(G.CAMERA, G.CTX);
       if (entity) {
         entity.entity.render(G.CAMERA, G.CTX);
-        // G.CTX.textAlign = 'center';
-        // G.CTX.textBaseline = 'middle';
-        // G.CTX.fillStyle = 'white';
-        // G.CTX.font = `15px sans-serif`;
-        // const point = new Vector3(
-        //   entity.entity.position.x,
-        //   entity.entity.position.y,
-        //   0
-        // );
-        // G.CAMERA.mapToScreen(point);
-        // console.log(
-        //   new Vector3(
-        //     entity.entity.position.x - 0.5,
-        //     entity.entity.position.y - 0.5,
-        //     0
-        //   )
-        // );
-        // G.CTX.fillText(i + ', ' + j, point.x, point.y);
       }
       // render the player in between other objects in the grid for proper overlap
       if (i === gpr && j === gpc) {
+        G.PLAYER.face.render(G.CAMERA, G.CTX);
         G.PLAYER.mesh.render(G.CAMERA, G.CTX);
       }
     }
   }
 };
 
-const animate = (time, clear = true) => {
+const animate = (time) => {
   G.AUDIO.update(time);
   // stats.begin();
   G.CURRENT_TIME = time;
