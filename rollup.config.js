@@ -15,6 +15,9 @@ export default {
       name: 'bundle',
       plugins: [
         terser({
+          compress: {
+            unsafe: true
+          },
           mangle: {
             toplevel: true,
             properties: {
@@ -34,9 +37,10 @@ export default {
                 'field',
                 'box',
                 'enemy1',
-                // protect the note types!
-                'q',
-                'e'
+                'inn'
+                // // protect the note types!
+                // 'q',
+                // 'e'
               ]
             }
           }

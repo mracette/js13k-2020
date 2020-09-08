@@ -1,9 +1,9 @@
-import { boundedSin, RAND } from '../utils/math';
+import { boundedSin, RAND, F32 } from '../utils/math';
 
 const generateNoise = (audioCtx) => {
   const samples = 5 * audioCtx.sampleRate;
-  const lBuffer = new Float32Array(samples);
-  const rBuffer = new Float32Array(samples);
+  const lBuffer = F32(samples);
+  const rBuffer = F32(samples);
   for (let i = 0; i < samples; i++) {
     lBuffer[i] = 1 - 2 * RAND();
     rBuffer[i] = 1 - 2 * RAND();
@@ -23,9 +23,6 @@ export class GameAudio {
     const props = {
       audioStartTime: null,
       state: 'stopped',
-      noteTypes: ['q', 'e'],
-      noteType: 1,
-      previousNote: null,
       audioCtx,
       sampleRate: audioCtx.sampleRate,
       bps,
@@ -41,13 +38,13 @@ export class GameAudio {
       sustain: 0.03,
       sustainAmount: 0.75,
       release: 0.08,
-      filterMin: 90,
-      filterMax: 900,
       reverbTime: 3.5,
       premasterFilterFreq: boundedSin(32 * bps, 350, 6500, 8 * bps),
       premaster: audioCtx.createGain(),
       premasterFilter: audioCtx.createBiquadFilter(),
-      filter: audioCtx.createBiquadFilter(),
+      envFilter: audioCtx.createBiquadFilter(),
+      envFilterMin: 90,
+      envFilterMax: 900,
       square: audioCtx.createOscillator(),
       squareEnv: audioCtx.createGain(),
       sine: audioCtx.createOscillator(),
@@ -68,15 +65,15 @@ export class GameAudio {
     this.renderReverbTail(5).then((buffer) => (this.reverb.buffer = buffer));
     this.reverb.connect(this.premaster);
 
-    this.filter.type = 'lowpass';
-    this.filter.Q.value = 2.7;
-    this.filter.connect(this.reverb);
+    this.envFilter.type = 'lowpass';
+    this.envFilter.Q.value = 2.7;
+    this.envFilter.connect(this.reverb);
 
     // square setup
     this.square.type = 'square';
     this.squareEnv.gain.value = 0;
     this.square.connect(this.squareEnv);
-    this.squareEnv.connect(this.filter);
+    this.squareEnv.connect(this.envFilter);
 
     // sine setup
     this.sine.type = 'sine';
@@ -157,20 +154,13 @@ export class GameAudio {
     switch (type) {
       case 'square':
         this.square.frequency.value = note;
+        this.applyEnvelop(time, this.squareEnv, 'gain', 0, 1, 0.25);
         this.applyEnvelop(
           time,
-          this.squareEnv,
-          'gain',
-          0,
-          1 - RAND() / 4,
-          0.25 + RAND() / 2
-        );
-        this.applyEnvelop(
-          time,
-          this.filter,
+          this.envFilter,
           'frequency',
-          this.filterMin,
-          this.filterMax
+          this.envFilterMin,
+          this.envFilterMax
         );
         break;
       case 'sine':
@@ -233,18 +223,21 @@ export class GameAudio {
       }
       // change note types every bar
       if (divisions.measure !== this.previousMeasure) {
-        this.noteType = this.noteTypes[
-          Math.floor(RAND() * this.noteTypes.length)
-        ];
+        this.noteRand = RAND();
         this.previousMeasure = divisions.measure;
       }
-      // trigger square on every noteType division
-      const noteIndex = divisions[this.noteType];
-      if (this.previousNote !== noteIndex) {
+      // trigger square on every division
+      let squareNote;
+      if (this.noteRand < 0.5) {
+        squareNote = divisions.q;
+      } else {
+        squareNote = divisions.e;
+      }
+      if (squareNote && this.previousNote !== squareNote) {
         const modeIndex = this.measures[divisions.twoMeasures % 8];
         const mode = this.modes[modeIndex];
         this.trigger(mode[Math.floor(RAND() * mode.length)], 'square');
-        this.previousNote = noteIndex;
+        this.previousNote = squareNote;
       }
     }
   }

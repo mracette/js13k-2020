@@ -5,9 +5,14 @@ import pprint
 import math
 
 # blender /Users/markracette/Drive/Dev/blender/projects/js13k/2020/grass.blend --background --python /Users/markracette/Drive/Dev/projects/js13k/2020/blender/export.py
-OBJECT_NAMES = ['rock']
+# OBJECT_NAMES = ['rock']
+OBJECT_NAMES = 'all'
 BLENDER_PROJECT_PATH = "/Users/markracette/Drive/Dev/blender/projects/js13k/2020/grass.blend"
 SAVE_PATH = "/Users/markracette/Drive/Dev/projects/js13k/2020/src/entities/geometries"
+
+if OBJECT_NAMES == 'all':
+    OBJECT_NAMES = [name[:name.find('.')] for name in os.listdir(SAVE_PATH)]
+    print(OBJECT_NAMES)
 
 for name in OBJECT_NAMES:
 

@@ -67,15 +67,17 @@ export class Map {
 
   cacheEntities() {
     const promises = [];
-    Object.entries(make).forEach((generator) => {
-      const entityName = generator[0];
-      const entity = generator[1]();
-      globalStyles.add(entity);
-      this._entities[entityName] = entity;
-      if (entity.type === 'mesh') {
-        promises.push(entity.cache());
-      }
-    });
+    if (G.CACHE) {
+      Object.entries(make).forEach((generator) => {
+        const entityName = generator[0];
+        const entity = generator[1]();
+        globalStyles.add(entity);
+        this._entities[entityName] = entity;
+        if (entity.type === 'mesh') {
+          promises.push(entity.cache());
+        }
+      });
+    }
     return Promise.all(promises);
   }
 

@@ -1,9 +1,11 @@
+import { F32 } from '../utils/math';
+
 // adapted from https://webglfundamentals.org/webgl/lessons/webgl-2d-drawimage.html
 
 class m4 {
   constructor() {}
   static orthographic(left, right, bottom, top, near, far, dst) {
-    dst = dst || new Float32Array(16).fill(0);
+    dst = dst || F32(16).fill(0);
     dst[0] = 2 / (right - left);
     dst[5] = 2 / (top - bottom);
     dst[10] = 2 / (near - far);
@@ -14,7 +16,7 @@ class m4 {
     return dst;
   }
   static scale(m, sx, sy, sz, dst) {
-    dst = dst || new Float32Array(16);
+    dst = dst || F32(16);
     dst[0] = sx * m[0 * 4 + 0];
     dst[1] = sx * m[0 * 4 + 1];
     dst[2] = sx * m[0 * 4 + 2];
@@ -36,7 +38,7 @@ class m4 {
     return dst;
   }
   static translate(m, tx, ty, tz, dst) {
-    dst = new Float32Array(16);
+    dst = F32(16);
     if (m !== dst) {
       dst[0] = m[0];
       dst[1] = m[1];
@@ -92,7 +94,7 @@ export class WebGL {
 
     // Put a unit quad in the buffer
     var positions = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, F32(positions), gl.STATIC_DRAW);
 
     // Create a buffer for texture coords
     this.texcoordBuffer = gl.createBuffer();
@@ -100,7 +102,7 @@ export class WebGL {
 
     // Put texcoords in the buffer
     var texcoords = [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texcoords), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, F32(texcoords), gl.STATIC_DRAW);
 
     // enable alpha
     gl.enable(gl.BLEND);

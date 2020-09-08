@@ -17,8 +17,7 @@ export const G = {
  */
 
 export const addScreenIndependentGlobals = (G) => {
-  G.ISO = true;
-  G.CACHE = true;
+  G.CACHE = false;
   G.USE_WEBGL = true;
   G.SUPPORTS_OFFSCREEN =
     typeof OffscreenCanvasRenderingContext2D === 'function';

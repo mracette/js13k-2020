@@ -2,9 +2,9 @@ import { BlenderGeometry } from '../core/Geometry';
 
 import boxConfig from './geometries/box.json';
 import squareConfig from './geometries/square.json';
-import tree1Config from './geometries/tree_1.json';
-import tree2Config from './geometries/tree_2.json';
-import tree3Config from './geometries/tree_3.json';
+import tree1Config from './geometries/tree1.json';
+import tree2Config from './geometries/tree2.json';
+import tree3Config from './geometries/tree3.json';
 import trunkConfig from './geometries/trunk.json';
 import rockConfig from './geometries/rock.json';
 import bushConfig from './geometries/bush.json';
@@ -19,9 +19,9 @@ import starfishConfig from './geometries/starfish.json';
 import shellConfig from './geometries/shell.json';
 import enemy1Config from './geometries/enemy1.json';
 
-export const tree1 = new BlenderGeometry(tree1Config, { name: 'tree_1' });
-export const tree2 = new BlenderGeometry(tree2Config, { name: 'tree_2' });
-export const tree3 = new BlenderGeometry(tree3Config, { name: 'tree_3' });
+export const tree1 = new BlenderGeometry(tree1Config, { name: 'tree1' });
+export const tree2 = new BlenderGeometry(tree2Config, { name: 'tree2' });
+export const tree3 = new BlenderGeometry(tree3Config, { name: 'tree3' });
 export const trunk = new BlenderGeometry(trunkConfig, { name: 'trunk' });
 export const box = new BlenderGeometry(boxConfig, { name: 'box' });
 export const square = new BlenderGeometry(squareConfig, { name: 'square' });
