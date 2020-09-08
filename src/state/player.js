@@ -41,8 +41,9 @@ export class Player {
   }
 
   _initMesh() {
-    this.face = make.playerFace();
-    return make.player({ position: this.position });
+    const player = make.player({ position: this.position });
+    this.face = player.children[1];
+    return player;
   }
 
   updateRotation(anchor, current, delta) {

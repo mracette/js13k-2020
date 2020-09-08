@@ -1,7 +1,7 @@
 import { G } from '../globals';
 import { Vector3 } from '../core/Vector3';
 import { globalStyles } from '../entities/styles';
-import { RAND } from '../utils/math';
+import { RAND } from '../utils/functions';
 import { make } from '../entities/generators';
 
 export class Map {

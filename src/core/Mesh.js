@@ -40,7 +40,24 @@ export class Mesh extends Entity {
     return position;
   }
 
+  async generateImage(offscreen) {
+    // safari workaround
+    return new Promise((resolve) => {
+      const image = new Image();
+      image.addEventListener(
+        'load',
+        () => {
+          resolve(image);
+        },
+        false
+      );
+      const dataURL = offscreen.toDataURL();
+      image.src = dataURL;
+    });
+  }
+
   async cache(camera = G.CAMERA) {
+    if (!this.cacheEnabled) return;
     const key = this.getKey();
 
     // get the projection, and update the bounding box
@@ -62,59 +79,49 @@ export class Mesh extends Entity {
     // draw the projection to the canvas
     camera.drawFaces(facesAndNormals, offscreenCtx, this.box);
 
+    let image;
     // render the bitmap
-    const image = await createImageBitmap(
-      offscreen,
-      0,
-      0,
-      offscreen.width,
-      offscreen.height
-    );
-    const texture = G.WEBGL.createTexture(image);
-    if (G.USE_WEBGL) {
-      camera.setCache(key, texture);
+    if (G.SUPPORTS_BITMAP) {
+      image = await createImageBitmap(
+        offscreen,
+        0,
+        0,
+        offscreen.width,
+        offscreen.height
+      );
     } else {
-      camera.setCache(key, image);
+      image = await this.generateImage(offscreen);
     }
 
-    // garbage collect
+    camera.setCache(key, image);
     offscreen = null;
     offscreenCtx = null;
+
     return key;
   }
 
   render(camera, ctx) {
-    if (this.enabled || this.needsUpdate) {
-      ctx.save();
-      // check if cache is supported
-      if (G.CACHE && this.cacheEnabled) {
-        // check if the image is in the cache
-        const cache = camera.getCache(this.getKey());
-        if (cache) {
-          // write from cache
-          const position = this.getProjectedPosition(camera);
-          // draw from cache
-          if (G.USE_WEBGL) {
-            G.WEBGL.drawImage(
-              cache,
-              position.x - cache.width / 2,
-              position.y - cache.height
-            );
-          } else {
-            ctx.drawImage(
-              cache,
-              position.x - cache.width / 2,
-              position.y - cache.height
-            );
-          }
-        }
-      } else {
-        // cpu render
-        this.applyAllStyles(ctx);
-        const faces = camera.project(this);
-        camera.drawFaces(faces, ctx, false);
+    ctx.save();
+    // check if cache is supported
+    if (G.CACHE && this.cacheEnabled) {
+      // check if the image is in the cache
+      const cache = camera.getCache(this.getKey());
+      if (cache) {
+        // write from cache
+        const position = this.getProjectedPosition(camera);
+        // draw from cache
+        ctx.drawImage(
+          cache,
+          position.x - cache.width / 2,
+          position.y - cache.height
+        );
       }
-      ctx.restore();
+    } else {
+      // cpu render
+      this.applyAllStyles(ctx);
+      const faces = camera.project(this);
+      camera.drawFaces(faces, ctx, false);
     }
+    ctx.restore();
   }
 }

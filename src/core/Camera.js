@@ -168,7 +168,7 @@ export class Camera extends Entity {
 
   drawFaces(faces, ctx, box = false, opts = {}) {
     const fill = opts.fill || true;
-    const stroke = opts.stroke || false;
+    const stroke = opts.stroke || true;
     const shade = opts.shade || true;
     const xAdj = box ? -1 * box[0] : 0;
     const yAdj = box ? -1 * box[1] : 0;

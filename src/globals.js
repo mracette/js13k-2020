@@ -1,6 +1,6 @@
 import { GameAudio } from './core/GameAudio';
 import { CanvasCoordinates } from './core/Coords';
-import { WebGL } from './core/WebGL';
+import { getElement } from './utils/functions';
 
 /**
  * @type {object} a single global object which other global values attach to
@@ -17,15 +17,14 @@ export const G = {
  */
 
 export const addScreenIndependentGlobals = (G) => {
-  G.CACHE = false;
-  G.USE_WEBGL = true;
+  G.CACHE = true;
   G.SUPPORTS_OFFSCREEN =
     typeof OffscreenCanvasRenderingContext2D === 'function';
+  G.SUPPORTS_BITMAP = typeof createImageBitmap === 'function';
   G.DOM = {
-    CANVAS: document.getElementById('viz'),
-    WEBGL_CANVAS: document.getElementById('webgl'),
-    POST_CANVAS: document.getElementById('post'),
-    ROOT: document.getElementById('root'),
+    CANVAS: getElement('viz'),
+    POST_CANVAS: getElement('post'),
+    ROOT: getElement('root'),
     BODY: document.body,
     HTML: document.documentElement
   };
@@ -35,12 +34,6 @@ export const addScreenIndependentGlobals = (G) => {
     // imageSmoothingEnabled: true
   });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
-  G.WEBGL_CTX = G.DOM.WEBGL_CANVAS.getContext('webgl', {
-    alpha: true,
-    premultipliedAlpha: false,
-    antialias: false
-  });
-  G.WEBGL = new WebGL(G.WEBGL_CTX);
   G.BOTTOM_SCREEN_BUFFER = 8;
   G.ANIMATION_FRAME;
   G.CURRENT_TIME;

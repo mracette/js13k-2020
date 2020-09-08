@@ -1,18 +1,5 @@
-import { boundedSin, RAND, F32 } from '../utils/math';
-
-const generateNoise = (audioCtx) => {
-  const samples = 5 * audioCtx.sampleRate;
-  const lBuffer = F32(samples);
-  const rBuffer = F32(samples);
-  for (let i = 0; i < samples; i++) {
-    lBuffer[i] = 1 - 2 * RAND();
-    rBuffer[i] = 1 - 2 * RAND();
-  }
-  const buffer = audioCtx.createBuffer(2, samples, audioCtx.sampleRate);
-  buffer.copyToChannel(lBuffer, 0);
-  buffer.copyToChannel(rBuffer, 1);
-  return buffer;
-};
+import { boundedSin } from '../utils/math';
+import { RAND, F32 } from '../utils/functions';
 
 export class GameAudio {
   constructor() {
@@ -38,7 +25,7 @@ export class GameAudio {
       sustain: 0.03,
       sustainAmount: 0.75,
       release: 0.08,
-      reverbTime: 3.5,
+      reverbTime: 2,
       premasterFilterFreq: boundedSin(32 * bps, 350, 6500, 8 * bps),
       premaster: audioCtx.createGain(),
       premasterFilter: audioCtx.createBiquadFilter(),
@@ -61,9 +48,10 @@ export class GameAudio {
     this.premaster.connect(this.premasterFilter);
     this.premaster.gain.value = 0.5;
 
-    this.reverb.normalize = true;
-    this.renderReverbTail(5).then((buffer) => (this.reverb.buffer = buffer));
-    this.reverb.connect(this.premaster);
+    this.renderReverbTail((buffer) => {
+      this.reverb.buffer = buffer;
+      this.reverb.connect(this.premaster);
+    });
 
     this.envFilter.type = 'lowpass';
     this.envFilter.Q.value = 2.7;
@@ -80,6 +68,10 @@ export class GameAudio {
     this.sineEnv.gain.value = 0;
     this.sine.connect(this.sineEnv);
     this.sineEnv.connect(this.premaster);
+  }
+
+  setParam(audioParam, value) {
+    audioParam.setValueAtTime(value, this.audioCtx.currentTime);
   }
 
   start() {
@@ -101,16 +93,36 @@ export class GameAudio {
     return node;
   }
 
-  renderReverbTail() {
-    const offline = new OfflineAudioContext(
+  generateNoise() {
+    const samples = this.reverbTime * this.audioCtx.sampleRate;
+    const lBuffer = F32(samples);
+    const rBuffer = F32(samples);
+    for (let i = 0; i < samples; i++) {
+      lBuffer[i] = 1 - 2 * RAND();
+      rBuffer[i] = 1 - 2 * RAND();
+    }
+    const buffer = this.audioCtx.createBuffer(
+      2,
+      samples,
+      this.audioCtx.sampleRate
+    );
+    buffer.getChannelData(0).set(lBuffer);
+    buffer.getChannelData(1).set(rBuffer);
+    return buffer;
+  }
+
+  renderReverbTail(callback) {
+    const offline = new (window.OfflineAudioContext ||
+      window.webkitOfflineAudioContext)(
       2,
       this.sampleRate * this.reverbTime,
       this.sampleRate
     );
 
     const envelope = offline.createGain();
-    envelope.gain.exponentialRampToValueAtTime(0.00001, this.reverbTime);
     envelope.connect(offline.destination);
+    envelope.gain.setValueAtTime(1, 0);
+    envelope.gain.linearRampToValueAtTime(0, this.reverbTime);
 
     const tailLPFilter = this.createFilter(offline, 'lowpass', 5000, envelope);
     const tailHPFilter = this.createFilter(
@@ -120,13 +132,16 @@ export class GameAudio {
       tailLPFilter
     );
 
-    const noise = generateNoise(this.audioCtx);
     const noiseSource = offline.createBufferSource();
-    noiseSource.buffer = noise;
+    noiseSource.buffer = this.generateNoise();
     noiseSource.connect(tailHPFilter);
     noiseSource.start();
+    offline.startRendering();
 
-    return offline.startRendering();
+    offline.oncomplete = (buffer) => {
+      console.log(buffer.renderedBuffer);
+      callback(buffer.renderedBuffer);
+    };
   }
 
   intervalToHz(interval) {
@@ -149,12 +164,12 @@ export class GameAudio {
   }
 
   trigger(interval, type, opts) {
-    const note = interval ? this.intervalToHz(interval) : null;
+    const note = this.intervalToHz(interval);
     const time = this.audioCtx.currentTime;
     switch (type) {
       case 'square':
-        this.square.frequency.value = note;
-        this.applyEnvelop(time, this.squareEnv, 'gain', 0, 1, 0.25);
+        this.setParam(this.square.frequency, note);
+        this.applyEnvelop(time, this.squareEnv, 'gain', 0, 0.8, 0.25);
         this.applyEnvelop(
           time,
           this.envFilter,
@@ -164,8 +179,8 @@ export class GameAudio {
         );
         break;
       case 'sine':
-        this.sine.frequency.value = note;
-        this.applyEnvelop(time, this.sineEnv, 'gain', 0, 1, 32);
+        this.setParam(this.sine.frequency, note);
+        this.applyEnvelop(time, this.sineEnv, 'gain', 0, opts.vol || 1, 32);
         break;
       case 'noise': {
         const source = this.audioCtx.createBufferSource();
@@ -176,10 +191,10 @@ export class GameAudio {
         source.connect(wet);
         dry.connect(this.premaster);
         wet.connect(this.reverb);
-        wet.gain.value = 0.2 * opts.gain || 1;
-        dry.gain.value = 0.6 * opts.gain || 1;
-        source.detune.value = opts.detune || 0;
-        source.start(0, 0, opts.duration || 2.75);
+        this.setParam(wet.gain, 0.2 * opts.vol || 1);
+        this.setParam(dry.gain, 0.6 * opts.vol || 1);
+        this.setParam(source.playbackRate, opts.speed || 1);
+        source.start(0, 0, opts.duration);
         break;
       }
     }
@@ -190,7 +205,10 @@ export class GameAudio {
       const gameSeconds = gameTime / 1000;
       this.audioStartTime === null && (this.audioStartTime = gameSeconds);
       const elapsed = gameSeconds - this.audioStartTime;
-      this.premasterFilter.frequency.value = this.premasterFilterFreq(elapsed);
+      this.setParam(
+        this.premasterFilter.frequency,
+        this.premasterFilterFreq(elapsed)
+      );
       const divisions = {
         e: ~~(elapsed * this.bps * 2),
         t: ~~((elapsed * this.bps * 3) / 2),
@@ -202,14 +220,18 @@ export class GameAudio {
       if (this.previousQuarter !== divisions.q) {
         // "snare"
         divisions.q % 2 === 1 &&
-          this.trigger(null, 'noise', { detune: -1200, gain: 0.15 });
+          this.trigger(null, 'noise', {
+            speed: 0.5,
+            vol: 0.01
+            // duration: 3
+          });
         this.previousQuarter = divisions.q;
       }
       if (this.previousTriplet !== divisions.t) {
         // "hats"
         this.trigger(null, 'noise', {
-          detune: 2400,
-          gain: 0.2,
+          speed: 3,
+          vol: 0.2,
           duration: 0.01
         });
         this.previousTriplet = divisions.t;
@@ -218,7 +240,8 @@ export class GameAudio {
       if (this.previousHalf !== divisions.h) {
         const modeIndex = this.measures[divisions.twoMeasures % 8];
         const mode = this.modes[modeIndex];
-        this.trigger(mode[0] - 12, 'sine'); // expected to always be the bass note
+        this.trigger(mode[0] - 24, 'sine', { vol: 0.3 }); // expected to always be the bass note
+        this.trigger(mode[0] - 12, 'square', { vol: 0.3 }); // expected to always be the bass note
         this.previousHalf = divisions.h;
       }
       // change note types every bar

@@ -76,7 +76,7 @@ function runHook(args) {
   }${Math.round((100 * (bytes1 - bytes2)) / bytes1)}% |\n`;
 
   // perform adv zip and log new size
-  execSync('advzip -z -4 -i 1000 ' + COMPRESSED_BUILD_FILE);
+  execSync('advzip -z -4 -i 10000 ' + COMPRESSED_BUILD_FILE);
   const [kb3, bytes3] = getFolderSize(path.join(COMPRESSED_BUILD_FOLDER, '/*'));
   LOG_MESSAGE += `| Compressed Build (Adv Zip) | ${kb3} kb | ${bytes3} | ${
     bytes3 < bytes2 ? '-' : '+'

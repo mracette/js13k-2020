@@ -59,44 +59,37 @@ make.shell = (opts) => new Group([make.sand(), make.shellMesh()], opts);
 /* player */
 make.playerShadow = () =>
   new Mesh(geos.shadow, {
-    uid: 'player-shadow',
     style: [styles.transparentBlack, styles.clearLine]
   });
 make.playerBody = () =>
   new Mesh(geos.playerBody, {
-    uid: 'player-body',
     style: styles.purple1
   });
 make.playerFace = () =>
   new Mesh(geos.playerFace, {
-    uid: 'player-face',
     style: styles.magnolia,
     position: new Vector3(0.5, 0.5, 0),
     cacheEnabled: false
   });
 make.playerRingFront = () =>
   new Mesh(geos.playerRingFront, {
-    uid: 'player-ring-front',
     style: [styles.green1]
   });
 make.playerRingBack = () =>
   new Mesh(geos.playerRingBack, {
-    uid: 'player-ring-back',
     style: [styles.green1]
   });
+make.playerLower = () =>
+  new Group([
+    make.playerShadow(),
+    make.playerRingBack(),
+    make.playerBody(),
+    make.playerRingFront()
+  ]);
 make.player = (opts) =>
-  new Group(
-    [
-      make.playerShadow(),
-      make.playerRingBack(),
-      make.playerBody(),
-      make.playerRingFront()
-    ],
-    {
-      uid: 'player-group',
-      ...opts
-    }
-  );
+  new Group([make.playerLower(), make.playerFace()], {
+    ...opts
+  });
 
 /* town */
 make.boxOne = () =>

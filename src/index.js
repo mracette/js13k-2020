@@ -41,7 +41,6 @@ const postProcess = () => {
 };
 
 const drawWorld = (time) => {
-  G.WEBGL.clear();
   G.CTX.clearRect(0, 0, G.DOM.CANVAS.width, G.DOM.CANVAS.height);
   G.PLAYER.updateActions(time);
   // identify the players position on the map to only render a certain area around them
@@ -64,8 +63,10 @@ const drawWorld = (time) => {
       }
       // render the player in between other objects in the grid for proper overlap
       if (i === gpr && j === gpc) {
-        G.PLAYER.face.render(G.CAMERA, G.CTX);
-        G.PLAYER.mesh.render(G.CAMERA, G.CTX);
+        let order = [0, 1];
+        G.PLAYER.orientation === 'down' && (order = [1, 0]);
+        G.PLAYER.mesh.children[order[0]].render(G.CAMERA, G.CTX);
+        G.PLAYER.mesh.children[order[1]].render(G.CAMERA, G.CTX);
       }
     }
   }

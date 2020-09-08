@@ -1,9 +1,7 @@
 import { Rx, Ry, Rz } from '../core/Matrix';
 
-export const F32 = (n) => new Float32Array(n);
 export const PI = Math.PI;
 export const TAU = Math.PI * 2;
-export const RAND = () => Math.random();
 
 // TODO: cut some params here
 export const boundedSin = (

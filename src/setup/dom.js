@@ -54,7 +54,7 @@ const initRoot = () => {
 };
 
 const initCanvas = () => {
-  const canvasElements = [G.DOM.CANVAS, G.DOM.POST_CANVAS, G.DOM.WEBGL_CANVAS];
+  const canvasElements = [G.DOM.CANVAS, G.DOM.POST_CANVAS];
   const canvasStyles = [['position', 'absolute']];
   setDomStyles(canvasElements, canvasStyles);
   cinematicResize(canvasElements, G.DOM.ROOT);
