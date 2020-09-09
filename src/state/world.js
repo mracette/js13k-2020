@@ -14,12 +14,28 @@ export class Map {
     this.visibleHeight = 9;
     this.visibleWidth = 3;
     this.grid = [];
+    this.actions = [];
+    this.actionId = 0;
     this.visibleGridSizeHalf = this.getGridFromTile(
       Math.round((-1 * G.CAMERA.getVisibleMapWidth()) / 4),
       Math.round((-1 * G.CAMERA.getVisibleMapHeight()) / 4)
     );
     this._entities = {};
     this._initWorld();
+  }
+
+  addAction(action, row, col) {
+    const obj = {
+      id: this.actionId++,
+      action,
+      type: action.type
+    };
+    this.grid[row][col] = obj;
+    this.actions.push(obj);
+  }
+
+  removeAction(id) {
+    this.actions = this.actions.filter((a) => a.id !== id);
   }
 
   getEntityOnGrid(i, j) {
@@ -95,7 +111,7 @@ export class Map {
   _initEntity(name, opts, type) {
     return {
       entity: make[name](opts),
-      type
+      type: type || ''
     };
   }
 
@@ -124,9 +140,9 @@ export class Map {
       return this._initEntity('rock', { position }, 'blocks');
 
     // random grass
-    if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.03) {
-      return this._initEntity('grass', { position });
-    }
+    // if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.1) {
+    return this._initEntity('grass', { position }, 'breaks(.05)');
+    // }
 
     return null;
   }

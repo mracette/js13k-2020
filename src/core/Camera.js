@@ -165,6 +165,21 @@ export class Camera extends Entity {
       return object;
     }
   }
+  screenToMap(point) {
+    const scale = G.COORDS.height() / (this.magnification || 1);
+    point.x = (point.x - G.COORDS.nx(0)) / scale;
+    point.y = (point.y - G.COORDS.ny(0)) / (scale / 4);
+    point.z = 0;
+  }
+
+  unproject(point) {
+    this.screenToMap(point);
+    rotate3d(point, 'x', degToRad(60), true);
+    rotate3d(point, 'z', degToRad(45), true);
+    point.x += 1 * this.position.x;
+    point.y += 1 * this.position.y;
+    return point;
+  }
 
   drawFaces(faces, ctx, box = false, opts = {}) {
     const fill = opts.fill || true;

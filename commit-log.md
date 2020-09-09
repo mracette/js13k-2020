@@ -304,3 +304,12 @@
 | Compressed Build (Adv Zip) | 8.99 kb | 9206 | -7% |
 
 
+**resting and map breakthroughs** - *Tue, 08 Sep 2020 23:39:34 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 51.13 kb | 52352 | NA |
+| Build | 25.29 kb | 25893 | -51% |
+| Compressed Build | 9.63 kb | 9859 | -62% |
+| Compressed Build (Adv Zip) | 9.04 kb | 9257 | -6% |
+
+

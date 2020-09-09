@@ -2,6 +2,7 @@ import { G } from '../globals';
 import { rotatePoint, boundedSin, PI, TAU } from '../utils/math';
 import { Vector3 } from '../core/Vector3';
 import { make } from '../entities/generators';
+import { Action } from '../core/Action';
 //import { drawWorld } from '../index';
 
 export class Player {
@@ -11,10 +12,10 @@ export class Player {
     this.position = new Vector3(-8, -8, 0);
 
     // identifies actions in the queue
-    this._actionId = 0;
+    this.actionId = 0;
 
     // the action that will be triggered by space bar
-    this.currentAction = 'beam';
+    this.currentAction = 'swing';
 
     // if an action has been triggered but not added to the action list
     this.currentActionTriggered = false;
@@ -24,33 +25,37 @@ export class Player {
 
     // these control animations and gameplay
     this.actionParams = {
-      beamDuration: 500,
-      beamLength: G.COORDS.width(0.05),
-      beamRadius: Math.PI / 4,
+      swingDuration: 300,
+      swingLength: G.COORDS.width(0.05),
+      swingRadius: Math.PI / 4,
       restLength: 1000
     };
 
     // movement / rotation params
-    this._lastUpdateTime = null;
-    this._movementSpeed = 0.03;
-    this._rotationSpeed = 0.005;
-    this._movementSpeedHalf = this._movementSpeed / 2;
-    this._faceOffset = 0.1;
+    this.lastUpdateTime = null;
+    this.movementSpeed = 0.003;
+    this.rotationSpeed = 0.005;
+    this.movementSpeedHalf = this.movementSpeed / 2;
+    this.faceOffset = 0.1;
+
+    // state
     this.isMoving = false;
+    this.isSwinging = false;
+    this.isResting = false;
 
     // life
-    this._maxLife = 10;
-    this._currentLife = 9;
-    this._isResting = false;
+    this.maxLife = 10;
+    this.currentLife = 9;
     this.restSin = boundedSin(this.actionParams.restLength * 2, -5, 5);
 
     // the action group + meshes
-    this.mesh = this._initMesh();
+    this.mesh = this.initMesh();
   }
 
-  _initMesh() {
+  initMesh() {
     const player = make.player({ position: this.position });
     this.face = player.children[1];
+    this.face.rotation.z = Math.PI;
     return player;
   }
 
@@ -101,11 +106,11 @@ export class Player {
     const [i, j] = G.MAP.getGridFromTile(newX, newY);
     const entity = G.MAP.getEntityOnGrid(i, j);
     if (entity) {
-      if (entity.type === 'blocks') {
+      if (entity.type.includes('blocks')) {
         return [0, 0];
       }
-      if (entity.type === 'home' && this._currentLife !== this._maxLife) {
-        this._isResting = true;
+      if (entity.type.includes('home') && this.currentLife !== this.maxLife) {
+        this.isResting = true;
         this.initiateAction('rest', G.CURRENT_TIME);
       }
     }
@@ -113,11 +118,11 @@ export class Player {
   }
 
   updatePosition() {
-    if (this._isResting) {
+    if (this.isResting) {
       return false;
     }
-    const delta = G.TIME_DELTA * this._movementSpeed;
-    const rotDelta = G.TIME_DELTA * this._rotationSpeed;
+    const delta = G.TIME_DELTA * this.movementSpeed;
+    const rotDelta = G.TIME_DELTA * this.rotationSpeed;
 
     let deltaX = 0;
     let deltaY = 0;
@@ -172,9 +177,9 @@ export class Player {
       this.position.y += deltaY;
       // change face
       this.face.position.x =
-        0.5 + this._faceOffset * Math.cos(Math.PI / 4 + this.face.rotation.z);
+        0.5 + this.faceOffset * Math.cos(Math.PI / 4 + this.face.rotation.z);
       this.face.position.y =
-        0.5 + this._faceOffset * Math.sin(Math.PI / 4 + this.face.rotation.z);
+        0.5 + this.faceOffset * Math.sin(Math.PI / 4 + this.face.rotation.z);
     }
 
     return needsUpdate;
@@ -227,8 +232,12 @@ export class Player {
   }
 
   initiateAction(type, start) {
+    if (type === 'swing') {
+      if (this.isSwinging) return;
+      this.isSwinging = true;
+    }
     this.currentActions.push({
-      id: this._actionId++,
+      id: this.actionId++,
       type,
       start
     });
@@ -236,8 +245,8 @@ export class Player {
 
   animateAction(time, action) {
     switch (action.type) {
-      case 'beam':
-        this.animateBeam(time, action);
+      case 'swing':
+        this.animateSwing(time, action);
         break;
       case 'rest':
         this.animateRest(time, action);
@@ -255,29 +264,55 @@ export class Player {
     const delta = (time - action.start) / 5;
     if (delta > this.actionParams.restLength) {
       this.removeAction(action.id);
-      this._isResting = false;
+      this.isResting = false;
       return;
     }
     G.CAMERA.magnification = G.MAGNIFICATION - this.restSin(delta);
   }
 
-  animateBeam(time, action, ctx = G.CTX) {
-    const delta = (time - action.start) / this.actionParams.beamDuration;
+  affectedFromSwing() {}
+
+  animateSwing(time, action, ctx = G.CTX) {
+    const delta = (time - action.start) / this.actionParams.swingDuration;
     // remove the action from the queue
     if (delta > 1) {
       this.removeAction(action.id);
+      this.isSwinging = false;
     } else {
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta})`;
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta * 0.8})`;
       ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);
       const c = this.position.clone().translate(new Vector3(0.5, 0.5, 0));
       G.CAMERA.project(c);
       const cx = c.x;
       const cy = c.y;
-      const px = cx + this.actionParams.beamLength;
-      const baseRot = this.face.rotation.z + PI / 2;
-      const addRot = this.actionParams.beamRadius / 2;
-      const p1 = rotatePoint(px, cy, cx, cy, baseRot + addRot);
-      const p2 = rotatePoint(px, cy, cx, cy, baseRot - addRot);
+      const px = cx + this.actionParams.swingLength;
+      const baseRot =
+        this.face.rotation.z + PI / 2 - this.actionParams.swingRadius / 2;
+      const addRot = this.actionParams.swingRadius / 16;
+      const p1 = rotatePoint(px, cy, cx, cy, baseRot);
+      const p2 = rotatePoint(
+        px,
+        cy,
+        cx,
+        cy,
+        baseRot + delta * this.actionParams.swingRadius - addRot
+      );
+      // samples tiles between the player and the end of the swing
+      const dx = G.COORDS.nx(0) - p2.x;
+      const dy = p2.y - G.COORDS.ny(0);
+      for (let i = 0, n = 5; i <= n; i++) {
+        const check = G.CAMERA.unproject(
+          new Vector3(p2.x - dx * (i / n), p2.y - dy * (i / n), 0)
+        );
+        const [row, col] = G.MAP.getGridFromTile(
+          Math.round(check.x - 0.5),
+          Math.round(check.y - 0.5)
+        );
+        const entity = G.MAP.getEntityOnGrid(row, col);
+        if (entity && entity.type.includes('breaks')) {
+          G.MAP.addAction(new Action(time, 'grass'), row, col);
+        }
+      }
       ctx.beginPath();
       ctx.moveTo(cx, cy);
       ctx.lineTo(p1.x, p1.y);

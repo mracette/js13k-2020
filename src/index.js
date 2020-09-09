@@ -2,6 +2,7 @@ import { Map } from './state/world';
 import { Player } from './state/player';
 import { Camera } from './core/Camera';
 import { initDom } from './setup/dom';
+import { Action } from './core/Action';
 // import { baseLine } from './entities/styles';
 // import { renderTileCoords } from './utils/screen';
 import {
@@ -73,7 +74,13 @@ const drawWorld = (time) => {
       const entity = G.MAP.getEntityOnGrid(i, j);
       // entity && entity.entity.render(G.CAMERA, G.CTX);
       if (entity) {
-        entity.entity.render(G.CAMERA, G.CTX);
+        // the tile object is either a entity or an action
+        const e = entity.entity;
+        const a = entity.action;
+        e && e.render(G.CAMERA, G.CTX);
+        if (a) {
+          a.render(G.CURRENT_TIME, i, j);
+        }
       }
       // render the player in between other objects in the grid for proper overlap
       if (i === gpr && j === gpc) {
@@ -87,16 +94,18 @@ const drawWorld = (time) => {
 };
 
 const animate = (time) => {
-  G.AUDIO.update(time);
+  // G.AUDIO.update(time);
   // stats.begin();
   G.CURRENT_TIME = time;
   G.TIME_DELTA = time - G.PREVIOUS_TIME;
-  // updates player actions;
-  const actionsAreOngoing = G.PLAYER.checkForActions(time);
+  // updates map actions
+  const mapActions = G.MAP.actions.length > 0;
+  // updates player actions
+  const playerActions = G.PLAYER.checkForActions(time);
   // updates position and rotation
   const playerPositionUpdated = G.PLAYER.updatePosition(time);
   // if player updated, so must the world; ongoing actions also cause a re-render
-  if (playerPositionUpdated || actionsAreOngoing) {
+  if (playerPositionUpdated || playerActions || mapActions) {
     playerPositionUpdated && G.CAMERA.position.set(G.PLAYER.position);
     drawWorld(time);
   }
@@ -118,7 +127,6 @@ window.addEventListener('keyup', (e) => {
 window.addEventListener('wheel', (e) => {
   G.CAMERA.magnification += e.deltaY / 100;
   drawWorld(G.CURRENT_TIME);
-  postProcess();
 });
 
 G.MAP.cacheEntities().then(() => {
