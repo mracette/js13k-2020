@@ -25,10 +25,14 @@ export const addScreenIndependentGlobals = (G) => {
   G.DOM = {
     CANVAS: getElement('viz'),
     POST_CANVAS: getElement('post'),
+    BLUR_CANVAS: getElement('blur'),
     ROOT: getElement('root'),
     BODY: document.body,
-    HTML: document.documentElement
+    HTML: document.documentElement,
+    SHOP: getElement('shop')
   };
+  G.BLUR_CTX = G.DOM.BLUR_CANVAS.getContext('2d');
+  G.BLUR_CTX.filter = 'blur(20px)';
   G.CTX = G.DOM.CANVAS.getContext('2d', {
     alpha: true,
     antialias: true
@@ -59,6 +63,6 @@ export const addScreenDependentGlobals = (G) => {
     G.COORDS.height()
   );
   G.GRADIENT.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  G.GRADIENT.addColorStop(0.5, 'rgba(255, 255, 255, .15)');
-  G.GRADIENT.addColorStop(1, 'rgba(255, 255, 255, .35)');
+  G.GRADIENT.addColorStop(0.5, 'rgba(255, 255, 255, .5)');
+  G.GRADIENT.addColorStop(1, 'rgba(255, 255, 255, 1)');
 };

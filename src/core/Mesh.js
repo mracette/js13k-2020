@@ -21,15 +21,17 @@ export class Mesh extends Entity {
   getKey() {
     // must uniquely identify the mesh in terms of how it would be rendered to
     // the screen (not counting it's position)
+    const s = this.getScale();
+    const r = this.getRotation();
     return [
       this.geometry.name,
       this.stylesId,
-      this.scale.x,
-      this.scale.y,
-      this.scale.z,
-      this.rotation.x,
-      this.rotation.y,
-      this.rotation.z
+      s.x,
+      s.y,
+      s.z,
+      r.x,
+      r.y,
+      r.z
     ].join('~');
   }
 
@@ -38,22 +40,6 @@ export class Mesh extends Entity {
     const position = this.getPosition().clone().translate(new Vector3(1, 1, 0));
     camera.project(position);
     return position;
-  }
-
-  async generateImage(offscreen) {
-    // safari workaround
-    return new Promise((resolve) => {
-      const image = new Image();
-      image.addEventListener(
-        'load',
-        () => {
-          resolve(image);
-        },
-        false
-      );
-      const dataURL = offscreen.toDataURL();
-      image.src = dataURL;
-    });
   }
 
   async cache(camera = G.CAMERA) {
@@ -70,28 +56,28 @@ export class Mesh extends Entity {
       // imageSmoothingEnabled: true,
       // antialias: true
     });
+
+    // apply all styles
+    this.applyAllStyles(offscreenCtx);
+
+    // account for line width in bounding box
+    const lw = parseFloat(offscreenCtx.lineWidth || 0);
+    this.box[0] -= lw / 2;
+    this.box[1] -= lw / 2;
+    this.box[2] += lw / 2;
+    this.box[3] += lw / 2;
+
     offscreen.width = this.box[2] - this.box[0];
     offscreen.height = this.box[3] - this.box[1];
 
-    // apply all styles
+    // apply all styles (again, because they reset when a canvas resizes)
     this.applyAllStyles(offscreenCtx);
 
     // draw the projection to the canvas
     camera.drawFaces(facesAndNormals, offscreenCtx, this.box);
 
-    let image;
-    // render the bitmap
-    if (G.SUPPORTS_BITMAP) {
-      image = await createImageBitmap(
-        offscreen,
-        0,
-        0,
-        offscreen.width,
-        offscreen.height
-      );
-    } else {
-      image = await this.generateImage(offscreen);
-    }
+    // render the bitmap / image
+    const image = await G.CAMERA.canvasToImage(offscreen);
 
     camera.setCache(key, image);
     offscreen = null;

@@ -57,6 +57,9 @@ make.tree3 = (opts) =>
 /* environment */
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
+make.stream = (opts) =>
+  new Mesh(geos.square, { ...opts, style: styles.waterBlue });
+make.bridge = (opts) => new Mesh(geos.square, { ...opts, style: styles.brown });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey2 });
 
 /* player */
@@ -95,15 +98,19 @@ make.player = (opts) =>
   });
 
 /* town */
-make.building = (opts) =>
+make.building = (opts = {}) =>
   new Group(
     [
-      make.box({ scale: new Vector3(2, 2, 2) }),
+      make.box({ scale: new Vector3(2, 2, 2), style: opts.style || [] }),
       make.pyramid({
         scale: new Vector3(2, 2, 1),
-        position: new Vector3(0, 0, 2),
+        position: new Vector3(0, 0, 2 + (opts.scale ? opts.scale.z : 0)),
         style: styles.brown
       })
     ],
-    opts
+    {
+      position: opts.position,
+      scale: opts.scale,
+      style: [styles.baseLine, styles.thickLine, styles.darkLine]
+    }
   );

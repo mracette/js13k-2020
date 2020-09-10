@@ -8,6 +8,12 @@ export const baseLine = new Style({
   lineJoin: 'round',
   lineCap: 'round'
 });
+export const thickLine = new Style({
+  lineWidth: () => G.COORDS.width(0.003)
+});
+export const darkLine = new Style({
+  strokeStyle: 'black'
+});
 export const lightLine = new Style({
   strokeStyle: 'white'
 });
@@ -53,7 +59,7 @@ export const sand = new Style({
   fillStyle: '#E7C496'
 });
 export const orange1 = new Style({
-  fillStyle: '#F47749'
+  fillStyle: '#E3DBDB'
 });
 export const grey1 = new Style({
   fillStyle: '#F7F8F8'

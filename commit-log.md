@@ -313,3 +313,12 @@
 | Compressed Build (Adv Zip) | 9.04 kb | 9257 | -6% |
 
 
+**map actions + grass breaks** - *Wed, 09 Sep 2020 04:14:47 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 54.50 kb | 55804 | NA |
+| Build | 26.59 kb | 27232 | -51% |
+| Compressed Build | 10.07 kb | 10310 | -62% |
+| Compressed Build (Adv Zip) | 9.46 kb | 9684 | -6% |
+
+

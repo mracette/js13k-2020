@@ -152,12 +152,6 @@ export class Camera extends Entity {
           this.updateBoundingBox(box, boundingLowerBound, point);
         }
       }
-      // account for line width in bounding box
-      // const lw = parseFloat(G.CTX.lineWidth || 0);
-      // box[0] -= lw / 2;
-      // box[1] -= lw / 2;
-      // box[2] += lw / 2;
-      // box[3] += lw / 2;
       return facesAndNormals;
     } else if (object.type === 'point') {
       // the projection of a point is much simpler, just use the camera's transforms
@@ -165,6 +159,27 @@ export class Camera extends Entity {
       return object;
     }
   }
+
+  async canvasToImage(canvas) {
+    if (G.SUPPORTS_BITMAP) {
+      return createImageBitmap(canvas, 0, 0, canvas.width, canvas.height);
+    } else {
+      // safari workaround
+      return new Promise((resolve) => {
+        const image = new Image();
+        image.addEventListener(
+          'load',
+          () => {
+            resolve(image);
+          },
+          false
+        );
+        const dataURL = canvas.toDataURL();
+        image.src = dataURL;
+      });
+    }
+  }
+
   screenToMap(point) {
     const scale = G.COORDS.height() / (this.magnification || 1);
     point.x = (point.x - G.COORDS.nx(0)) / scale;
@@ -204,10 +219,6 @@ export class Camera extends Entity {
         // save the base styles and apply them to the face
         ctx.save();
         ctx.fill();
-        // use a thin border to compensate for sub pixel gaps
-        // ctx.lineWidth = 0.1;
-        // ctx.strokeStyle = ctx.fillStyle;
-        // ctx.stroke();
         if (shade) {
           // use a darkened layer for flat shading
           ctx.fillStyle = `rgba(0, 0, 0, ${

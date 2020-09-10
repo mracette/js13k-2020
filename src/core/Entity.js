@@ -53,7 +53,7 @@ export class Entity {
   }
 
   getScale() {
-    if (this.parent) {
+    if (this.parent && this.parent.scale) {
       const parentScale = this.parent.getScale();
       return new Vector3(
         parentScale.x * this.scale.x,

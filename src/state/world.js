@@ -17,8 +17,8 @@ export class Map {
     this.actions = [];
     this.actionId = 0;
     this.visibleGridSizeHalf = this.getGridFromTile(
-      Math.round((-1 * G.CAMERA.getVisibleMapWidth()) / 4),
-      Math.round((-1 * G.CAMERA.getVisibleMapHeight()) / 4)
+      Math.floor((-1 * G.CAMERA.getVisibleMapWidth()) / 4) - 1,
+      Math.floor((-1 * G.CAMERA.getVisibleMapHeight()) / 4) - 1
     );
     this._entities = {};
     this._initWorld();
@@ -124,6 +124,14 @@ export class Map {
     if (col <= 1 || col >= this.width - 2 || row <= 2)
       return this._initEntity('rock', { position }, 'blocks');
 
+    // bridge
+    if ((y === -2 || y === -1) && x !== -18 && col >= 6 && col <= 8)
+      return this._initEntity('bridge', { position });
+
+    // world-wide stream
+    if (col >= 6 && col <= 8)
+      return this._initEntity('stream', { position }, 'blocks');
+
     /* THE TOWN */
     // house
     if (row === 25 && col === 11)
@@ -132,17 +140,51 @@ export class Map {
         { position, style: styles.green1 },
         false
       );
+    if ((row === 27 && col === 12) || (row === 24 && col === 10)) {
+      return this._initEntity('tree1', { position }, 'blocks');
+    }
+    // home tile
     if ((row === 25 && col === 12) || (row === 24 && col === 11))
       return this._initEntity('whiteTile', { position }, 'home');
+
+    // shop tile
+    if ((row === 22 && col === 19) || (row === 23 && col === 19))
+      return this._initEntity('whiteTile', { position }, 'home');
+    // shop
+    if (
+      (row === 27 && col === 18) ||
+      (row === 20 && col === 21) ||
+      (row === 21 && col === 22)
+    ) {
+      return this._initEntity('tree1', { position }, 'blocks');
+    }
+    if (row === 25 && col === 19)
+      return this._initEntity(
+        'building',
+        { position, style: styles.orange1 },
+        false
+      );
+    if (row === 23 && col === 20)
+      return this._initEntity(
+        'building',
+        { position, style: styles.orange1, scale: new Vector3(1, 1, 2) },
+        false
+      );
+    if (row === 21 && col === 21)
+      return this._initEntity(
+        'building',
+        { position, style: styles.orange1 },
+        false
+      );
 
     // rock border
     if (row <= 30 && row > 27 && (col < 14 || col > 16))
       return this._initEntity('rock', { position }, 'blocks');
 
     // random grass
-    // if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.1) {
-    return this._initEntity('grass', { position }, 'breaks(.05)');
-    // }
+    if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.1) {
+      return this._initEntity('grass', { position }, 'breaks(.05)');
+    }
 
     return null;
   }

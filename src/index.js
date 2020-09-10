@@ -33,12 +33,11 @@ G.CAMERA.position.set(G.PLAYER.position);
 // init map
 G.MAP = new Map();
 
-const postProcess = () => {
-  const args = [0, 0, G.COORDS.width(), G.COORDS.height()];
-  G.POST_CTX.clearRect(...args);
-  G.POST_CTX.setTransform(2, 0, 0, 1, -G.DOM.POST_CANVAS.width / 2, 0);
-  G.POST_CTX.fillStyle = G.GRADIENT;
-  G.POST_CTX.fillRect(...args);
+const cacheGradient = async (ctx) => {
+  return true;
+  // drawGradient(ctx);
+  // const image = await G.CAMERA.canvasToImage(ctx.canvas);
+  // return image;
 };
 
 let prevTileX = null;
@@ -52,6 +51,11 @@ const drawTileGroup = () => {
     G.MAP.getEntity('tileGroup').position.y = newTileY;
     G.MAP.getEntity('tileGroup').render(G.CAMERA, G.CTX);
   }
+};
+
+const showShop = () => {
+  G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
+  G.DOM.SHOP.style.visibility = 'visible';
 };
 
 const drawWorld = (time) => {
@@ -91,6 +95,7 @@ const drawWorld = (time) => {
       }
     }
   }
+  // drawBlur();
 };
 
 const animate = (time) => {
@@ -130,7 +135,11 @@ window.addEventListener('wheel', (e) => {
 });
 
 G.MAP.cacheEntities().then(() => {
-  drawWorld(0);
-  postProcess();
-  G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
+  cacheGradient(G.BLUR_CTX).then((image) => {
+    G.GRADIENT_CACHE = image;
+    G.BLUR_CTX.filter = 'blur(.2vw) brightness(150%)';
+    G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
+    drawWorld(0);
+    showShop();
+  });
 });
