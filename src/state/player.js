@@ -3,6 +3,8 @@ import { rotatePoint, boundedSin, PI, TAU } from '../utils/math';
 import { Vector3 } from '../core/Vector3';
 import { make } from '../entities/generators';
 import { Action } from '../core/Action';
+import { hazyPurple } from '../entities/styles';
+import { showShop, closeShop } from '../index';
 //import { drawWorld } from '../index';
 
 export class Player {
@@ -48,14 +50,26 @@ export class Player {
     this.currentLife = 9;
     this.restSin = boundedSin(this.actionParams.restLength * 2, -5, 5);
 
+    // money
+    this.money = 0;
+
+    // experience
+    this.experience = 0;
+
+    // haze
+    this.hazeAmount = 'None';
+    this.haze = 0;
+
     // the action group + meshes
     this.mesh = this.initMesh();
+    this.quad = 0;
   }
 
   initMesh() {
     const player = make.player({ position: this.position });
     this.face = player.children[1];
-    this.face.rotation.z = Math.PI;
+    this.machete = player.children[2];
+    this.face.rotation.z;
     return player;
   }
 
@@ -67,10 +81,13 @@ export class Player {
       diff = anchor + TAU - current;
     }
     const next = current + diff * delta;
-    const quad = Math.abs((next / TAU) % 1);
-    quad > 0.36 && quad < 0.64
-      ? (this.orientation = 'up')
-      : (this.orientation = 'down');
+    // used for animation order
+
+    if (next < 0) {
+      this.quad = ((next + TAU) / TAU) % 1;
+    } else {
+      this.quad = (next / TAU) % 1;
+    }
     return next;
   }
 
@@ -103,8 +120,8 @@ export class Player {
     if (!deltaX && !deltaY) return [0, 0];
     const newX = Math.trunc(this.position.x + deltaX - 0.5);
     const newY = Math.trunc(this.position.y + deltaY - 0.5);
-    const [i, j] = G.MAP.getGridFromTile(newX, newY);
-    const entity = G.MAP.getEntityOnGrid(i, j);
+    const [row, col] = G.MAP.getGridFromTile(newX, newY);
+    const entity = G.MAP.getEntityOnGrid(row, col);
     if (entity) {
       if (entity.type.includes('blocks')) {
         return [0, 0];
@@ -113,6 +130,39 @@ export class Player {
         this.isResting = true;
         this.initiateAction('rest', G.CURRENT_TIME);
       }
+      if (entity.type.includes('shop')) {
+        this.isShopping = true;
+        showShop();
+      }
+    } else {
+      // closes shop when leaving the tile
+      if (this.isShopping) {
+        this.isShopping = false;
+        closeShop();
+      }
+    }
+    this.prevHaze = this.haze;
+    // haze effects
+    if (row > 30) {
+      this.haze = 1 + 9 * (row / 500);
+      if (this.haze < 3) {
+        this.hazeAmount = 'Low';
+      } else if (this.haze < 6) {
+        this.hazeAmount = 'Harmful';
+      } else if (this.haze < 9) {
+        this.hazeAmount = 'Extreme';
+      } else {
+        this.hazeAmount = 'EXCRUCIATING';
+      }
+    } else {
+      this.haze = 0;
+      this.hazeAmount = 'None';
+    }
+    if (this.prevHaze !== this.haze) {
+      G.POST_CTX.fillStyle = hazyPurple.fillStyle;
+      G.POST_CTX.globalAlpha = this.haze / 20;
+      G.POST_CTX.clearRect(0, 0, G.COORDS.width(), G.COORDS.height());
+      G.POST_CTX.fillRect(0, 0, G.COORDS.width(), G.COORDS.height());
     }
     return [deltaX, deltaY];
   }
@@ -167,15 +217,17 @@ export class Player {
     const needsUpdate = deltaX !== 0 || deltaY !== 0;
 
     if (needsUpdate) {
-      this.face.rotation.z = this.updateRotation(
+      const newRotation = this.updateRotation(
         direction,
         this.face.rotation.z,
         rotDelta
       );
+      this.face.rotation.z = newRotation;
+      this.machete.rotation.z = newRotation;
       // change position
       this.position.x += deltaX;
       this.position.y += deltaY;
-      // change face
+      // change face position
       this.face.position.x =
         0.5 + this.faceOffset * Math.cos(Math.PI / 4 + this.face.rotation.z);
       this.face.position.y =
@@ -264,20 +316,20 @@ export class Player {
     const delta = (time - action.start) / 5;
     if (delta > this.actionParams.restLength) {
       this.removeAction(action.id);
+      this.currentLife = this.maxLife;
       this.isResting = false;
       return;
     }
     G.CAMERA.magnification = G.MAGNIFICATION - this.restSin(delta);
   }
-
-  affectedFromSwing() {}
-
   animateSwing(time, action, ctx = G.CTX) {
     const delta = (time - action.start) / this.actionParams.swingDuration;
     // remove the action from the queue
     if (delta > 1) {
       this.removeAction(action.id);
       this.isSwinging = false;
+      this.machete.rotation.z = this.face.rotation.z;
+      this.machete.rotation.y = 0;
     } else {
       ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta * 0.8})`;
       ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);
@@ -287,16 +339,14 @@ export class Player {
       const cy = c.y;
       const px = cx + this.actionParams.swingLength;
       const baseRot =
-        this.face.rotation.z + PI / 2 - this.actionParams.swingRadius / 2;
-      const addRot = this.actionParams.swingRadius / 16;
+        this.face.rotation.z + PI / 2 + this.actionParams.swingRadius / 2;
+      const currentRot = baseRot - delta * this.actionParams.swingRadius;
+      // ground animation
       const p1 = rotatePoint(px, cy, cx, cy, baseRot);
-      const p2 = rotatePoint(
-        px,
-        cy,
-        cx,
-        cy,
-        baseRot + delta * this.actionParams.swingRadius - addRot
-      );
+      const p2 = rotatePoint(px, cy, cx, cy, currentRot);
+      // rotate the machete
+      this.machete.rotation.z = Math.PI + currentRot;
+      this.machete.rotation.y = (Math.PI / 2) * delta;
       // samples tiles between the player and the end of the swing
       const dx = G.COORDS.nx(0) - p2.x;
       const dy = p2.y - G.COORDS.ny(0);
@@ -309,8 +359,8 @@ export class Player {
           Math.round(check.y - 0.5)
         );
         const entity = G.MAP.getEntityOnGrid(row, col);
-        if (entity && entity.type.includes('breaks')) {
-          G.MAP.addAction(new Action(time, 'grass'), row, col);
+        if (entity && !entity.action && entity.type.includes('breaks')) {
+          G.MAP.addAction(new Action(time, 'breaks', row, col));
         }
       }
       ctx.beginPath();

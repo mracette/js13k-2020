@@ -29,6 +29,7 @@ export const transparentWhite = new Style({
   fillStyle: 'rgba(255,255,255,.25)'
 });
 
+// ENVIRONMENT
 export const waterBlue = new Style({
   fillStyle: '#2E86AB',
   uid: 'waterBlue'
@@ -42,6 +43,10 @@ export const grassGreen = new Style({
 export const raisinBlack = new Style({
   fillStyle: '#272838'
 });
+export const hazyPurple = new Style({
+  fillStyle: 'purple'
+});
+// OTHER
 export const magnolia = new Style({
   fillStyle: '#F7F0F5',
   uid: 'magnolia'

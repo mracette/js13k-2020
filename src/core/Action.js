@@ -6,11 +6,12 @@ const GRASS_DURATION = 1000;
 let ID = 0;
 
 export class Action {
-  constructor(start, type, ctx = G.CTX) {
-    Object.assign(this, { start, type, ctx });
+  constructor(start, type, row, col, params = {}, ctx = G.CTX) {
+    const [x, y] = G.MAP.getTileFromGrid(row, col);
+    Object.assign(this, { start, type, ctx, row, col, x, y, ...params });
     this.id = ID++;
     switch (type) {
-      case 'grass': {
+      case 'breaks': {
         this.pieces = Array(10)
           .fill()
           .map(() => -0.5 + Math.random());
@@ -18,20 +19,19 @@ export class Action {
       }
     }
   }
-  render(time, row, col) {
-    const [x, y] = G.MAP.getTileFromGrid(row, col);
-    const p = G.CAMERA.project(new Vector3(x + 0.5, y + 0.5, 0));
+  render(time) {
+    const p = G.CAMERA.project(new Vector3(this.x + 0.5, this.y + 0.5, 0));
     this.ctx.save();
     switch (this.type) {
-      case 'grass':
-        this.renderGrass(time, p.x, p.y);
+      case 'breaks':
+        this.renderBreak(time, p.x, p.y);
         break;
       default:
         break;
     }
     this.ctx.restore();
   }
-  renderGrass(time, cx, cy) {
+  renderBreak(time, cx, cy) {
     const delta = (time - this.start) / GRASS_DURATION;
     if (delta > 1) {
       G.MAP.removeAction(this.id);

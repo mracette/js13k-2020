@@ -5,31 +5,24 @@ export class CanvasCoordinates {
   }
 
   nx(n) {
-    return this._baseWidth * (n + 1 / 2);
+    return this._baseWidth * ((n + 1) / 2);
   }
 
   ny(n) {
-    return this._baseHeight * (n + 1 / 2);
+    return this._baseHeight * ((n + 1) / 2);
   }
 
   width(n) {
-    let w = this._baseWidth;
-    if (n) {
-      return w * n;
+    if (typeof n !== 'undefined') {
+      return this._baseWidth * n;
     }
-    return w;
+    return this._baseWidth;
   }
 
   height(n) {
-    let h = this._baseHeight;
-    if (n) {
-      return h * n;
+    if (typeof n !== 'undefined') {
+      return this._baseHeight * n;
     }
-    return h;
+    return this._baseHeight;
   }
-
-  // resize() {
-  //   this._baseWidth = this.baseWidth || this.canvas.width;
-  //   this._baseHeight = this.baseHeight || this.canvas.height;
-  // }
 }

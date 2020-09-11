@@ -2,9 +2,7 @@ import { Map } from './state/world';
 import { Player } from './state/player';
 import { Camera } from './core/Camera';
 import { initDom } from './setup/dom';
-import { Action } from './core/Action';
-// import { baseLine } from './entities/styles';
-// import { renderTileCoords } from './utils/screen';
+import { hazyPurple } from './entities/styles';
 import {
   G,
   addScreenDependentGlobals,
@@ -53,9 +51,81 @@ const drawTileGroup = () => {
   }
 };
 
-const showShop = () => {
+const renderStats = () => {
+  G.CTX.save();
+  G.CTX.fillStyle = 'black';
+  G.CTX.strokeStyle = 'green';
+  G.CTX.lineWidth = G.COORDS.height(0.005);
+  G.CTX.fillRect(
+    G.COORDS.nx(-1),
+    G.COORDS.ny(1) - G.BAR_HEIGHT,
+    G.COORDS.width(),
+    G.BAR_HEIGHT
+  );
+  // life bar
+  G.CTX.strokeRect(
+    G.COORDS.nx(-0.5) - G.CTX.lineWidth,
+    G.COORDS.ny(1) - G.BAR_HEIGHT + G.CTX.lineWidth / 2,
+    G.COORDS.width(0.25),
+    G.BAR_HEIGHT - G.CTX.lineWidth
+  );
+  G.CTX.fillStyle = 'green';
+  G.CTX.fillRect(
+    G.COORDS.nx(-0.5) - G.CTX.lineWidth + (3 * G.CTX.lineWidth) / 2,
+    G.COORDS.ny(1) - G.BAR_HEIGHT + G.CTX.lineWidth * 2,
+    (G.COORDS.width(0.25) - (6 * G.CTX.lineWidth) / 2) *
+      (G.PLAYER.currentLife / G.PLAYER.maxLife),
+    G.BAR_HEIGHT - G.CTX.lineWidth * 4
+  );
+  G.CTX.fillStyle = 'white';
+  G.CTX.fillText(
+    Math.round(G.PLAYER.currentLife),
+    G.COORDS.nx(-0.5) - G.CTX.lineWidth / 2 + G.CTX.lineWidth * 3,
+    G.COORDS.ny(1) - G.BAR_HEIGHT / 2
+  );
+  // haze bar
+  G.CTX.strokeStyle = hazyPurple.fillStyle;
+  G.CTX.strokeRect(
+    G.COORDS.nx(0) + G.CTX.lineWidth,
+    G.COORDS.ny(1) - G.BAR_HEIGHT + G.CTX.lineWidth / 2,
+    G.COORDS.width(0.25),
+    G.BAR_HEIGHT - G.CTX.lineWidth
+  );
+  G.CTX.fillStyle = hazyPurple.fillStyle;
+  G.CTX.fillRect(
+    G.COORDS.nx(0) + G.CTX.lineWidth + (3 * G.CTX.lineWidth) / 2,
+    G.COORDS.ny(1) - G.BAR_HEIGHT + G.CTX.lineWidth * 2,
+    (G.COORDS.width(0.25) - (6 * G.CTX.lineWidth) / 2) * (G.PLAYER.haze / 10),
+    G.BAR_HEIGHT - G.CTX.lineWidth * 4
+  );
+  G.CTX.fillStyle = 'white';
+  G.CTX.fillText(
+    `Haze: ${G.PLAYER.hazeAmount}`,
+    G.COORDS.nx(0) + G.CTX.lineWidth + G.CTX.lineWidth * 3,
+    G.COORDS.ny(1) - G.BAR_HEIGHT / 2
+  );
+  // money
+  G.CTX.fillText(
+    `${G.PLAYER.money}g`,
+    G.COORDS.nx(-0.75),
+    G.COORDS.ny(1) - G.BAR_HEIGHT / 2
+  );
+  // experience
+  G.CTX.fillText(
+    `${G.PLAYER.experience} exp`,
+    G.COORDS.nx(0.75),
+    G.COORDS.ny(1) - G.BAR_HEIGHT / 2
+  );
+  G.CTX.restore();
+};
+
+export const showShop = () => {
   G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
   G.DOM.SHOP.style.visibility = 'visible';
+};
+
+export const closeShop = () => {
+  G.DOM.SHOP.style.visibility = 'hidden';
 };
 
 const drawWorld = (time) => {
@@ -88,10 +158,21 @@ const drawWorld = (time) => {
       }
       // render the player in between other objects in the grid for proper overlap
       if (i === gpr && j === gpc) {
-        let order = [0, 1];
-        G.PLAYER.orientation === 'up' && (order = [1, 0]);
-        G.PLAYER.mesh.children[order[0]].render(G.CAMERA, G.CTX);
-        G.PLAYER.mesh.children[order[1]].render(G.CAMERA, G.CTX);
+        if (G.PLAYER.quad >= 0.2 && G.PLAYER.quad <= 0.7) {
+          // render machete first
+          G.PLAYER.machete.render(G.CAMERA, G.CTX);
+        }
+        if (G.PLAYER.quad > 0.3 && G.PLAYER.quad < 0.7) {
+          G.PLAYER.face.render(G.CAMERA, G.CTX);
+          G.PLAYER.mesh.children[0].render(G.CAMERA, G.CTX);
+        } else {
+          G.PLAYER.mesh.children[0].render(G.CAMERA, G.CTX);
+          G.PLAYER.face.render(G.CAMERA, G.CTX);
+        }
+        if (G.PLAYER.quad < 0.2 || G.PLAYER.quad > 0.7) {
+          // render machete last
+          G.PLAYER.machete.render(G.CAMERA, G.CTX);
+        }
       }
     }
   }
@@ -114,6 +195,9 @@ const animate = (time) => {
     playerPositionUpdated && G.CAMERA.position.set(G.PLAYER.position);
     drawWorld(time);
   }
+  // shows life, experience, etc
+  G.PLAYER.currentLife -= G.PLAYER.haze * 0.0001 * (G.TIME_DELTA || 0);
+  renderStats();
   G.PREVIOUS_TIME = time;
   // stats.end();
   G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
@@ -140,6 +224,5 @@ G.MAP.cacheEntities().then(() => {
     G.BLUR_CTX.filter = 'blur(.2vw) brightness(150%)';
     G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
     drawWorld(0);
-    showShop();
   });
 });

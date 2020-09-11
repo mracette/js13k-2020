@@ -31,6 +31,7 @@ export default {
                 'stream',
                 'bridge',
                 'rock',
+                'bush',
                 'tileGroup',
                 'box',
                 'enemy1',

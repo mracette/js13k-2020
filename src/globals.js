@@ -65,4 +65,9 @@ export const addScreenDependentGlobals = (G) => {
   G.GRADIENT.addColorStop(0, 'rgba(255, 255, 255, 0)');
   G.GRADIENT.addColorStop(0.5, 'rgba(255, 255, 255, .5)');
   G.GRADIENT.addColorStop(1, 'rgba(255, 255, 255, 1)');
+  G.BAR_HEIGHT = G.COORDS.height(0.05);
+  G.BAR_PADDING = G.COORDS.height(0.005);
+  G.CTX.textAlign = 'left';
+  G.CTX.textBaseline = 'middle';
+  G.CTX.font = `${G.COORDS.height(0.025)}px Fantasy`;
 };

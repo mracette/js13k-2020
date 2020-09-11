@@ -24,18 +24,19 @@ export class Map {
     this._initWorld();
   }
 
-  addAction(action, row, col) {
-    const obj = {
-      id: this.actionId++,
-      action,
-      type: action.type
-    };
-    this.grid[row][col] = obj;
-    this.actions.push(obj);
+  addAction(action) {
+    this.grid[action.row][action.col].action = action;
+    this.actions.push(action);
   }
 
   removeAction(id) {
-    this.actions = this.actions.filter((a) => a.id !== id);
+    this.actions = this.actions.filter((a) => {
+      const thisIsAction = a.id === id;
+      if (thisIsAction) {
+        this.grid[a.row][a.col].action = null;
+      }
+      return !thisIsAction;
+    });
   }
 
   getEntityOnGrid(i, j) {
@@ -111,6 +112,7 @@ export class Map {
   _initEntity(name, opts, type) {
     return {
       entity: make[name](opts),
+      action: false,
       type: type || ''
     };
   }
@@ -149,7 +151,7 @@ export class Map {
 
     // shop tile
     if ((row === 22 && col === 19) || (row === 23 && col === 19))
-      return this._initEntity('whiteTile', { position }, 'home');
+      return this._initEntity('whiteTile', { position }, 'shop');
     // shop
     if (
       (row === 27 && col === 18) ||
@@ -177,13 +179,17 @@ export class Map {
         false
       );
 
-    // rock border
+    // rock border town
     if (row <= 30 && row > 27 && (col < 14 || col > 16))
       return this._initEntity('rock', { position }, 'blocks');
 
+    if (row <= 30 && row > 27) {
+      return this._initEntity('bush', { position }, '.15.blocks');
+    }
+
     // random grass
     if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.1) {
-      return this._initEntity('grass', { position }, 'breaks(.05)');
+      return this._initEntity('grass', { position }, '.05.breaks');
     }
 
     return null;

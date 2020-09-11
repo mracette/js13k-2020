@@ -57,12 +57,20 @@ make.tree3 = (opts) =>
 /* environment */
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
+make.bush = (opts) =>
+  new Mesh(geos.bush, { ...opts, style: styles.grassGreen });
 make.stream = (opts) =>
   new Mesh(geos.square, { ...opts, style: styles.waterBlue });
 make.bridge = (opts) => new Mesh(geos.square, { ...opts, style: styles.brown });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey2 });
 
 /* player */
+make.machete = () =>
+  new Mesh(geos.machete, {
+    style: styles.magnolia,
+    cacheEnabled: false,
+    position: new Vector3(0, 0, 0)
+  });
 make.playerShadow = () =>
   new Mesh(geos.shadow, {
     style: [styles.transparentBlack, styles.clearLine]
@@ -72,11 +80,21 @@ make.playerBody = () =>
     style: styles.purple1
   });
 make.playerFace = () =>
-  new Mesh(geos.playerFace, {
-    style: styles.magnolia,
-    position: new Vector3(0.5, 0.5, 0),
-    cacheEnabled: false
-  });
+  new Group(
+    [
+      new Mesh(geos.playerFaceUpper, {
+        style: styles.purple1,
+        cacheEnabled: false
+      }),
+      new Mesh(geos.playerFaceLower, {
+        style: styles.magnolia,
+        cacheEnabled: false
+      })
+    ],
+    {
+      position: new Vector3(0.5, 0.5, 0)
+    }
+  );
 make.playerRingFront = () =>
   new Mesh(geos.playerRingFront, {
     style: [styles.green1]
@@ -93,7 +111,7 @@ make.playerLower = () =>
     make.playerRingFront()
   ]);
 make.player = (opts) =>
-  new Group([make.playerLower(), make.playerFace()], {
+  new Group([make.playerLower(), make.playerFace(), make.machete()], {
     ...opts
   });
 

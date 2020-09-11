@@ -4,6 +4,10 @@ export class Style {
   constructor(styles, uid) {
     this.uid = uid || G.UID++;
     this.styles = styles;
+    Object.getOwnPropertyNames(styles).forEach((prop) => {
+      this[prop] = styles[prop];
+    });
+    console.log(this);
   }
   apply(ctx = G.CTX) {
     for (const [key, value] of Object.entries(this.styles)) {

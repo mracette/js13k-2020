@@ -54,11 +54,11 @@ export class Group extends Entity {
   //   }
   // }
 
-  render(camera, ctx, iso = G.ISO) {
+  render(camera, ctx) {
     if (this.enabled || this.needsUpdate) {
       ctx.save();
       this.applyAllStyles(ctx);
-      this.children.forEach((child) => child.render(camera, ctx, iso));
+      this.children.forEach((child) => child.render(camera, ctx));
       ctx.restore();
     }
   }
