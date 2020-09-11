@@ -3,6 +3,7 @@ import { Player } from './state/player';
 import { Camera } from './core/Camera';
 import { initDom } from './setup/dom';
 import { hazyPurple } from './entities/styles';
+import { boundedSin } from './utils/math';
 import {
   G,
   addScreenDependentGlobals,
@@ -30,13 +31,6 @@ G.CAMERA.position.set(G.PLAYER.position);
 
 // init map
 G.MAP = new Map();
-
-const cacheGradient = async (ctx) => {
-  return true;
-  // drawGradient(ctx);
-  // const image = await G.CAMERA.canvasToImage(ctx.canvas);
-  // return image;
-};
 
 let prevTileX = null;
 let prevTileY = null;
@@ -121,11 +115,11 @@ const renderStats = () => {
 
 export const showShop = () => {
   G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
-  G.DOM.SHOP.style.visibility = 'visible';
+  G.DOM.SHOP.style.display = 'flex';
 };
 
 export const closeShop = () => {
-  G.DOM.SHOP.style.visibility = 'hidden';
+  G.DOM.SHOP.style.display = 'none';
 };
 
 const drawWorld = (time) => {
@@ -179,7 +173,7 @@ const drawWorld = (time) => {
   // drawBlur();
 };
 
-const animate = (time) => {
+const animate = (time, loop = false) => {
   // G.AUDIO.update(time);
   // stats.begin();
   G.CURRENT_TIME = time;
@@ -191,16 +185,16 @@ const animate = (time) => {
   // updates position and rotation
   const playerPositionUpdated = G.PLAYER.updatePosition(time);
   // if player updated, so must the world; ongoing actions also cause a re-render
-  if (playerPositionUpdated || playerActions || mapActions) {
+  if (playerPositionUpdated || playerActions || mapActions || time === 0) {
     playerPositionUpdated && G.CAMERA.position.set(G.PLAYER.position);
     drawWorld(time);
   }
-  // shows life, experience, etc
   G.PLAYER.currentLife -= G.PLAYER.haze * 0.0001 * (G.TIME_DELTA || 0);
+  // shows life, experience, etc
   renderStats();
   G.PREVIOUS_TIME = time;
   // stats.end();
-  G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
+  loop && (G.ANIMATION_FRAME = window.requestAnimationFrame(animate));
 };
 
 G.DOM.CANVAS.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -218,11 +212,30 @@ window.addEventListener('wheel', (e) => {
   drawWorld(G.CURRENT_TIME);
 });
 
+const landingSequence = () => {
+  G.CTX.fillStyle = 'rgba(0,0,0,.5)';
+  const p = 10000;
+  const sine = boundedSin(p, 1, 8, (3 * p) / 2);
+  const draw = (time) => {
+    G.CTX.clearRect(0, 0, G.COORDS.width(), G.COORDS.height());
+    G.CAMERA.magnification = sine(time);
+    G.MAP.getEntity('tileGroup').rotation.z += 0.1;
+    drawTileGroup();
+    G.CTX.fillRect(0, 0, G.COORDS.width(), G.COORDS.height());
+    G.ANIMATION_FRAME = window.requestAnimationFrame(draw);
+  };
+  G.ANIMATION_FRAME = window.requestAnimationFrame(draw);
+};
+
+const startSequence = async () => {
+  G.CAMERA.magnification = 0.2;
+  drawWorld();
+  return true;
+};
+
 G.MAP.cacheEntities().then(() => {
-  cacheGradient(G.BLUR_CTX).then((image) => {
-    G.GRADIENT_CACHE = image;
-    G.BLUR_CTX.filter = 'blur(.2vw) brightness(150%)';
-    G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
-    drawWorld(0);
-  });
+  landingSequence();
+  // startSequence().then(() => {
+  // animate(0, true);
+  // });
 });

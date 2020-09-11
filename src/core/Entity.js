@@ -34,6 +34,15 @@ export class Entity {
     this.getStyleList().forEach((s) => s.apply(ctx));
   }
 
+  getEnabled() {
+    if (this.parent) {
+      const parentEnabled = this.parent.getEnabled();
+      return parentEnabled && this.enabled;
+    } else {
+      return this.enabled;
+    }
+  }
+
   getPosition() {
     if (this.parent) {
       const parentPosition = this.parent.getPosition();

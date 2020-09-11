@@ -87,29 +87,31 @@ export class Mesh extends Entity {
   }
 
   render(camera, ctx) {
-    ctx.save();
-    // check if cache is supported
-    if (G.CACHE && this.cacheEnabled) {
-      // check if the image is in the cache
-      const cache = camera.getCache(this.getKey());
-      if (cache) {
-        // write from cache
-        const position = this.getProjectedPosition(camera);
-        // draw from cache
-        ctx.drawImage(
-          cache,
-          position.x - cache.width / 2,
-          position.y - cache.height
-        );
+    if (this.getEnabled()) {
+      ctx.save();
+      // check if cache is supported
+      if (G.CACHE && this.cacheEnabled) {
+        // check if the image is in the cache
+        const cache = camera.getCache(this.getKey());
+        if (cache) {
+          // write from cache
+          const position = this.getProjectedPosition(camera);
+          // draw from cache
+          ctx.drawImage(
+            cache,
+            position.x - cache.width / 2,
+            position.y - cache.height
+          );
+        } else {
+          this.cache(camera).then(() => this.render(camera, ctx));
+        }
       } else {
-        this.cache(camera).then(() => this.render(camera, ctx));
+        // cpu render
+        this.applyAllStyles(ctx);
+        const faces = camera.project(this);
+        camera.drawFaces(faces, ctx, false);
       }
-    } else {
-      // cpu render
-      this.applyAllStyles(ctx);
-      const faces = camera.project(this);
-      camera.drawFaces(faces, ctx, false);
+      ctx.restore();
     }
-    ctx.restore();
   }
 }

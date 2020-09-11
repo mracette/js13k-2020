@@ -7,7 +7,6 @@ export class Style {
     Object.getOwnPropertyNames(styles).forEach((prop) => {
       this[prop] = styles[prop];
     });
-    console.log(this);
   }
   apply(ctx = G.CTX) {
     for (const [key, value] of Object.entries(this.styles)) {

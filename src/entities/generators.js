@@ -69,7 +69,8 @@ make.machete = () =>
   new Mesh(geos.machete, {
     style: styles.magnolia,
     cacheEnabled: false,
-    position: new Vector3(0, 0, 0)
+    position: new Vector3(0, 0, 0),
+    enabled: false
   });
 make.playerShadow = () =>
   new Mesh(geos.shadow, {

@@ -5,13 +5,13 @@ import { make } from '../entities/generators';
 import { Action } from '../core/Action';
 import { hazyPurple } from '../entities/styles';
 import { showShop, closeShop } from '../index';
-//import { drawWorld } from '../index';
+import { items } from '../entities/items';
 
 export class Player {
   constructor() {
     // this is a "virtual" position, because the mesh will always be at the center of the screen
     // this.position = new Vector3(-28, -28, 0);
-    this.position = new Vector3(-8, -8, 0);
+    this.position = new Vector3(-15, -9, 0);
 
     // identifies actions in the queue
     this.actionId = 0;
@@ -26,12 +26,7 @@ export class Player {
     this.currentActions = [];
 
     // these control animations and gameplay
-    this.actionParams = {
-      swingDuration: 300,
-      swingLength: G.COORDS.width(0.05),
-      swingRadius: Math.PI / 4,
-      restLength: 1000
-    };
+    this.macheteType = null;
 
     // movement / rotation params
     this.lastUpdateTime = null;
@@ -47,8 +42,8 @@ export class Player {
 
     // life
     this.maxLife = 10;
-    this.currentLife = 9;
-    this.restSin = boundedSin(this.actionParams.restLength * 2, -5, 5);
+    this.currentLife = 10;
+    this.restSin = boundedSin(2000, -5, 5);
 
     // money
     this.money = 0;
@@ -63,6 +58,11 @@ export class Player {
     // the action group + meshes
     this.mesh = this.initMesh();
     this.quad = 0;
+  }
+
+  updateMachete(newType) {
+    this.macheteType = newType;
+    this.machete = items.filter((i) => i.name === newType);
   }
 
   initMesh() {
@@ -314,7 +314,7 @@ export class Player {
 
   animateRest(time, action) {
     const delta = (time - action.start) / 5;
-    if (delta > this.actionParams.restLength) {
+    if (delta > 1000) {
       this.removeAction(action.id);
       this.currentLife = this.maxLife;
       this.isResting = false;
@@ -323,52 +323,54 @@ export class Player {
     G.CAMERA.magnification = G.MAGNIFICATION - this.restSin(delta);
   }
   animateSwing(time, action, ctx = G.CTX) {
-    const delta = (time - action.start) / this.actionParams.swingDuration;
-    // remove the action from the queue
-    if (delta > 1) {
-      this.removeAction(action.id);
-      this.isSwinging = false;
-      this.machete.rotation.z = this.face.rotation.z;
-      this.machete.rotation.y = 0;
-    } else {
-      ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta * 0.8})`;
-      ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);
-      const c = this.position.clone().translate(new Vector3(0.5, 0.5, 0));
-      G.CAMERA.project(c);
-      const cx = c.x;
-      const cy = c.y;
-      const px = cx + this.actionParams.swingLength;
-      const baseRot =
-        this.face.rotation.z + PI / 2 + this.actionParams.swingRadius / 2;
-      const currentRot = baseRot - delta * this.actionParams.swingRadius;
-      // ground animation
-      const p1 = rotatePoint(px, cy, cx, cy, baseRot);
-      const p2 = rotatePoint(px, cy, cx, cy, currentRot);
-      // rotate the machete
-      this.machete.rotation.z = Math.PI + currentRot;
-      this.machete.rotation.y = (Math.PI / 2) * delta;
-      // samples tiles between the player and the end of the swing
-      const dx = G.COORDS.nx(0) - p2.x;
-      const dy = p2.y - G.COORDS.ny(0);
-      for (let i = 0, n = 5; i <= n; i++) {
-        const check = G.CAMERA.unproject(
-          new Vector3(p2.x - dx * (i / n), p2.y - dy * (i / n), 0)
-        );
-        const [row, col] = G.MAP.getGridFromTile(
-          Math.round(check.x - 0.5),
-          Math.round(check.y - 0.5)
-        );
-        const entity = G.MAP.getEntityOnGrid(row, col);
-        if (entity && !entity.action && entity.type.includes('breaks')) {
-          G.MAP.addAction(new Action(time, 'breaks', row, col));
+    if (this.macheteType) {
+      const delta = (time - action.start) / this.actionParams.swingDuration;
+      // remove the action from the queue
+      if (delta > 1) {
+        this.removeAction(action.id);
+        this.isSwinging = false;
+        this.machete.rotation.z = this.face.rotation.z;
+        this.machete.rotation.y = 0;
+      } else {
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.55 - 0.55 * delta * 0.8})`;
+        ctx.setTransform(2, 0, 0, 1, -G.COORDS.width(0.5), 0);
+        const c = this.position.clone().translate(new Vector3(0.5, 0.5, 0));
+        G.CAMERA.project(c);
+        const cx = c.x;
+        const cy = c.y;
+        const px = cx + this.actionParams.swingLength;
+        const baseRot =
+          this.face.rotation.z + PI / 2 + this.actionParams.swingRadius / 2;
+        const currentRot = baseRot - delta * this.actionParams.swingRadius;
+        // ground animation
+        const p1 = rotatePoint(px, cy, cx, cy, baseRot);
+        const p2 = rotatePoint(px, cy, cx, cy, currentRot);
+        // rotate the machete
+        this.machete.rotation.z = Math.PI + currentRot;
+        this.machete.rotation.y = (Math.PI / 2) * delta;
+        // samples tiles between the player and the end of the swing
+        const dx = G.COORDS.nx(0) - p2.x;
+        const dy = p2.y - G.COORDS.ny(0);
+        for (let i = 0, n = 5; i <= n; i++) {
+          const check = G.CAMERA.unproject(
+            new Vector3(p2.x - dx * (i / n), p2.y - dy * (i / n), 0)
+          );
+          const [row, col] = G.MAP.getGridFromTile(
+            Math.round(check.x - 0.5),
+            Math.round(check.y - 0.5)
+          );
+          const entity = G.MAP.getEntityOnGrid(row, col);
+          if (entity && !entity.action && entity.type.includes('breaks')) {
+            G.MAP.addAction(new Action(time, 'breaks', row, col));
+          }
         }
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.closePath();
+        ctx.fill();
       }
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(p1.x, p1.y);
-      ctx.lineTo(p2.x, p2.y);
-      ctx.closePath();
-      ctx.fill();
     }
   }
 }
