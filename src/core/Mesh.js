@@ -9,7 +9,6 @@ export class Mesh extends Entity {
       type: 'mesh',
       uid: G.UID++,
       style: null,
-      cacheEnabled: true,
       box: [] // x0, y0, x1, y1
     };
     this.stylesId = this.getStyleList()
@@ -43,7 +42,7 @@ export class Mesh extends Entity {
   }
 
   async cache(camera = G.CAMERA) {
-    if (!this.cacheEnabled) return;
+    if (!this.getCacheEnabled()) return;
     const key = this.getKey();
 
     // get the projection, and update the bounding box
@@ -90,7 +89,7 @@ export class Mesh extends Entity {
     if (this.getEnabled()) {
       ctx.save();
       // check if cache is supported
-      if (G.CACHE && this.cacheEnabled) {
+      if (G.CACHE && this.getCacheEnabled()) {
         // check if the image is in the cache
         const cache = camera.getCache(this.getKey());
         if (cache) {

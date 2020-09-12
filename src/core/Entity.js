@@ -5,6 +5,7 @@ export class Entity {
   constructor(opts = {}) {
     const defaults = {
       enabled: true,
+      cacheEnabled: true,
       position: new Vector3(0, 0, 0),
       rotation: new Vector3(0, 0, 0),
       scale: new Vector3(1, 1, 1)
@@ -40,6 +41,15 @@ export class Entity {
       return parentEnabled && this.enabled;
     } else {
       return this.enabled;
+    }
+  }
+
+  getCacheEnabled() {
+    if (this.parent) {
+      const parentEnabled = this.parent.getCacheEnabled();
+      return parentEnabled && this.cacheEnabled;
+    } else {
+      return this.cacheEnabled;
     }
   }
 

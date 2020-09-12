@@ -62,7 +62,8 @@ export class Player {
 
   updateMachete(newType) {
     this.macheteType = newType;
-    this.machete = items.filter((i) => i.name === newType);
+    this.macheteItem = items.find((i) => i.name === newType);
+    this.machete.enabled = true;
   }
 
   initMesh() {
@@ -168,7 +169,7 @@ export class Player {
   }
 
   updatePosition() {
-    if (this.isResting) {
+    if (this.isResting || G.DIALOGUE_ACTIVE) {
       return false;
     }
     const delta = G.TIME_DELTA * this.movementSpeed;

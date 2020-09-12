@@ -29,7 +29,9 @@ export const addScreenIndependentGlobals = (G) => {
     ROOT: getElement('root'),
     BODY: document.body,
     HTML: document.documentElement,
-    SHOP: getElement('shop')
+    SHOP: getElement('shop'),
+    DIALOGUE: getElement('dialogue'),
+    LANDING: getElement('landing')
   };
   G.BLUR_CTX = G.DOM.BLUR_CANVAS.getContext('2d');
   G.BLUR_CTX.filter = 'blur(20px)';

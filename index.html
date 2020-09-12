@@ -6,12 +6,13 @@
         <title>Four, oh Four...</title>
     </head>
     <style>
-        * {color: white; font-family: "Papyrus", fantasy; text-align: center; padding: 0; margin: 0; width: 100%; height: 100%}
+        * {color: white; font-family: "Papyrus", fantasy; text-align: center; padding: 0; margin: 0; width: 100%; height: 100%; transition-duration: 500ms;}
         canvas {position: absolute;}
         .header {display: flex; justify-content: center; align-items: center;}
         .row {display: flex;}
         .item {display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1px solid grey;}
         .item:hover {background-color: rgba(255, 255, 255, .2);}
+        #dialogue {font-size: 2rem; display: none; height: auto; z-index: 2;}
         #start { width: 300px; height: auto; border: 2px solid white; cursor: pointer;}
         #start:hover {background-color: rgba(255, 255, 255, .2);}
         #landing {z-index: 2; font-size: 2rem; display: flex; flex-direction: column;}
@@ -46,11 +47,14 @@
             </div>
             <div id="landing" class="row">
                 <h1 class="header">Four, oh Four...</h1>
-                <h3>An adventure game by <a href="https://twitter.com/markracette">@markracette</a></h3>
+                <h3>An adventure game<br>by <a href="https://twitter.com/markracette">@markracette</a></h3>
                 <div class="header" style="align-items: flex-start;">
                     <div id="start"><h2>Start</h2></div>
                 </div>
                 <h3>#js13k 2020</h3>
+            </div>
+            <div id="dialogue">
+                <h1 style="margin-top: 10%"></h2>
             </div>
         </div>
         <script src="/build/bundle.min.js"></script>

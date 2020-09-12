@@ -3,6 +3,8 @@ import { Player } from './state/player';
 import { Camera } from './core/Camera';
 import { initDom } from './setup/dom';
 import { hazyPurple } from './entities/styles';
+import { make } from './entities/generators';
+import { delay } from './utils/functions';
 import { boundedSin } from './utils/math';
 import {
   G,
@@ -113,9 +115,57 @@ const renderStats = () => {
   G.CTX.restore();
 };
 
+const shopDialogue = async () => {
+  G.DIALOGUE_ACTIVE = true;
+  G.DOM.SHOP.display = 'none';
+  G.DOM.LANDING.display = 'none';
+  G.DOM.DIALOGUE.innerText = "Glad to see you're feeling better.\n";
+  // await delay(3000);
+  // G.DOM.DIALOGUE.innerText =
+  //   "If you're planning to find your friend, you'll need to be prepared.\n";
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   'The woods outside of town are a forbidden land.\n';
+  // await delay(3000);
+  // G.DOM.DIALOGUE.innerText +=
+  //   'The air is thick with a cursed haze that will consume you.\n';
+  // await delay(3000);
+  // G.DOM.DIALOGUE.innerText +=
+  //   'Every second you spend there will deplete your life force.\n';
+  // await delay(3000);
+  // G.DOM.DIALOGUE.innerText +=
+  //   "If you don't come back to rest often, you will surely lose your way and perish.\n";
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   'Your journey will also be slowed by the the thick, untamed growth.';
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   "Here, take this machete. It's the only way you'll be able to make a path.";
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   "Remember not to over-work yourself. \nWhen you are near exhaustion, come back and rest. \nThat way we won't have to rescue you again...";
+  // await delay(8000);
+  // G.DOM.DIALOGUE.innerText =
+  //   'Anyways, good luck! Come back if you need anything else.';
+  // await delay(3000);
+  G.DOM.DIALOGUE.innerText = '';
+  G.PLAYER.updateMachete('basic-machete');
+  G.DOM.SHOP.display = 'block';
+  G.DIALOGUE_ACTIVE = false;
+  return true;
+};
+
 export const showShop = () => {
-  G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
-  G.DOM.SHOP.style.display = 'flex';
+  console.log(G.PLAYER.macheteType);
+  if (!G.PLAYER.macheteType) {
+    shopDialogue().then(() => {
+      G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
+      G.DOM.SHOP.style.display = 'flex';
+    });
+  } else {
+    G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
+    G.DOM.SHOP.style.display = 'flex';
+  }
 };
 
 export const closeShop = () => {
@@ -151,6 +201,7 @@ const drawWorld = (time) => {
         }
       }
       // render the player in between other objects in the grid for proper overlap
+      console.log(G.PLAYER.face);
       if (i === gpr && j === gpc) {
         if (G.PLAYER.quad >= 0.2 && G.PLAYER.quad <= 0.7) {
           // render machete first
@@ -173,7 +224,7 @@ const drawWorld = (time) => {
   // drawBlur();
 };
 
-const animate = (time, loop = false) => {
+const animate = (time) => {
   // G.AUDIO.update(time);
   // stats.begin();
   G.CURRENT_TIME = time;
@@ -194,7 +245,7 @@ const animate = (time, loop = false) => {
   renderStats();
   G.PREVIOUS_TIME = time;
   // stats.end();
-  loop && (G.ANIMATION_FRAME = window.requestAnimationFrame(animate));
+  G.ANIMATION_FRAME = window.requestAnimationFrame(animate);
 };
 
 G.DOM.CANVAS.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -219,7 +270,6 @@ const landingSequence = () => {
   const draw = (time) => {
     G.CTX.clearRect(0, 0, G.COORDS.width(), G.COORDS.height());
     G.CAMERA.magnification = sine(time);
-    G.MAP.getEntity('tileGroup').rotation.z += 0.1;
     drawTileGroup();
     G.CTX.fillRect(0, 0, G.COORDS.width(), G.COORDS.height());
     G.ANIMATION_FRAME = window.requestAnimationFrame(draw);
@@ -228,14 +278,57 @@ const landingSequence = () => {
 };
 
 const startSequence = async () => {
-  G.CAMERA.magnification = 0.2;
-  drawWorld();
+  G.DOM.LANDING.style.opacity = 0;
+  G.PLAYER.mesh.render(G.CAMERA, G.CTX);
+  await delay(2000);
+  G.DOM.LANDING.style.display = 'none';
+  G.DOM.DIALOGUE.style.display = 'inline';
+  // G.DOM.DIALOGUE.innerText = 'Hello?';
+  // await delay(3000);
+  // G.DOM.DIALOGUE.style.fontSize = '4rem';
+  // G.DOM.DIALOGUE.innerText = 'HELLO???';
+  // G.DOM.DIALOGUE.style.fontSize = '2rem';
+  // await delay(3000);
+  // G.DOM.DIALOGUE.innerText = "Finally! You're awake...";
+  // await delay(3000);
+  // G.DOM.DIALOGUE.innerText =
+  //   'We found you passed out in the woods,\n nearly thought you were dead.';
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText = 'All you had was this note on you:';
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText = 'Four, oh Four...\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += 'how I adore,\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += 'the sweetness of\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += 'your heady lore.\n\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += 'I lived my life\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += 'at your front door,\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += 'so now your call\n';
+  // await delay(2000);
+  // G.DOM.DIALOGUE.innerText += "I can't ignore.\n";
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   "So you're looking for somebody named 'Four', huh?\n Strange name...\n";
+  // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   "Come down to the shop when you're feeling better. \nI have something you might be interested in.";
+  // await delay(5000);
+  G.DOM.DIALOGUE.innerText = '';
+  G.CAMERA.magnification = 8;
   return true;
 };
 
 G.MAP.cacheEntities().then(() => {
   landingSequence();
-  // startSequence().then(() => {
-  // animate(0, true);
-  // });
+  document.getElementById('start').onclick = () => {
+    startSequence().then(() => {
+      window.cancelAnimationFrame(G.ANIMATION_FRAME);
+      animate(0);
+    });
+  };
 });
