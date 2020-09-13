@@ -5,7 +5,6 @@ export class Entity {
   constructor(opts = {}) {
     const defaults = {
       enabled: true,
-      cacheEnabled: true,
       position: new Vector3(0, 0, 0),
       rotation: new Vector3(0, 0, 0),
       scale: new Vector3(1, 1, 1)
@@ -33,24 +32,6 @@ export class Entity {
 
   applyAllStyles(ctx = G.CTX) {
     this.getStyleList().forEach((s) => s.apply(ctx));
-  }
-
-  getEnabled() {
-    if (this.parent) {
-      const parentEnabled = this.parent.getEnabled();
-      return parentEnabled && this.enabled;
-    } else {
-      return this.enabled;
-    }
-  }
-
-  getCacheEnabled() {
-    if (this.parent) {
-      const parentEnabled = this.parent.getCacheEnabled();
-      return parentEnabled && this.cacheEnabled;
-    } else {
-      return this.cacheEnabled;
-    }
   }
 
   getPosition() {

@@ -6,6 +6,7 @@ import { Action } from '../core/Action';
 import { hazyPurple } from '../entities/styles';
 import { showShop, closeShop } from '../index';
 import { items } from '../entities/items';
+import { dialogue } from '../utils/functions';
 
 export class Player {
   constructor() {
@@ -30,7 +31,7 @@ export class Player {
 
     // movement / rotation params
     this.lastUpdateTime = null;
-    this.movementSpeed = 0.003;
+    this.movementSpeed = 0.005;
     this.rotationSpeed = 0.005;
     this.movementSpeedHalf = this.movementSpeed / 2;
     this.faceOffset = 0.1;
@@ -39,17 +40,20 @@ export class Player {
     this.isMoving = false;
     this.isSwinging = false;
     this.isResting = false;
+    this.hasItems = [];
 
     // life
     this.maxLife = 10;
-    this.currentLife = 10;
+    this.currentLife = 0.1;
     this.restSin = boundedSin(2000, -5, 5);
 
-    // money
-    this.money = 0;
+    // gold
+    this.gold = 0;
 
     // experience
-    this.experience = 0;
+    this.experience = 90;
+    this.prevLevelExperience = 0;
+    this.levelAmount = 100;
 
     // haze
     this.hazeAmount = 'None';
@@ -63,7 +67,34 @@ export class Player {
   updateMachete(newType) {
     this.macheteType = newType;
     this.macheteItem = items.find((i) => i.name === newType);
-    this.machete.enabled = true;
+    this.hasItems.push(newType);
+    let newMachete;
+    switch (newType) {
+      case 'basic-machete': {
+        newMachete = make.basicMachete();
+        break;
+      }
+      case 'bronze-machete': {
+        newMachete = make.bronzeMachete();
+        break;
+      }
+      case 'steel-machete': {
+        newMachete = make.steelMachete();
+        break;
+      }
+      case 'mythril-machete': {
+        newMachete = make.mythrilMachete();
+        break;
+      }
+      case 'magic-machete': {
+        newMachete = make.magicMachete();
+        break;
+      }
+    }
+    this.machete && this.mesh.remove(this.machete);
+    this.mesh.add(newMachete);
+    newMachete.enabled = true;
+    this.machete = newMachete;
   }
 
   initMesh() {
@@ -124,7 +155,7 @@ export class Player {
     const [row, col] = G.MAP.getGridFromTile(newX, newY);
     const entity = G.MAP.getEntityOnGrid(row, col);
     if (entity) {
-      if (entity.type.includes('blocks')) {
+      if (entity.type.includes('blocks') && G.BLOCKS) {
         return [0, 0];
       }
       if (entity.type.includes('home') && this.currentLife !== this.maxLife) {
@@ -134,6 +165,10 @@ export class Player {
       if (entity.type.includes('shop')) {
         this.isShopping = true;
         showShop();
+      }
+      if (entity.slows) {
+        deltaX *= 1 - entity.slows;
+        deltaY *= 1 - entity.slows;
       }
     } else {
       // closes shop when leaving the tile
@@ -323,9 +358,11 @@ export class Player {
     }
     G.CAMERA.magnification = G.MAGNIFICATION - this.restSin(delta);
   }
+
   animateSwing(time, action, ctx = G.CTX) {
     if (this.macheteType) {
-      const delta = (time - action.start) / this.actionParams.swingDuration;
+      ctx.save();
+      const delta = (time - action.start) / this.macheteItem.swingDuration;
       // remove the action from the queue
       if (delta > 1) {
         this.removeAction(action.id);
@@ -339,10 +376,10 @@ export class Player {
         G.CAMERA.project(c);
         const cx = c.x;
         const cy = c.y;
-        const px = cx + this.actionParams.swingLength;
+        const px = cx + G.COORDS.width(this.macheteItem.swingLength);
         const baseRot =
-          this.face.rotation.z + PI / 2 + this.actionParams.swingRadius / 2;
-        const currentRot = baseRot - delta * this.actionParams.swingRadius;
+          this.face.rotation.z + PI / 2 + this.macheteItem.swingRadius / 2;
+        const currentRot = baseRot - delta * this.macheteItem.swingRadius;
         // ground animation
         const p1 = rotatePoint(px, cy, cx, cy, baseRot);
         const p2 = rotatePoint(px, cy, cx, cy, currentRot);
@@ -363,6 +400,25 @@ export class Player {
           const entity = G.MAP.getEntityOnGrid(row, col);
           if (entity && !entity.action && entity.type.includes('breaks')) {
             G.MAP.addAction(new Action(time, 'breaks', row, col));
+            entity.strength -= this.macheteItem.power;
+            this.currentLife -= this.macheteItem.power;
+            this.experience += this.macheteItem.power * 100;
+            if (this.experience - this.prevLevelExperience > this.levelAmount) {
+              this.currentLife += 1;
+              this.maxLife += 1;
+              this.levelAmount += 100;
+              this.prevLevelExperience = this.experience;
+              dialogue('Level Up! (+1 life)', 2000);
+            }
+            if (entity.strength <= 0) {
+              G.MAP.grid[row][col] = { action: entity.action, type: '' };
+              if (entity.probability && entity.probability >= Math.random()) {
+                G.MAP.addAction(
+                  new Action(time, 'gold', row, col, { amount: entity.amount })
+                );
+                this.gold += entity.amount;
+              }
+            }
           }
         }
         ctx.beginPath();
@@ -371,6 +427,7 @@ export class Player {
         ctx.lineTo(p2.x, p2.y);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
       }
     }
   }

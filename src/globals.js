@@ -31,8 +31,15 @@ export const addScreenIndependentGlobals = (G) => {
     HTML: document.documentElement,
     SHOP: getElement('shop'),
     DIALOGUE: getElement('dialogue'),
-    LANDING: getElement('landing')
+    LANDING: getElement('landing'),
+    ITEMS: [
+      getElement('br-ma'),
+      getElement('st-ma'),
+      getElement('my-ma'),
+      getElement('ma-ma')
+    ]
   };
+  G.BLOCKS = true;
   G.BLUR_CTX = G.DOM.BLUR_CANVAS.getContext('2d');
   G.BLUR_CTX.filter = 'blur(20px)';
   G.CTX = G.DOM.CANVAS.getContext('2d', {

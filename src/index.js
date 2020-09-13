@@ -3,8 +3,8 @@ import { Player } from './state/player';
 import { Camera } from './core/Camera';
 import { initDom } from './setup/dom';
 import { hazyPurple } from './entities/styles';
-import { make } from './entities/generators';
-import { delay } from './utils/functions';
+import { items } from '../src/entities/items';
+import * as styles from '../src/entities/styles';
 import { boundedSin } from './utils/math';
 import {
   G,
@@ -13,12 +13,6 @@ import {
 } from './globals';
 
 window.addEventListener('mousedown', () => G.AUDIO.start());
-
-// TODO: remove
-// import Stats from 'stats.js/src/Stats';
-// var stats = new Stats();
-// stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-// document.body.appendChild(stats.dom);
 
 addScreenIndependentGlobals(G);
 initDom();
@@ -100,9 +94,9 @@ const renderStats = () => {
     G.COORDS.nx(0) + G.CTX.lineWidth + G.CTX.lineWidth * 3,
     G.COORDS.ny(1) - G.BAR_HEIGHT / 2
   );
-  // money
+  // gold
   G.CTX.fillText(
-    `${G.PLAYER.money}g`,
+    `${G.PLAYER.gold}g`,
     G.COORDS.nx(-0.75),
     G.COORDS.ny(1) - G.BAR_HEIGHT / 2
   );
@@ -119,23 +113,27 @@ const shopDialogue = async () => {
   G.DIALOGUE_ACTIVE = true;
   G.DOM.SHOP.display = 'none';
   G.DOM.LANDING.display = 'none';
-  G.DOM.DIALOGUE.innerText = "Glad to see you're feeling better.\n";
+  G.POST_CTX.save();
+  G.POST_CTX.globalAlpha = 1;
+  G.POST_CTX.fillStyle = 'rgba(0,0,0,.5)';
+  G.POST_CTX.fillRect(0, 0, G.COORDS.width(), G.COORDS.height());
+  // G.DOM.DIALOGUE.innerText = "Glad to see you're feeling better.\n";
   // await delay(3000);
   // G.DOM.DIALOGUE.innerText =
   //   "If you're planning to find your friend, you'll need to be prepared.\n";
   // await delay(5000);
   // G.DOM.DIALOGUE.innerText =
   //   'The woods outside of town are a forbidden land.\n';
-  // await delay(3000);
+  // await delay(5000);
   // G.DOM.DIALOGUE.innerText +=
   //   'The air is thick with a cursed haze that will consume you.\n';
-  // await delay(3000);
+  // await delay(5000);
   // G.DOM.DIALOGUE.innerText +=
   //   'Every second you spend there will deplete your life force.\n';
-  // await delay(3000);
-  // G.DOM.DIALOGUE.innerText +=
-  //   "If you don't come back to rest often, you will surely lose your way and perish.\n";
   // await delay(5000);
+  // G.DOM.DIALOGUE.innerText =
+  //   "If you don't come back to rest often, you will surely lose your way and perish.\n";
+  // await delay(8000);
   // G.DOM.DIALOGUE.innerText =
   //   'Your journey will also be slowed by the the thick, untamed growth.';
   // await delay(5000);
@@ -150,21 +148,45 @@ const shopDialogue = async () => {
   // await delay(3000);
   G.DOM.DIALOGUE.innerText = '';
   G.PLAYER.updateMachete('basic-machete');
+  G.POST_CTX.clearRect(0, 0, G.COORDS.width(), G.COORDS.height());
+  G.POST_CTX.restore();
+  drawWorld();
   G.DOM.SHOP.display = 'block';
   G.DIALOGUE_ACTIVE = false;
   return true;
 };
 
 export const showShop = () => {
-  console.log(G.PLAYER.macheteType);
+  const updateDom = () => {
+    G.DOM.ITEMS.forEach((d, i) => {
+      const item = items[i + 1];
+      if (G.PLAYER.hasItems.includes(item.name)) {
+        d.style.color = styles.emeraldGreen.fillStyle;
+      } else if (
+        item.cost <= G.PLAYER.gold &&
+        !G.PLAYER.hasItems.includes(item.name)
+      ) {
+        d.style.color = 'white';
+        if (i <= 4) {
+          d.onclick = () => {
+            G.PLAYER.updateMachete(item.name);
+          };
+        }
+      } else {
+        d.style.color = 'darkgrey';
+      }
+    });
+  };
   if (!G.PLAYER.macheteType) {
     shopDialogue().then(() => {
       G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
       G.DOM.SHOP.style.display = 'flex';
+      updateDom();
     });
   } else {
     G.DOM.SHOP.style.height = G.DOM.CANVAS.style.height;
     G.DOM.SHOP.style.display = 'flex';
+    updateDom();
   }
 };
 
@@ -201,9 +223,8 @@ const drawWorld = (time) => {
         }
       }
       // render the player in between other objects in the grid for proper overlap
-      console.log(G.PLAYER.face);
       if (i === gpr && j === gpc) {
-        if (G.PLAYER.quad >= 0.2 && G.PLAYER.quad <= 0.7) {
+        if (G.PLAYER.machete && G.PLAYER.quad >= 0.2 && G.PLAYER.quad <= 0.7) {
           // render machete first
           G.PLAYER.machete.render(G.CAMERA, G.CTX);
         }
@@ -214,7 +235,7 @@ const drawWorld = (time) => {
           G.PLAYER.mesh.children[0].render(G.CAMERA, G.CTX);
           G.PLAYER.face.render(G.CAMERA, G.CTX);
         }
-        if (G.PLAYER.quad < 0.2 || G.PLAYER.quad > 0.7) {
+        if (G.PLAYER.machete && (G.PLAYER.quad < 0.2 || G.PLAYER.quad > 0.7)) {
           // render machete last
           G.PLAYER.machete.render(G.CAMERA, G.CTX);
         }
@@ -241,6 +262,11 @@ const animate = (time) => {
     drawWorld(time);
   }
   G.PLAYER.currentLife -= G.PLAYER.haze * 0.0001 * (G.TIME_DELTA || 0);
+  if (G.PLAYER.currentLife <= 0) {
+    G.PLAYER.position.x = -15;
+    G.PLAYER.position.y = -9;
+    G.CAMERA.position.set(G.PLAYER.position);
+  }
   // shows life, experience, etc
   renderStats();
   G.PREVIOUS_TIME = time;
@@ -256,11 +282,6 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => {
   G.PLAYER.onKeyUp(e);
-});
-
-window.addEventListener('wheel', (e) => {
-  G.CAMERA.magnification += e.deltaY / 100;
-  drawWorld(G.CURRENT_TIME);
 });
 
 const landingSequence = () => {
@@ -279,11 +300,11 @@ const landingSequence = () => {
 
 const startSequence = async () => {
   G.DOM.LANDING.style.opacity = 0;
-  G.PLAYER.mesh.render(G.CAMERA, G.CTX);
-  await delay(2000);
+  // G.PLAYER.mesh.render(G.CAMERA, G.CTX);
+  // await delay(2000);
   G.DOM.LANDING.style.display = 'none';
   G.DOM.DIALOGUE.style.display = 'inline';
-  // G.DOM.DIALOGUE.innerText = 'Hello?';
+  G.DOM.DIALOGUE.innerText = 'Hello?';
   // await delay(3000);
   // G.DOM.DIALOGUE.style.fontSize = '4rem';
   // G.DOM.DIALOGUE.innerText = 'HELLO???';
