@@ -1,5 +1,3 @@
-import { G } from '../globals';
-import { Vector3 } from './Vector3';
 import { Entity } from './Entity';
 
 export class Group extends Entity {

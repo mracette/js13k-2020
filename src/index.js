@@ -146,8 +146,7 @@ const shopDialogue = async () => {
   G.DOM.DIALOGUE.innerText =
     "Remember not to over-work yourself. \nWhen you are near exhaustion, come back and rest. \nThat way we won't have to rescue you again...";
   await delay(8000);
-  G.DOM.DIALOGUE.innerText =
-    'Anyways, good luck! Come back if you need anything else.';
+  G.DOM.DIALOGUE.innerText = 'Good luck! Come back if you need anything else.';
   await delay(3000);
   G.DOM.DIALOGUE.innerText = '';
   G.PLAYER.updateMachete('basic-machete');
