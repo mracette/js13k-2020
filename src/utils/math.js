@@ -9,16 +9,12 @@ export const boundedSin = (
   yMin = -1,
   yMax = 1,
   translateX = 0,
-  translateY = 0,
-  invert = false
+  translateY = 0
 ) => {
   return (x) =>
     yMin +
     (yMax - yMin) *
-      (0.5 +
-        ((invert ? -1 : 1) *
-          Math.sin(-translateX + (Math.PI * x) / (period / 2))) /
-          2) +
+      (0.5 + Math.sin(-translateX + (Math.PI * x) / (period / 2)) / 2) +
     translateY;
 };
 
