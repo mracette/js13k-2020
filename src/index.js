@@ -351,12 +351,9 @@ G.MAP.cacheEntities().then(() => {
   landingSequence();
   document.getElementById('start').onclick = () => {
     G.AUDIO.start();
-    // startSequence().then(() => {
-    G.DOM.LANDING.style.display = 'none';
-    G.CAMERA.magnification = 8;
-    G.DOM.DIALOGUE.innerText = '';
-    window.cancelAnimationFrame(G.ANIMATION_FRAME);
-    animate(0);
-    // });
+    startSequence().then(() => {
+      window.cancelAnimationFrame(G.ANIMATION_FRAME);
+      animate(0);
+    });
   };
 });
