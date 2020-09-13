@@ -6,13 +6,12 @@ import { hazyPurple } from './entities/styles';
 import { items } from '../src/entities/items';
 import * as styles from '../src/entities/styles';
 import { boundedSin } from './utils/math';
+import { delay } from './utils/functions';
 import {
   G,
   addScreenDependentGlobals,
   addScreenIndependentGlobals
 } from './globals';
-
-window.addEventListener('mousedown', () => G.AUDIO.start());
 
 addScreenIndependentGlobals(G);
 initDom();
@@ -59,12 +58,16 @@ const renderStats = () => {
     G.COORDS.width(0.25),
     G.BAR_HEIGHT - G.CTX.lineWidth
   );
-  G.CTX.fillStyle = 'green';
+  const lifeAmount = G.PLAYER.currentLife / G.PLAYER.maxLife;
+  if (lifeAmount < 0.3) {
+    G.CTX.fillStyle = 'red';
+  } else {
+    G.CTX.fillStyle = 'green';
+  }
   G.CTX.fillRect(
     G.COORDS.nx(-0.5) - G.CTX.lineWidth + (3 * G.CTX.lineWidth) / 2,
     G.COORDS.ny(1) - G.BAR_HEIGHT + G.CTX.lineWidth * 2,
-    (G.COORDS.width(0.25) - (6 * G.CTX.lineWidth) / 2) *
-      (G.PLAYER.currentLife / G.PLAYER.maxLife),
+    (G.COORDS.width(0.25) - (6 * G.CTX.lineWidth) / 2) * lifeAmount,
     G.BAR_HEIGHT - G.CTX.lineWidth * 4
   );
   G.CTX.fillStyle = 'white';
@@ -117,35 +120,35 @@ const shopDialogue = async () => {
   G.POST_CTX.globalAlpha = 1;
   G.POST_CTX.fillStyle = 'rgba(0,0,0,.5)';
   G.POST_CTX.fillRect(0, 0, G.COORDS.width(), G.COORDS.height());
-  // G.DOM.DIALOGUE.innerText = "Glad to see you're feeling better.\n";
-  // await delay(3000);
-  // G.DOM.DIALOGUE.innerText =
-  //   "If you're planning to find your friend, you'll need to be prepared.\n";
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText =
-  //   'The woods outside of town are a forbidden land.\n';
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText +=
-  //   'The air is thick with a cursed haze that will consume you.\n';
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText +=
-  //   'Every second you spend there will deplete your life force.\n';
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText =
-  //   "If you don't come back to rest often, you will surely lose your way and perish.\n";
-  // await delay(8000);
-  // G.DOM.DIALOGUE.innerText =
-  //   'Your journey will also be slowed by the the thick, untamed growth.';
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText =
-  //   "Here, take this machete. It's the only way you'll be able to make a path.";
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText =
-  //   "Remember not to over-work yourself. \nWhen you are near exhaustion, come back and rest. \nThat way we won't have to rescue you again...";
-  // await delay(8000);
-  // G.DOM.DIALOGUE.innerText =
-  //   'Anyways, good luck! Come back if you need anything else.';
-  // await delay(3000);
+  G.DOM.DIALOGUE.innerText = "Glad to see you're feeling better.\n";
+  await delay(3000);
+  G.DOM.DIALOGUE.innerText =
+    "If you're planning to find your friend, you'll need to be prepared.\n";
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText =
+    'The woods outside of town are a forbidden land.\n';
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText +=
+    'The air is thick with a cursed haze that will consume you.\n';
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText +=
+    'Every second you spend there will deplete your life force.\n';
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText =
+    "If you don't come back to rest often, you will surely lose your way and perish.\n";
+  await delay(8000);
+  G.DOM.DIALOGUE.innerText =
+    'Your journey will also be slowed by the the thick, untamed growth.';
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText =
+    "Here, take this machete. It's the only way you'll be able to make a path.";
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText =
+    "Remember not to over-work yourself. \nWhen you are near exhaustion, come back and rest. \nThat way we won't have to rescue you again...";
+  await delay(8000);
+  G.DOM.DIALOGUE.innerText =
+    'Anyways, good luck! Come back if you need anything else.';
+  await delay(3000);
   G.DOM.DIALOGUE.innerText = '';
   G.PLAYER.updateMachete('basic-machete');
   G.POST_CTX.clearRect(0, 0, G.COORDS.width(), G.COORDS.height());
@@ -242,11 +245,10 @@ const drawWorld = (time) => {
       }
     }
   }
-  // drawBlur();
 };
 
 const animate = (time) => {
-  // G.AUDIO.update(time);
+  G.AUDIO.update(time);
   // stats.begin();
   G.CURRENT_TIME = time;
   G.TIME_DELTA = time - G.PREVIOUS_TIME;
@@ -263,6 +265,7 @@ const animate = (time) => {
   }
   G.PLAYER.currentLife -= G.PLAYER.haze * 0.0001 * (G.TIME_DELTA || 0);
   if (G.PLAYER.currentLife <= 0) {
+    G.PLAYER.currentLife = G.PLAYER.maxLife;
     G.PLAYER.position.x = -15;
     G.PLAYER.position.y = -9;
     G.CAMERA.position.set(G.PLAYER.position);
@@ -284,11 +287,12 @@ window.addEventListener('keyup', (e) => {
   G.PLAYER.onKeyUp(e);
 });
 
-const landingSequence = () => {
+const landingSequence = (time) => {
   G.CTX.fillStyle = 'rgba(0,0,0,.5)';
   const p = 10000;
   const sine = boundedSin(p, 1, 8, (3 * p) / 2);
   const draw = (time) => {
+    G.AUDIO.update(time);
     G.CTX.clearRect(0, 0, G.COORDS.width(), G.COORDS.height());
     G.CAMERA.magnification = sine(time);
     drawTileGroup();
@@ -300,45 +304,44 @@ const landingSequence = () => {
 
 const startSequence = async () => {
   G.DOM.LANDING.style.opacity = 0;
-  // G.PLAYER.mesh.render(G.CAMERA, G.CTX);
-  // await delay(2000);
+  await delay(2000);
   G.DOM.LANDING.style.display = 'none';
   G.DOM.DIALOGUE.style.display = 'inline';
   G.DOM.DIALOGUE.innerText = 'Hello?';
-  // await delay(3000);
-  // G.DOM.DIALOGUE.style.fontSize = '4rem';
-  // G.DOM.DIALOGUE.innerText = 'HELLO???';
-  // G.DOM.DIALOGUE.style.fontSize = '2rem';
-  // await delay(3000);
-  // G.DOM.DIALOGUE.innerText = "Finally! You're awake...";
-  // await delay(3000);
-  // G.DOM.DIALOGUE.innerText =
-  //   'We found you passed out in the woods,\n nearly thought you were dead.';
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText = 'All you had was this note on you:';
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText = 'Four, oh Four...\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += 'how I adore,\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += 'the sweetness of\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += 'your heady lore.\n\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += 'I lived my life\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += 'at your front door,\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += 'so now your call\n';
-  // await delay(2000);
-  // G.DOM.DIALOGUE.innerText += "I can't ignore.\n";
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText =
-  //   "So you're looking for somebody named 'Four', huh?\n Strange name...\n";
-  // await delay(5000);
-  // G.DOM.DIALOGUE.innerText =
-  //   "Come down to the shop when you're feeling better. \nI have something you might be interested in.";
-  // await delay(5000);
+  await delay(3000);
+  G.DOM.DIALOGUE.style.fontSize = '4rem';
+  G.DOM.DIALOGUE.innerText = 'HELLO???';
+  G.DOM.DIALOGUE.style.fontSize = '2rem';
+  await delay(3000);
+  G.DOM.DIALOGUE.innerText = "Finally! You're awake...";
+  await delay(3000);
+  G.DOM.DIALOGUE.innerText =
+    'We found you passed out in the woods,\n nearly thought you were dead.';
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText = 'All you had was this note on you:';
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText = 'Four, oh Four...\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += 'how I adore,\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += 'the sweetness of\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += 'your heady lore.\n\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += 'I lived my life\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += 'at your front door,\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += 'so now your call\n';
+  await delay(2000);
+  G.DOM.DIALOGUE.innerText += "I can't ignore.\n";
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText =
+    "So you're looking for somebody named 'Four', huh?\n Strange name...\n";
+  await delay(5000);
+  G.DOM.DIALOGUE.innerText =
+    "Come down to the shop when you're feeling better. \nI have something you might be interested in.";
+  await delay(5000);
   G.DOM.DIALOGUE.innerText = '';
   G.CAMERA.magnification = 8;
   return true;
@@ -347,9 +350,13 @@ const startSequence = async () => {
 G.MAP.cacheEntities().then(() => {
   landingSequence();
   document.getElementById('start').onclick = () => {
-    startSequence().then(() => {
-      window.cancelAnimationFrame(G.ANIMATION_FRAME);
-      animate(0);
-    });
+    G.AUDIO.start();
+    // startSequence().then(() => {
+    G.DOM.LANDING.style.display = 'none';
+    G.CAMERA.magnification = 8;
+    G.DOM.DIALOGUE.innerText = '';
+    window.cancelAnimationFrame(G.ANIMATION_FRAME);
+    animate(0);
+    // });
   };
 });

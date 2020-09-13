@@ -31,7 +31,7 @@ export class Player {
 
     // movement / rotation params
     this.lastUpdateTime = null;
-    this.movementSpeed = 0.005;
+    this.movementSpeed = 0.003;
     this.rotationSpeed = 0.005;
     this.movementSpeedHalf = this.movementSpeed / 2;
     this.faceOffset = 0.1;
@@ -44,14 +44,14 @@ export class Player {
 
     // life
     this.maxLife = 10;
-    this.currentLife = 0.1;
+    this.currentLife = 10;
     this.restSin = boundedSin(2000, -5, 5);
 
     // gold
     this.gold = 0;
 
     // experience
-    this.experience = 90;
+    this.experience = 0;
     this.prevLevelExperience = 0;
     this.levelAmount = 100;
 
@@ -269,7 +269,6 @@ export class Player {
       this.face.position.y =
         0.5 + this.faceOffset * Math.sin(Math.PI / 4 + this.face.rotation.z);
     }
-
     return needsUpdate;
   }
 
@@ -405,6 +404,7 @@ export class Player {
             this.experience += this.macheteItem.power * 100;
             if (this.experience - this.prevLevelExperience > this.levelAmount) {
               this.currentLife += 1;
+              this.movementSpeed += 0.0002;
               this.maxLife += 1;
               this.levelAmount += 100;
               this.prevLevelExperience = this.experience;

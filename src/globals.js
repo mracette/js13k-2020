@@ -43,9 +43,7 @@ export const addScreenIndependentGlobals = (G) => {
   G.BLUR_CTX = G.DOM.BLUR_CANVAS.getContext('2d');
   G.BLUR_CTX.filter = 'blur(20px)';
   G.CTX = G.DOM.CANVAS.getContext('2d', {
-    alpha: true,
-    antialias: true
-    // imageSmoothingEnabled: true
+    alpha: true
   });
   G.POST_CTX = G.DOM.POST_CANVAS.getContext('2d', { alpha: true });
   G.BOTTOM_SCREEN_BUFFER = 8;
@@ -78,5 +76,5 @@ export const addScreenDependentGlobals = (G) => {
   G.BAR_PADDING = G.COORDS.height(0.005);
   G.CTX.textAlign = 'left';
   G.CTX.textBaseline = 'middle';
-  G.CTX.font = `${G.COORDS.height(0.025)}px Fantasy`;
+  G.CTX.font = `${G.COORDS.height(0.025)}px "Papyrus", Fantasy`;
 };
