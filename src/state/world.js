@@ -109,16 +109,21 @@ export class Map {
     }
   }
 
-  _initEntity(name, opts, type) {
+  _initEntity(name, opts, type, strength, probability, amount, slows) {
     return {
       entity: make[name](opts),
       action: false,
-      type: type || ''
+      type: type || '',
+      strength,
+      probability,
+      amount,
+      slows
     };
   }
 
   _initEntityOnGrid(row, col) {
     const r = RAND();
+    const rare = row / 500;
     const [x, y] = this.getTileFromGrid(row, col);
     const position = new Vector3(x, y, 0);
 
@@ -163,19 +168,19 @@ export class Map {
     if (row === 25 && col === 19)
       return this._initEntity(
         'building',
-        { position, style: styles.orange1 },
+        { position, style: styles.offWhite },
         false
       );
     if (row === 23 && col === 20)
       return this._initEntity(
         'building',
-        { position, style: styles.orange1, scale: new Vector3(1, 1, 2) },
+        { position, style: styles.offWhite, scale: new Vector3(1, 1, 2) },
         false
       );
     if (row === 21 && col === 21)
       return this._initEntity(
         'building',
-        { position, style: styles.orange1 },
+        { position, style: styles.offWhite },
         false
       );
 
@@ -183,13 +188,87 @@ export class Map {
     if (row <= 30 && row > 27 && (col < 14 || col > 16))
       return this._initEntity('rock', { position }, 'blocks');
 
+    // bushes
     if (row <= 30 && row > 27) {
-      return this._initEntity('bush', { position }, '.15.blocks');
+      return this._initEntity('bush', { position }, 'blocks.breaks', 0.15);
     }
 
-    // random grass
+    // random grass in town
     if (row <= 22 && col > 1 && col < this.width - 2 && r < 0.1) {
-      return this._initEntity('grass', { position }, '.05.breaks');
+      return this._initEntity(
+        'grass',
+        { position },
+        'breaks',
+        0.05,
+        0.2,
+        5,
+        0.4
+      );
+    }
+
+    if (row > 30) {
+      if (r < 0.04) {
+        return this._initEntity(
+          'tree1',
+          { position },
+          'breaks.blocks',
+          1,
+          0.75,
+          100
+        );
+      }
+      if (r < 0.08) {
+        return this._initEntity(
+          'tree2',
+          { position },
+          'breaks.blocks',
+          1,
+          0.75,
+          100
+        );
+      }
+      if (r < 0.12) {
+        return this._initEntity(
+          'tree3',
+          { position },
+          'breaks.blocks',
+          1,
+          0.75,
+          100
+        );
+      }
+      if (r < 0.16) {
+        return this._initEntity('rock', { position }, 'blocks');
+      }
+      if (r > 1 - rare / 4)
+        return this._initEntity(
+          'grassPurple',
+          { position },
+          'breaks',
+          0.1,
+          0.3,
+          30,
+          0.4
+        );
+      if (row > 90 && r > 1 - rare / 3.5)
+        return this._initEntity(
+          'grassOrange',
+          { position },
+          'breaks',
+          0.3,
+          0.5,
+          100,
+          0.4
+        );
+      return this._initEntity(
+        'grass',
+        { position },
+        'breaks',
+        0.05,
+        0.2,
+        5,
+        0.4
+      );
     }
 
     return null;

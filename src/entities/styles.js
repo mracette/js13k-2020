@@ -63,8 +63,20 @@ export const ivoryBlack = new Style({
 export const sand = new Style({
   fillStyle: '#E7C496'
 });
-export const orange1 = new Style({
+export const offWhite = new Style({
   fillStyle: '#E3DBDB'
+});
+export const orange1 = new Style({
+  fillStyle: '#F47749'
+});
+export const bronze = new Style({
+  fillStyle: '#CD7F32'
+});
+export const steel = new Style({
+  fillStyle: '#B0C4DE'
+});
+export const mythril = new Style({
+  fillStyle: '#87CEFA'
 });
 export const grey1 = new Style({
   fillStyle: '#F7F8F8'

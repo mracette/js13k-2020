@@ -1,62 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
-        <title>Four, oh Four...</title>
-    </head>
-    <style>
-        * {color: white; font-family: "Papyrus", fantasy; text-align: center; padding: 0; margin: 0; width: 100%; height: 100%; transition-duration: 500ms;}
-        canvas {position: absolute;}
-        .header {display: flex; justify-content: center; align-items: center;}
-        .row {display: flex;}
-        .item {display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1px solid grey;}
-        .item:hover {background-color: rgba(255, 255, 255, .2);}
-        #dialogue {font-size: 2rem; display: none; height: auto; z-index: 2;}
-        #start { width: 300px; height: auto; border: 2px solid white; cursor: pointer;}
-        #start:hover {background-color: rgba(255, 255, 255, .2);}
-        #landing {z-index: 2; font-size: 2rem; display: flex; flex-direction: column;}
-        #shop {background-color: #272838; vertical-align: middle; z-index: 2; width: 50%; display: none; flex-direction: column;}
-        #root {display: flex; justify-content: center; align-items: center; background-color: black}
-    </style>
-    <body>
-        <div id="root">
-            <canvas id="viz"></canvas>
-            <canvas id="blur"></canvas>
-            <canvas id="post"></canvas>
-            <div id="shop">
-                <h1><div class="header">Market (156g)</div></h1>
-                <div class="row">
-                    <div class="item">Bronze Machete (250g)</div>
-                    <div class="item">Steel Machete (1,000g)</div>
-                    <div class="item">Mythril Machete (5,000g)</div>
-                    <div class="item">Magic Machete (15,000g)</div>
-                </div>
-                <div class="row">
-                    <div class="item">Bronze Armor (250g)</div>
-                    <div class="item">Steel Armor (1,000g)</div>
-                    <div class="item">Mythril Armor (5,000g)</div>
-                    <div class="item">Magic Armor (15,000g)</div>
-                </div>
-                <div class="row">
-                    <div class="item">Ring of Agility (2,500g)</div>
-                    <div class="item">Ring of Speed (2,500g)</div>
-                    <div class="item">Ring of Power (2,500g)</div>
-                </div>
-                <div></div>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+    <title>Four, oh Four...</title>
+</head>
+<style>
+    * {
+        color: white;
+        font-family: "Papyrus", fantasy;
+        text-align: center;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+
+        height: 100%\} canvas {
+            position: absolute;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .row {
+            display: flex;
+        }
+
+        .item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid grey;
+        }
+
+        .item:hover {
+            background-color: rgba(255, 255, 255, .2);
+        }
+
+        #dialogue {
+            font-size: 2rem;
+            display: none;
+            height: auto;
+            z-index: 2;
+        }
+
+        #start {
+            width: 300px;
+            height: auto;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+
+        #start:hover {
+            background-color: rgba(255, 255, 255, .2);
+        }
+
+        #landing {
+            z-index: 2;
+            font-size: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #shop {
+            background-color: #272838;
+            vertical-align: middle;
+            z-index: 2;
+            width: 50%;
+            display: none;
+            flex-direction: column;
+        }
+
+        #root {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black
+        }
+</style>
+
+<body>
+    <div id="root">
+        <canvas id="viz"></canvas>
+        <canvas id="blur"></canvas>
+        <canvas id="post"></canvas>
+        <div id="shop">
+            <h1>
+                <div id="shop-header" class="header"></div>
+            </h1>
+            <div class="row">
+                <div id="br-ma" class="item">Bronze Machete (250g)</div>
+                <div id="st-ma" class="item">Steel Machete (1,000g)</div>
+                <div id="my-ma" class="item">Mythril Machete (5,000g)</div>
+                <div id="ma-ma" class="item">Magic Machete (15,000g)</div>
             </div>
-            <div id="landing" class="row">
-                <h1 class="header">Four, oh Four...</h1>
-                <h3>An adventure game<br>by <a href="https://twitter.com/markracette">@markracette</a></h3>
-                <div class="header" style="align-items: flex-start;">
-                    <div id="start"><h2>Start</h2></div>
-                </div>
-                <h3>#js13k 2020</h3>
-            </div>
-            <div id="dialogue">
-                <h1 style="margin-top: 10%"></h2>
-            </div>
+            <div></div>
         </div>
-        <script src="/build/bundle.min.js"></script>
-    </body>
+        <div id="landing" class="row">
+            <h1 class="header">Four, oh Four...</h1>
+            <h3>An adventure game<br>by <a href="https://twitter.com/markracette">@markracette</a></h3>
+            <div class="header" style="align-items: flex-start;">
+                <div id="start">
+                    <h2>Start</h2>
+                </div>
+            </div>
+            <h3>#js13k 2020</h3>
+        </div>
+        <div id="dialogue">
+            <h1 style="margin-top: 10%">
+                </h2>
+        </div>
+    </div>
+    <script src="/build/bundle.min.js"></script>
+</body>
+
 </html>

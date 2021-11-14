@@ -349,3 +349,57 @@
 | Compressed Build (Adv Zip) | 11.07 kb | 11331 | -6% |
 
 
+**dialogue** - *Sat, 12 Sep 2020 04:34:55 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 66.78 kb | 68379 | NA |
+| Build | 34.00 kb | 34820 | -49% |
+| Compressed Build | 12.40 kb | 12699 | -64% |
+| Compressed Build (Adv Zip) | 11.68 kb | 11957 | -6% |
+
+
+**pre-submit** - *Sun, 13 Sep 2020 02:30:09 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 71.86 kb | 73584 | NA |
+| Build | 36.01 kb | 36875 | -50% |
+| Compressed Build | 12.97 kb | 13285 | -64% |
+| Compressed Build (Adv Zip) | 12.22 kb | 12512 | -6% |
+
+
+**final** - *Sun, 13 Sep 2020 03:22:53 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 71.88 kb | 73609 | NA |
+| Build | 36.94 kb | 37830 | -49% |
+| Compressed Build | 13.43 kb | 13751 | -64% |
+| Compressed Build (Adv Zip) | 12.65 kb | 12951 | -6% |
+
+
+**final** - *Sun, 13 Sep 2020 03:24:08 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 71.78 kb | 73498 | NA |
+| Build | 38.00 kb | 38916 | -47% |
+| Compressed Build | 13.77 kb | 14096 | -64% |
+| Compressed Build (Adv Zip) | 13.00 kb | 13314 | -6% |
+
+
+**cut but 2 bytes?** - *Sun, 13 Sep 2020 03:31:13 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 71.71 kb | 73430 | NA |
+| Build | 37.99 kb | 38902 | -47% |
+| Compressed Build | 13.76 kb | 14088 | -64% |
+| Compressed Build (Adv Zip) | 13.00 kb | 13316 | -5% |
+
+
+**cuts?** - *Sun, 13 Sep 2020 03:34:52 GMT*
+| Measure | Size (kb) | Size (bytes) | Reduction |
+| --- | --- | --- | --- |
+| Raw Source Code | 71.63 kb | 73348 | NA |
+| Build | 37.98 kb | 38893 | -47% |
+| Compressed Build | 13.75 kb | 14081 | -64% |
+| Compressed Build (Adv Zip) | 13.00 kb | 13309 | -5% |
+
+

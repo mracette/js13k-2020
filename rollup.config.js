@@ -28,6 +28,8 @@ export default {
                 'tree2',
                 'tree3',
                 'grass',
+                'grassOrange',
+                'grassPurple',
                 'stream',
                 'bridge',
                 'rock',

@@ -1,5 +1,3 @@
-import { G } from '../globals';
-import { Vector3 } from './Vector3';
 import { Entity } from './Entity';
 
 export class Group extends Entity {
@@ -26,33 +24,20 @@ export class Group extends Entity {
     }
   }
 
-  // remove(object) {
-  //   let index = null;
-  //   let count = 0;
-  //   while (index === null && count < this.children.length) {
-  //     if (this.children[index].uid === object.uid) {
-  //       index = count;
-  //     } else {
-  //       count++;
-  //     }
-  //   }
-  //   if (index !== null) {
-  //     this.children.splice(index, 1);
-  //   }
-  // }
-
-  // getChild(uid, children = null, recursive = false) {
-  //   const list = children || this.children;
-  //   for (let i = 0; i < list.length; i++) {
-  //     const child = list[i];
-  //     if (child.uid === uid) {
-  //       return child;
-  //     }
-  //     if (recursive && child.children && child.children.length) {
-  //       return this.getChild(child.children);
-  //     }
-  //   }
-  // }
+  remove(object) {
+    let index = null;
+    let count = 0;
+    while (index === null && count < this.children.length) {
+      if (this.children[count].uid === object.uid) {
+        index = count;
+      } else {
+        count++;
+      }
+    }
+    if (index !== null) {
+      this.children.splice(index, 1);
+    }
+  }
 
   render(camera, ctx) {
     if (this.enabled || this.needsUpdate) {

@@ -57,6 +57,10 @@ make.tree3 = (opts) =>
 /* environment */
 make.grass = (opts) =>
   new Mesh(geos.grass, { ...opts, style: styles.grassGreen });
+make.grassOrange = (opts) =>
+  new Mesh(geos.grass, { ...opts, style: styles.orange1 });
+make.grassPurple = (opts) =>
+  new Mesh(geos.grass, { ...opts, style: styles.purple2 });
 make.bush = (opts) =>
   new Mesh(geos.bush, { ...opts, style: styles.grassGreen });
 make.stream = (opts) =>
@@ -65,9 +69,37 @@ make.bridge = (opts) => new Mesh(geos.square, { ...opts, style: styles.brown });
 make.rock = (opts) => new Mesh(geos.rock, { ...opts, style: styles.grey2 });
 
 /* player */
-make.machete = () =>
+make.basicMachete = () =>
   new Mesh(geos.machete, {
-    style: styles.magnolia,
+    style: [styles.magnolia, styles.clearLine],
+    cacheEnabled: false,
+    position: new Vector3(0, 0, 0),
+    enabled: false
+  });
+make.bronzeMachete = () =>
+  new Mesh(geos.machete, {
+    style: [styles.bronze, styles.clearLine],
+    cacheEnabled: false,
+    position: new Vector3(0, 0, 0),
+    enabled: false
+  });
+make.steelMachete = () =>
+  new Mesh(geos.machete, {
+    style: [styles.steel, styles.clearLine],
+    cacheEnabled: false,
+    position: new Vector3(0, 0, 0),
+    enabled: false
+  });
+make.mythrilMachete = () =>
+  new Mesh(geos.machete, {
+    style: [styles.mythril, styles.clearLine],
+    cacheEnabled: false,
+    position: new Vector3(0, 0, 0),
+    enabled: false
+  });
+make.magicMachete = () =>
+  new Mesh(geos.machete, {
+    style: [styles.purple2, styles.clearLine],
     cacheEnabled: false,
     position: new Vector3(0, 0, 0),
     enabled: false
@@ -81,21 +113,11 @@ make.playerBody = () =>
     style: styles.purple1
   });
 make.playerFace = () =>
-  new Group(
-    [
-      new Mesh(geos.playerFaceUpper, {
-        style: styles.purple1,
-        cacheEnabled: false
-      }),
-      new Mesh(geos.playerFaceLower, {
-        style: styles.magnolia,
-        cacheEnabled: false
-      })
-    ],
-    {
-      position: new Vector3(0.5, 0.5, 0)
-    }
-  );
+  new Mesh(geos.playerFace, {
+    style: [styles.magnolia, styles.clearLine],
+    cacheEnabled: false,
+    position: new Vector3(0.5, 0.5, 0)
+  });
 make.playerRingFront = () =>
   new Mesh(geos.playerRingFront, {
     style: [styles.green1]
@@ -112,7 +134,7 @@ make.playerLower = () =>
     make.playerRingFront()
   ]);
 make.player = (opts) =>
-  new Group([make.playerLower(), make.playerFace(), make.machete()], {
+  new Group([make.playerLower(), make.playerFace(), make.basicMachete()], {
     ...opts
   });
 

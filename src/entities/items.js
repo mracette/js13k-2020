@@ -17,7 +17,7 @@ export const items = [
   {
     name: 'steel-machete',
     power: 0.15,
-    cost: 1000,
+    cost: 750,
     swingDuration: 400,
     swingLength: 0.08,
     swingRadius: Math.PI / 3
@@ -25,7 +25,7 @@ export const items = [
   {
     name: 'mythril-machete',
     power: 0.3,
-    cost: 5000,
+    cost: 2000,
     swingDuration: 300,
     swingLength: 0.1,
     swingRadius: Math.PI / 2.5
@@ -33,7 +33,7 @@ export const items = [
   {
     name: 'magic-machete',
     power: 0.5,
-    cost: 15000,
+    cost: 5000,
     swingDuration: 200,
     swingLength: 0.15,
     swingRadius: Math.PI / 2
